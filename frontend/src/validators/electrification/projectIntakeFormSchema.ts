@@ -9,6 +9,7 @@ import {
   requiredString,
   requiredTextSchema
 } from '@/utils/zodSchema';
+import { permitsFormSchema } from '@/validators/common';
 import { contactFormSchema } from '@/validators/contact';
 
 import type { CodeTableName, OrgBookOption } from '@/types';
@@ -35,7 +36,8 @@ export function createProjectIntakeSchema(codeList: Record<CodeTableName, string
         projectType: requiredOneOf('Project type', codeList.ElectrificationProjectType),
         bcHydroNumber: z.string().max(255, maxMessage('BC Hydro Call for Power project number', 255)).nullish()
       })
-    )
+    ),
+    [IntakeFormCategory.PERMITS]: formSection(permitsFormSchema)
   });
 }
 

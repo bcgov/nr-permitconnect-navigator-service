@@ -1,5 +1,6 @@
 import { runSchema } from '../../../helpers';
 import { createProjectIntakeSchema } from '@/validators/electrification/projectIntakeFormSchema';
+import { BasicResponse } from '@/utils/enums/application';
 import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
@@ -25,7 +26,8 @@ const testForm = {
     firstName: 'First',
     phoneNumber: '555-555-5555'
   },
-  project: { projectType: ElectrificationProjectType.IPP_SOLAR, bcHydroNumber: '12345' }
+  project: { projectType: ElectrificationProjectType.IPP_SOLAR, bcHydroNumber: '12345' },
+  permits: { hasAppliedProvincialPermits: BasicResponse.NO }
 };
 
 // Mount
@@ -53,7 +55,8 @@ describe('electrification createProjectIntakeSchema', () => {
       'contacts.email': 'Email is a required field',
       'contacts.firstName': 'First name is a required field',
       'contacts.phoneNumber': 'Phone number is a required field',
-      'project.projectType': 'Project type is a required field'
+      'project.projectType': 'Project type is a required field',
+      'permits.hasAppliedProvincialPermits': 'Applied permits is a required field'
     });
   });
 
@@ -63,14 +66,16 @@ describe('electrification createProjectIntakeSchema', () => {
         await runSchema(schema, {
           ...testForm,
           basic: { registeredName: 'Not a suggestion', projectName: 'a'.repeat(256), projectDescription: 'Desc' },
-          project: { projectType: 'NOT_A_TYPE', bcHydroNumber: 'a'.repeat(256) }
+          project: { projectType: 'NOT_A_TYPE', bcHydroNumber: 'a'.repeat(256) },
+          permits: { hasAppliedProvincialPermits: 123 }
         })
       ).errors
     ).toEqual({
       'basic.projectName': 'Project name must be at most 255 characters',
       'basic.registeredName': 'Business name must be a valid value from the list of suggestions',
       'project.projectType': 'Project type must be one of the following values: IPP_SOLAR, OTHER',
-      'project.bcHydroNumber': 'BC Hydro Call for Power project number must be at most 255 characters'
+      'project.bcHydroNumber': 'BC Hydro Call for Power project number must be at most 255 characters',
+      'permits.hasAppliedProvincialPermits': 'Applied permits must be one of the following values: Yes, No, Unsure'
     });
   });
 

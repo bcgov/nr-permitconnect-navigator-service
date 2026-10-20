@@ -1,22 +1,15 @@
 import { randomUUID } from 'node:crypto';
 
 import { ensureActivityWithPrimaryContact } from './activity.ts';
-import { buildNewPermitRecord } from './permit.ts';
-import { PermitStage, PermitState } from '#src/db/codes/enums';
+import { buildIntakePermits } from './permit.ts';
 import { jsonToPrismaInputJson } from '#src/db/utils/utils';
 import { getCurrentUsername } from '#src/utils/index';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { NumResidentialUnits } from '#src/utils/enums/housing';
-import { PermitNeeded } from '#src/utils/enums/permit';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type {
-  CurrentContext,
-  HousingProjectCreateInput,
-  PermitTrackingCreateInput,
-  SubmitHousingProjectDraftInput
-} from '#types';
+import type { CurrentContext, HousingProjectCreateInput, SubmitHousingProjectDraftInput } from '#types';
 
 export type HousingPriorityInput = Pick<
   HousingProjectCreateInput,
@@ -75,7 +68,7 @@ export const assignPriority = (housingProject: HousingPriorityInput) => {
  * fills fields in afterward via patch, or via submitHousingProjectData for a full intake).
  * @param repositories - The required repositories
  * @param currentContext - The current context of the request
- * @returns A new, mostly-empty project and permit data
+ * @returns A new, mostly-empty project
  */
 export const createHousingProjectData = async (
   repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
@@ -86,24 +79,19 @@ export const createHousingProjectData = async (
   const submittedBy = getCurrentUsername(currentContext);
   if (!submittedBy) throw new Error('Failed to determine submittedBy');
 
-  const housingProjectData = {
-    housingProject: {
-      housingProjectId: randomUUID(),
-      activityId,
-      submittedAt: new Date(),
-      submittedBy,
-      applicationStatus: ApplicationStatus.NEW,
-      submissionType: SubmissionType.GUIDANCE,
-      queuePriority: null
-    } satisfies HousingProjectCreateInput,
-    appliedPermits: [] as ReturnType<typeof buildNewPermitRecord>[],
-    investigatePermits: [] as ReturnType<typeof buildNewPermitRecord>[],
-    appliedPermitTrackers: [] as PermitTrackingCreateInput[]
-  };
+  const housingProject = {
+    housingProjectId: randomUUID(),
+    activityId,
+    submittedAt: new Date(),
+    submittedBy,
+    applicationStatus: ApplicationStatus.NEW,
+    submissionType: SubmissionType.GUIDANCE,
+    queuePriority: null
+  } satisfies HousingProjectCreateInput;
 
-  assignPriority(housingProjectData.housingProject);
+  assignPriority(housingProject);
 
-  return housingProjectData;
+  return housingProject;
 };
 
 /**
@@ -172,49 +160,6 @@ export const generateHousingProjectData = async (
     hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
   };
 
-  let appliedPermits: ReturnType<typeof buildNewPermitRecord>[] = [];
-  let investigatePermits: ReturnType<typeof buildNewPermitRecord>[] = [];
-  const appliedPermitTrackers: PermitTrackingCreateInput[] = [];
-
-  if (data.permits.appliedPermits?.length) {
-    appliedPermits = data.permits.appliedPermits.map((x) => {
-      const permitId = randomUUID();
-
-      // Add each tracker for this permit with the proper permitId
-      x.permitTracking?.forEach((pt) =>
-        appliedPermitTrackers.push({
-          ...pt,
-          permitId,
-          permitTrackingId: pt.permitTrackingId ?? undefined,
-          shownToProponent: pt.shownToProponent ?? undefined
-        } satisfies PermitTrackingCreateInput)
-      );
-
-      return buildNewPermitRecord({
-        permitId,
-        permitTypeId: x.permitTypeId,
-        activityId,
-        stage: PermitStage.APPLICATION_SUBMISSION,
-        needed: PermitNeeded.YES,
-        state: PermitState.IN_PROGRESS,
-        submittedDate: x.submittedDate
-      });
-    });
-  }
-
-  if (data.permits.investigatePermits?.length) {
-    investigatePermits = data.permits.investigatePermits.map((x) =>
-      buildNewPermitRecord({
-        permitId: randomUUID(),
-        permitTypeId: x.permitTypeId,
-        activityId,
-        stage: PermitStage.PRE_SUBMISSION,
-        needed: PermitNeeded.UNDER_INVESTIGATION,
-        state: PermitState.NONE
-      })
-    );
-  }
-
   // Put new housing project together
   const housingProjectData = {
     housingProject: {
@@ -238,9 +183,7 @@ export const generateHousingProjectData = async (
         data.housing.financiallySupportedHousingCoop
       ].includes(BasicResponse.YES)
     } satisfies HousingProjectCreateInput,
-    appliedPermits,
-    investigatePermits,
-    appliedPermitTrackers
+    ...buildIntakePermits(activityId, data.permits)
   };
 
   assignPriority(housingProjectData.housingProject);

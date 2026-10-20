@@ -16,8 +16,8 @@ import { BasicResponse } from '@/utils/enums/application';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 // Props
-const { tab } = defineProps<{
-  tab: number;
+const { tab = 0 } = defineProps<{
+  tab?: number;
 }>();
 
 // Composables

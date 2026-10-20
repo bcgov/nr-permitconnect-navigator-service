@@ -1854,6 +1854,7 @@ export interface components {
       atsEnquiryId: number | null;
       addedToAts: boolean;
       companyIdRegistered: string | null;
+      hasAppliedProvincialPermits: string | null;
       activity?: {
         activityId: string;
         initiativeId: string;
@@ -3890,6 +3891,50 @@ export interface operations {
           project: {
             bcHydroNumber?: string | null;
             projectType: string;
+          };
+          permits: {
+            appliedPermits?:
+              | {
+                  permitTypeId: number;
+                  stage?: string | null;
+                  submittedDate?: string | number | unknown;
+                  permitTracking?:
+                    | {
+                        trackingId?: string | null;
+                        permitTrackingId?: number | null;
+                        shownToProponent?: boolean | null;
+                        sourceSystemKindId?: number | null;
+                        sourceSystemKind?: {
+                          sourceSystemKindId: number;
+                          description: string;
+                          integrated?: boolean;
+                          kind?: string | null;
+                          sourceSystem: string;
+                          createdAt?: string | number | unknown;
+                          createdBy?: string | null;
+                          updatedAt?: string | number | unknown;
+                          updatedBy?: string | null;
+                          deletedAt?: string | number | unknown;
+                          deletedBy?: string | null;
+                        } | null;
+                        permitId?: string | null;
+                        createdAt?: string | number | unknown;
+                        createdBy?: string | null;
+                        updatedAt?: string | number | unknown;
+                        updatedBy?: string | null;
+                        deletedAt?: string | number | unknown;
+                        deletedBy?: string | null;
+                      }[]
+                    | null;
+                }[]
+              | null;
+            /** @enum {string} */
+            hasAppliedProvincialPermits: 'Yes' | 'No' | 'Unsure';
+            investigatePermits?:
+              | {
+                  permitTypeId: number;
+                }[]
+              | null;
           };
         };
       };

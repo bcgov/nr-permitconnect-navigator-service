@@ -11,7 +11,7 @@ import {
   createElectrificationProjectData,
   generateElectrificationProjectData
 } from '#src/domains/electrificationProject';
-import { Initiative } from '#src/utils/enums/application';
+import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
 vi.mock('../../../src/external/ches');
@@ -23,6 +23,8 @@ vi.mock('config', async () => {
       get: vi.fn((key: string) => {
         if (key === 'server.ches.submission.cc') return 'noreply@example.com';
         if (key === 'server.pcns.appUrl') return 'www.example.com';
+        if (key === 'server.pcbcUrl') return 'www.example.com';
+        if (key === 'server.env') return 'test';
 
         return actual.get(key);
       }),
@@ -55,8 +57,8 @@ describe('electrificationProject domain', () => {
         TEST_CURRENT_CONTEXT,
         intake.activityId
       );
-      expect(result.electrificationProjectId).toBeDefined();
-      expect(result.activityId).toBe(TEST_ACTIVITY_ELECTRIFICATION.activityId);
+      expect(result.electrificationProject.electrificationProjectId).toBeDefined();
+      expect(result.electrificationProject.activityId).toBe(TEST_ACTIVITY_ELECTRIFICATION.activityId);
     });
 
     it('should use provided activityId and skip activity creation', async () => {
@@ -68,7 +70,7 @@ describe('electrificationProject domain', () => {
       const result = await generateElectrificationProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
       expect(mockRepos.activity.create).not.toHaveBeenCalled();
-      expect(result.activityId).toBe('ACTI1234');
+      expect(result.electrificationProject.activityId).toBe('ACTI1234');
     });
 
     it('should throw error when activity creation fails', async () => {
@@ -98,15 +100,19 @@ describe('electrificationProject domain', () => {
 
       const result = await generateElectrificationProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
-      expect(result.projectName).toBe(TEST_ELECTRIFICATION_INTAKE.basic?.projectName);
-      expect(result.projectDescription).toBe(TEST_ELECTRIFICATION_INTAKE.basic?.projectDescription);
-      expect(result.companyIdRegistered).toBe(TEST_ELECTRIFICATION_INTAKE.basic?.registeredId);
-      expect(result.companyNameRegistered).toBe(TEST_ELECTRIFICATION_INTAKE.basic?.registeredName);
-      expect(result.bcHydroNumber).toBe(TEST_ELECTRIFICATION_INTAKE.project?.bcHydroNumber);
-      expect(result.projectType).toBe(TEST_ELECTRIFICATION_INTAKE.project?.projectType);
-      expect(result.applicationStatus).toBe(ApplicationStatus.NEW);
-      expect(result.submissionType).toBe(SubmissionType.GUIDANCE);
-      expect(result.submittedAt).toBeInstanceOf(Date);
+      expect(result.electrificationProject.projectName).toBe(TEST_ELECTRIFICATION_INTAKE.basic?.projectName);
+      expect(result.electrificationProject.projectDescription).toBe(
+        TEST_ELECTRIFICATION_INTAKE.basic?.projectDescription
+      );
+      expect(result.electrificationProject.companyIdRegistered).toBe(TEST_ELECTRIFICATION_INTAKE.basic?.registeredId);
+      expect(result.electrificationProject.companyNameRegistered).toBe(
+        TEST_ELECTRIFICATION_INTAKE.basic?.registeredName
+      );
+      expect(result.electrificationProject.bcHydroNumber).toBe(TEST_ELECTRIFICATION_INTAKE.project?.bcHydroNumber);
+      expect(result.electrificationProject.projectType).toBe(TEST_ELECTRIFICATION_INTAKE.project?.projectType);
+      expect(result.electrificationProject.applicationStatus).toBe(ApplicationStatus.NEW);
+      expect(result.electrificationProject.submissionType).toBe(SubmissionType.GUIDANCE);
+      expect(result.electrificationProject.submittedAt).toBeInstanceOf(Date);
     });
 
     it('should set defaults for optional fields', async () => {
@@ -121,10 +127,31 @@ describe('electrificationProject domain', () => {
 
       const result = await generateElectrificationProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
-      expect(result.companyIdRegistered).toBeNull();
-      expect(result.aaiUpdated).toBe(false);
-      expect(result.addedToAts).toBe(false);
-      expect(result.queuePriority).toBeNull();
+      expect(result.electrificationProject.companyIdRegistered).toBeNull();
+      expect(result.electrificationProject.aaiUpdated).toBe(false);
+      expect(result.electrificationProject.addedToAts).toBe(false);
+      expect(result.electrificationProject.queuePriority).toBeNull();
+    });
+
+    it('should store hasAppliedProvincialPermits and build permits from the intake', async () => {
+      const intake = {
+        ...TEST_ELECTRIFICATION_INTAKE,
+        activityId: 'ACTI1234',
+        permits: {
+          hasAppliedProvincialPermits: BasicResponse.YES,
+          appliedPermits: [{ permitTypeId: 1, permitTracking: [{ trackingId: 'TRK-1' }] }],
+          investigatePermits: [{ permitTypeId: 2 }]
+        }
+      };
+
+      const result = await generateElectrificationProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
+
+      expect(result.electrificationProject.hasAppliedProvincialPermits).toBe(BasicResponse.YES);
+      expect(result.appliedPermits).toHaveLength(1);
+      expect(result.appliedPermits[0].activityId).toBe('ACTI1234');
+      expect(result.appliedPermitTrackers).toHaveLength(1);
+      expect(result.appliedPermitTrackers[0].permitId).toBe(result.appliedPermits[0].permitId);
+      expect(result.investigatePermits).toHaveLength(1);
     });
   });
 

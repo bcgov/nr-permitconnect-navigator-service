@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { intakePermits } from './appliedPermit.ts';
 import { atsEnquirySubmissionFields } from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
 import { paginationOptions } from './paginationOptions.ts';
@@ -33,7 +34,8 @@ export const schema = {
             bcHydroNumber: z.string().max(255).trim().nullish(),
             projectType: requireValidCode.ElectrificationProjectType(z.string())
           })
-          .strict()
+          .strict(),
+        permits: intakePermits
       })
       .strict()
   },

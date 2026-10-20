@@ -20,9 +20,11 @@ import type { Repositories } from '#src/db/unitOfWork';
 import type {
   Contact,
   CurrentContext,
+  DraftPermitsInput,
   Email,
   Permit,
   PermitCreateInput,
+  PermitTrackingCreateInput,
   PermitUpdateEmailParams,
   ProjectRepositoryKeys
 } from '#types';
@@ -67,6 +69,55 @@ export const buildNewPermitRecord = (params: {
   targetDateDescription: null,
   technicalReviewer: null
 });
+
+/**
+ * Builds the permit and tracker records for the permits section of a project intake
+ * @param activityId - The activity the permits belong to
+ * @param permits - The permits section of the intake submission
+ * @returns Applied and investigate permit records, plus the trackers for the applied permits
+ */
+export const buildIntakePermits = (activityId: string, permits: DraftPermitsInput) => {
+  const appliedPermitTrackers: PermitTrackingCreateInput[] = [];
+
+  const appliedPermits = (permits.appliedPermits ?? []).map((x) => {
+    const permitId = randomUUID();
+
+    // Add each tracker for this permit with the proper permitId
+    x.permitTracking
+      ?.filter((pt) => pt.trackingId)
+      .forEach((pt) =>
+        appliedPermitTrackers.push({
+          ...pt,
+          permitId,
+          permitTrackingId: pt.permitTrackingId ?? undefined,
+          shownToProponent: pt.shownToProponent ?? undefined
+        } satisfies PermitTrackingCreateInput)
+      );
+
+    return buildNewPermitRecord({
+      permitId,
+      permitTypeId: x.permitTypeId,
+      activityId,
+      stage: PermitStage.APPLICATION_SUBMISSION,
+      needed: PermitNeeded.YES,
+      state: PermitState.IN_PROGRESS,
+      submittedDate: x.submittedDate
+    });
+  });
+
+  const investigatePermits = (permits.investigatePermits ?? []).map((x) =>
+    buildNewPermitRecord({
+      permitId: randomUUID(),
+      permitTypeId: x.permitTypeId,
+      activityId,
+      stage: PermitStage.PRE_SUBMISSION,
+      needed: PermitNeeded.UNDER_INVESTIGATION,
+      state: PermitState.NONE
+    })
+  );
+
+  return { appliedPermits, investigatePermits, appliedPermitTrackers };
+};
 
 /**
  * Retrieve permits and trackings that are PEACH integrated

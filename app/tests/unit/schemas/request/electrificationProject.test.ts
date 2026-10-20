@@ -28,7 +28,8 @@ describe('submitElectrificationProjectDraft validator', () => {
     return {
       contact: validContact,
       basic: { projectName: 'Test', registeredName: 'Acme', projectDescription: 'desc' },
-      project
+      project,
+      permits: { hasAppliedProvincialPermits: 'No' }
     };
   }
 
@@ -47,7 +48,7 @@ describe('submitElectrificationProjectDraft validator', () => {
     expect(!result.success && result.error.issues[0].path).toEqual(['basic', 'projectDescription']);
   });
 
-  it('requires basic, contact, and project', () => {
+  it('requires basic, contact, project, and permits', () => {
     const result = schema.submitElectrificationProjectDraft.body.safeParse({});
     expect(result.success).toBe(false);
   });

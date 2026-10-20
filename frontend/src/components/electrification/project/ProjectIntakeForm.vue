@@ -7,9 +7,12 @@ import { useRouter } from 'vue-router';
 
 import { FormAutosave, FormNavigationGuard } from '@/components/form';
 import {
+  AppliedPermitsIntakeCard,
   BcHydroNumberCard,
   CollectionDisclaimer,
   ContactCardIntakeForm,
+  InvestigatePermitsCard,
+  PermitLearnCard,
   ProjectDescriptionCard,
   ProjectNameCard,
   ProjectTypeCard,
@@ -19,16 +22,19 @@ import {
 import { createProjectIntakeSchema } from '@/validators/electrification/projectIntakeFormSchema';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { electrificationProjectService } from '@/services';
-import { useCodeStore, useContactStore, useFormStore } from '@/store';
+import { useCodeStore, useContactStore, useFormStore, useProjectStore } from '@/store';
+import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { RouteName } from '@/utils/enums/application';
+import { PermitStage } from '@/utils/enums/codeEnums';
+import { PermitNeeded } from '@/utils/enums/permit';
 import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
-import { generalErrorHandler } from '@/utils/utils';
+import { generalErrorHandler, toOneOf } from '@/utils/utils';
 import { toTypedSchema } from '@/utils/zodSchema';
 import { toContactFormValues } from '@/validators/contact';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { DeepPartial, Draft, ElectrificationProject, OrgBookOption } from '@/types';
+import type { DeepPartial, Draft, ElectrificationProject, OrgBookOption, Permit } from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
 // Props
@@ -124,6 +130,15 @@ async function onSubmit(data: FormSchemaType) {
       project: {
         bcHydroNumber: data.project.bcHydroNumber,
         projectType: data.project.projectType
+      },
+      permits: {
+        appliedPermits: data.permits.appliedPermits?.map((x) => ({
+          submittedDate: x.submittedDate?.toISOString(),
+          permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId }],
+          permitTypeId: x.permitTypeId
+        })),
+        hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
+        investigatePermits: data.permits.investigatePermits
       }
     };
 
@@ -151,7 +166,20 @@ onBeforeMount(async () => {
 
     if (draft.value) {
       initialFormValues.value = {
-        ...draft.value.data
+        ...draft.value.data,
+        permits: {
+          ...draft.value.data.permits,
+          appliedPermits:
+            draft.value.data.permits?.appliedPermits?.map((x) => ({
+              permitTypeId: x.permitTypeId,
+              permitTracking: [
+                {
+                  trackingId: x.permitTracking?.[0]?.trackingId
+                }
+              ],
+              submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
+            })) ?? []
+        }
       };
 
       // Load org book option if company name is already filled
@@ -176,6 +204,18 @@ onBeforeMount(async () => {
         project: {
           bcHydroNumber: project.bcHydroNumber,
           projectType: project.projectType ?? undefined
+        },
+        permits: {
+          appliedPermits: useProjectStore()
+            .getPermits.filter((x: Permit) => x.stage === PermitStage.APPLICATION_SUBMISSION)
+            .map((x: Permit) => ({
+              ...x,
+              submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
+            })),
+          hasAppliedProvincialPermits: toOneOf(YES_NO_UNSURE_LIST, project.hasAppliedProvincialPermits),
+          investigatePermits: useProjectStore().getPermits.filter(
+            (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
+          )
         }
       };
     } else {
@@ -222,7 +262,9 @@ onBeforeMount(async () => {
     <ProjectTypeCard />
     <BcHydroNumberCard />
     <ProjectDescriptionCard :activity-id="draft?.activityId ?? project?.activityId" />
-
+    <AppliedPermitsIntakeCard />
+    <PermitLearnCard />
+    <InvestigatePermitsCard />
     <div class="flex items-center justify-center mt-6">
       <Button
         :label="t('ui.actions.submit')"
