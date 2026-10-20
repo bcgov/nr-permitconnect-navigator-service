@@ -91,11 +91,16 @@ export const appliedPermitSchema = z.looseObject({
 
 export const appliedPermitsFormSchema = z.array(appliedPermitSchema).optional();
 
-export const permitsFormSchema = z.looseObject({
-  appliedPermits: appliedPermitsFormSchema,
-  hasAppliedProvincialPermits: requiredOneOf('Applied permits', YES_NO_UNSURE_LIST),
-  investigatePermits: z.array(z.looseObject({ permitTypeId: permitTypeIdSchema })).optional()
-});
+export const permitsFormSchema = z
+  .looseObject({
+    appliedPermits: appliedPermitsFormSchema,
+    hasAppliedProvincialPermits: requiredOneOf('Applied permits', YES_NO_UNSURE_LIST),
+    investigatePermits: z.array(z.looseObject({ permitTypeId: permitTypeIdSchema })).optional()
+  })
+  // The list is hidden on No, so drop any stale entries (e.g. from a draft) the API would reject
+  .transform((permits) =>
+    permits.hasAppliedProvincialPermits === BasicResponse.NO ? { ...permits, appliedPermits: undefined } : permits
+  );
 
 interface BusinessRegistration {
   projectApplicantType?: unknown;

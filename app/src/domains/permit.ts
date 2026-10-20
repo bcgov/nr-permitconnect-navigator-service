@@ -82,10 +82,11 @@ export const buildIntakePermits = (activityId: string, permits: DraftPermitsInpu
     x.permitTracking
       ?.filter((pt) => pt.trackingId)
       .forEach((pt) =>
+        // Pick fields explicitly, a client-sent permitTrackingId would overwrite another project's tracker
         appliedPermitTrackers.push({
-          ...pt,
           permitId,
-          permitTrackingId: pt.permitTrackingId ?? undefined,
+          trackingId: pt.trackingId,
+          sourceSystemKindId: pt.sourceSystemKindId,
           shownToProponent: pt.shownToProponent ?? undefined
         } satisfies PermitTrackingCreateInput)
       );
