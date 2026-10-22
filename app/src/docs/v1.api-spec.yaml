@@ -1916,10 +1916,10 @@ components:
         consultationStartDate:
           type: string
           nullable: true
-        consultationEndDate:
+        consultationStartTime:
           type: string
           nullable: true
-        consultationStartTime:
+        consultationEndDate:
           type: string
           nullable: true
         consultationEndTime:
@@ -2087,8 +2087,8 @@ components:
         - onHoldCode
         - technicalReviewer
         - consultationStartDate
-        - consultationEndDate
         - consultationStartTime
+        - consultationEndDate
         - consultationEndTime
       additionalProperties: false
     PermitType:
