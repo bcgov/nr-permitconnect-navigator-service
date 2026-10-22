@@ -88,6 +88,106 @@ describe('replacePlaceholders', () => {
 
     expect(result).toBe('Hello John, your code is {{ code }}.');
   });
+
+  describe('isHtmlTemplate = true (default)', () => {
+    const special = '<b>"Tom" & \'Jerry\'</b>';
+    const escaped = '&lt;b&gt;&quot;Tom&quot; &amp; &#39;Jerry&#39;&lt;/b&gt;';
+
+    it('escapes HTML special characters in string values by default', () => {
+      expect(replacePlaceholders('Hi {{ name }}', { name: special })).toBe(`Hi ${escaped}`);
+    });
+
+    it('escapes HTML special characters when isHtmlTemplate is explicitly true', () => {
+      expect(replacePlaceholders('Hi {{ name }}', { name: special }, true)).toBe(`Hi ${escaped}`);
+    });
+
+    it('escapes HTML special characters in array values', () => {
+      const result = replacePlaceholders('{{ items }}', { items: ['<a>', 'b & c'] }, true);
+
+      expect(result).toBe('&lt;a&gt;\nb &amp; c');
+    });
+
+    it('escapes every occurrence of a repeated placeholder', () => {
+      const result = replacePlaceholders('{{ name }} and {{ name }}', { name: '<x>' });
+
+      expect(result).toBe('&lt;x&gt; and &lt;x&gt;');
+    });
+  });
+
+  describe('isHtmlTemplate = false', () => {
+    const special = '<b>"Tom" & \'Jerry\'</b>';
+
+    it('does not escape string values', () => {
+      expect(replacePlaceholders('Hi {{ name }}', { name: special }, false)).toBe(`Hi ${special}`);
+    });
+
+    it('does not escape array values and still joins with newlines', () => {
+      const result = replacePlaceholders('{{ items }}', { items: ['<a>', 'b & c'] }, false);
+
+      expect(result).toBe('<a>\nb & c');
+    });
+
+    it('still ignores null, undefined and empty string values', () => {
+      const result = replacePlaceholders('{{ a }}|{{ b }}|{{ c }}', { a: null, b: undefined, c: '' }, false);
+
+      expect(result).toBe('{{ a }}|{{ b }}|{{ c }}');
+    });
+  });
+
+  describe("template = 'intakePermitNotificationTemplate'", () => {
+    const template = 'intakePermitNotificationTemplate';
+    const links = [
+      { href: 'http://example.com/a?x=1&y=2', label: 'Permit <A>' },
+      { href: 'http://example.com/b', label: 'Permit B' }
+    ];
+    const expectedLinks =
+      '<a href="http://example.com/a?x=1&y=2">Permit <A></a>, <a href="http://example.com/b">Permit B</a>';
+
+    it('renders HrefLinks as comma-separated anchors without escaping', () => {
+      expect(replacePlaceholders('Permits: {{ permits }}', { permits: links }, true, template)).toBe(
+        `Permits: ${expectedLinks}`
+      );
+    });
+
+    it('renders the same anchors when isHtmlTemplate is false', () => {
+      expect(replacePlaceholders('Permits: {{ permits }}', { permits: links }, false, template)).toBe(
+        `Permits: ${expectedLinks}`
+      );
+    });
+
+    it('renders a single link without a separator', () => {
+      const result = replacePlaceholders('{{ permits }}', { permits: [links[1]] }, true, template);
+
+      expect(result).toBe('<a href="http://example.com/b">Permit B</a>');
+    });
+
+    it('replaces an empty array with an empty string', () => {
+      expect(replacePlaceholders('[{{ permits }}]', { permits: [] }, true, template)).toBe('[]');
+    });
+
+    it('still escapes string values when isHtmlTemplate is true', () => {
+      const result = replacePlaceholders(
+        '{{ name }} {{ permits }}',
+        { name: '<J>', permits: [links[1]] },
+        true,
+        template
+      );
+
+      expect(result).toBe('&lt;J&gt; <a href="http://example.com/b">Permit B</a>');
+    });
+
+    it('does not escape string values when isHtmlTemplate is false', () => {
+      const result = replacePlaceholders('{{ name }}', { name: '<J>' }, false, template);
+
+      expect(result).toBe('<J>');
+    });
+
+    it('falls back to newline-joined arrays for other template names', () => {
+      const result = replacePlaceholders('{{ items }}', { items: ['A', 'B'] }, true, 'someOtherTemplate');
+
+      expect(result).toBe('A\nB');
+    });
+  });
 });
 
 describe('permit email templates', () => {
