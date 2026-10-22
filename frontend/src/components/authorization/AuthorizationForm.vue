@@ -306,10 +306,15 @@ async function onSubmit(data: GenericObject) {
         permitData.submittedDate = response.submittedDate;
         // Set statusLastVerified to statusLastChanged if statusLastChanged is more recent
         permitData.statusLastVerified =
-          !permitData.statusLastVerified || response.statusLastChanged > permitData.statusLastVerified
+          !permitData.statusLastVerified ||
+          (response.statusLastChanged && response.statusLastChanged > permitData.statusLastVerified)
             ? response.statusLastChanged
             : permitData.statusLastVerified;
         permitData.onHoldCode = response.onHoldCode;
+        permitData.consultationStartDate = response.consultationStartDate;
+        permitData.consultationStartTime = response.consultationStartTime;
+        permitData.consultationEndDate = response.consultationEndDate;
+        permitData.consultationEndTime = response.consultationEndTime;
       }
     }
 

@@ -959,7 +959,11 @@ export const TEST_PEACH_SUMMARY: PeachSummaryResponse = {
   statusLastChanged: '2024-01-15',
   submittedTime: null,
   decisionTime: null,
-  statusLastChangedTime: null
+  statusLastChangedTime: null,
+  consultationStartDate: null,
+  consultationEndDate: null,
+  consultationStartTime: null,
+  consultationEndTime: null
 };
 
 export const TEST_PERMIT_1: Permit = {

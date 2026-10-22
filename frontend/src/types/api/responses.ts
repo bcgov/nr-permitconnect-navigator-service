@@ -54,9 +54,13 @@ export interface GetPeachSummaryResponse {
   onHoldCode?: PiesOnHold;
   submittedDate: string | null;
   submittedTime: string | null;
+  consultationStartDate: string | null;
+  consultationStartTime: string | null;
+  consultationEndDate: string | null;
+  consultationEndTime: string | null;
   decisionDate: string | null;
   decisionTime: string | null;
-  statusLastChanged: string;
+  statusLastChanged: string | null;
   statusLastChangedTime: string | null;
 }
 
