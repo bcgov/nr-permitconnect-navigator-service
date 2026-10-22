@@ -41,6 +41,13 @@ describe('roadmapFormSchema', () => {
     ).toMatchObject({ to: ['a@b.co', 'c@d.co', 'e@f.co'], cc: ['g@h.co'] });
   });
 
+  // No assignee email and no configured BCC leaves the sender empty
+  it.each(['', 'not-an-email'])('rejects a sender of %j', async (from) => {
+    expect((await runSchema(roadmapFormSchema, { ...testForm, from })).errors).toEqual({
+      from: 'The roadmap has no valid sender email'
+    });
+  });
+
   it('rejects invalid addresses', async () => {
     expect((await runSchema(roadmapFormSchema, { ...testForm, to: 'a@b.co; nope' })).errors).toEqual({
       'to.1': 'nope is not a valid email'

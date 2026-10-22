@@ -70,6 +70,11 @@ const confirmSubmit = (data: GenericObject) => {
   });
 };
 
+// The sender has no field, so its error would otherwise block the send without a word
+function onInvalidSubmit({ errors }: GenericObject) {
+  if (errors.from) toast.error('Failed to send roadmap', errors.from);
+}
+
 function onFileRemove(document: Document) {
   selectedFiles.value = selectedFiles.value.filter((x) => x.documentId !== document.documentId);
 }
@@ -132,6 +137,7 @@ watch(
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
     @submit="confirmSubmit"
+    @invalid-submit="onInvalidSubmit"
   >
     <div class="grid grid-cols-12 gap-4">
       <InputText

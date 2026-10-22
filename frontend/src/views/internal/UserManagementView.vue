@@ -82,7 +82,8 @@ const toast = useToast();
 // The API requires a user's identity details, which a stored IDIR user always has
 function toAccessRequestUser(user: User): RequestBody<`create${ApiInitiative}AccessRequest`>['user'] {
   const { userId, idp, sub, email, firstName, fullName, lastName, active } = user;
-  if (!idp || !email || !firstName || !fullName || !lastName) throw new Error('User is missing identity details');
+  if (!idp || !email || !firstName || !fullName || !lastName)
+    throw new Error(t('views.i.userManagementView.errorMissingIdentity'));
   return { userId, idp, sub, email, firstName, fullName, lastName, active };
 }
 
@@ -139,12 +140,14 @@ async function onProcessUserAccessRequest() {
       usersAndAccessRequests.value.splice(idx, 1);
     }
 
-    // TODO: i18n parameterized magic for this string
-    toast.success(
-      `User's ${userProcessRequestType.value} request has been ${
-        approvedAccess || approvedRevocation ? 'approved' : 'denied'
-      }`
-    );
+    const outcome = approvedAccess
+      ? 'accessApproved'
+      : deniedAccess
+        ? 'accessDenied'
+        : approvedRevocation
+          ? 'revocationApproved'
+          : 'revocationDenied';
+    toast.success(t(`views.i.userManagementView.${outcome}`));
   } catch (error) {
     toast.error(String(error));
   }
@@ -160,7 +163,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
 
   confirm.require({
     message: message,
-    header: 'Revoke user',
+    header: t('views.i.userManagementView.revokeHeader'),
     acceptLabel: t('views.i.userManagementView.confirm'),
     acceptClass: 'p-button-danger',
     rejectLabel: t('views.i.userManagementView.cancel'),
@@ -168,7 +171,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
     accept: async () => {
       try {
         const groupId = userAccessRequest.user.groups?.[0]?.groupId;
-        if (!groupId) throw new Error('User has no group');
+        if (!groupId) throw new Error(t('views.i.userManagementView.errorNoGroup'));
         let response;
 
         if (admin) {
@@ -190,7 +193,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
 
         const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === userAccessRequest.user.userId);
 
-        if (idx < 0) throw new Error('User not found in table');
+        if (idx < 0) throw new Error(t('views.i.userManagementView.errorNotInTable'));
 
         if (admin) {
           usersAndAccessRequests.value.splice(idx, 1);
@@ -263,7 +266,7 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
       user: omittedUser
     });
     // Only an admin revoke returns no body, and this is a grant
-    if (!response) throw new Error('No access request returned');
+    if (!response) throw new Error(t('views.i.userManagementView.errorNoAccessRequest'));
 
     // Update main data table; a pending request returns the created access request, an immediate grant only its result
     if ('accessRequestId' in response) {
@@ -348,8 +351,8 @@ onBeforeMount(async () => {
     });
   } catch (error) {
     if (isAxiosError(error))
-      toast.error('Failed to load access requests', error.response?.data?.message ?? error.message);
-    else if (error instanceof Error) toast.error('Failed to load access requests', error.message);
+      toast.error(t('views.i.userManagementView.errorLoad'), error.response?.data?.message ?? error.message);
+    else if (error instanceof Error) toast.error(t('views.i.userManagementView.errorLoad'), error.message);
   } finally {
     createUserModalVisible.value = false;
     loading.value = false;

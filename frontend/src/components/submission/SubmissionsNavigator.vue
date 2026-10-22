@@ -192,16 +192,16 @@ watch(accordionIndex, () => {
 });
 
 watchEffect(() => {
-  const filteredBringForwards = bringForward.value.filter((x): x is DatedBringForward => {
-    // A bring forward without a date can't be scheduled
-    if (!x.bringForwardDate) return false;
-    const { pastOrToday, withinMonth } = getBringForwardInterval(x as DatedBringForward);
-    const assignedAndWithinMonth =
-      (x.createdByFullName === getProfile.value?.name || myAssignedTo.value.has(x.projectId ?? '')) &&
-      (pastOrToday || withinMonth);
-    const escalated = authzStore.isInGroup([GroupName.SUPERVISOR]) && x.escalateToSupervisor;
-    return assignedAndWithinMonth || escalated;
-  });
+  const filteredBringForwards = bringForward.value
+    .filter((bf): bf is DatedBringForward => !!bf.bringForwardDate)
+    .filter((bf) => {
+      const { pastOrToday, withinMonth } = getBringForwardInterval(bf);
+      const assignedAndWithinMonth =
+        (bf.createdByFullName === getProfile.value?.name || myAssignedTo.value.has(bf.projectId ?? '')) &&
+        (pastOrToday || withinMonth);
+      const escalated = authzStore.isInGroup([GroupName.SUPERVISOR]) && bf.escalateToSupervisor;
+      return assignedAndWithinMonth || escalated;
+    });
   relevantBringForwards.value = sortRelevantBringForwards(filteredBringForwards);
 });
 </script>
