@@ -104,6 +104,15 @@ function convertRemToPixels(rem: number) {
   return pixels || 64;
 }
 
+// Content loads after navigation, so wait until the scroll target can actually be reached
+function waitFor(ready: () => boolean, timeout = 2000): Promise<void> {
+  const start = performance.now();
+  return new Promise((resolve) => {
+    const check = () => (ready() || performance.now() - start > timeout ? resolve() : requestAnimationFrame(check));
+    check();
+  });
+}
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -165,43 +174,29 @@ export default function getRouter() {
   const router = createRouter({
     history: createWebHistory(),
     routes,
-    // TODO: Uncomment when navigating to last location/tab/etc. is fixed
-    // scrollBehavior(to, from, savedPosition) {
-    scrollBehavior(to, from) {
-      // Scroll to hash
-      // Slight delay to account for asynchronous loading
-      if (to.hash) {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              el: to.hash,
-              behavior: 'smooth',
-              top: convertRemToPixels(5)
-            });
-          }, 500);
-        });
-      } else if (to.name === from.name) {
-        // Do not scroll if same page
-        return false;
-      } else {
-        // Default scroll to top
-        return { top: 0 };
+    // Views with tabs should keep the active tab in the query, or a restored position lands on the wrong layout
+    scrollBehavior(to, from, savedPosition) {
+      if (savedPosition) {
+        const { top } = savedPosition;
+        return waitFor(() => document.documentElement.scrollHeight - window.innerHeight >= top).then(
+          () => savedPosition
+        );
       }
+      if (to.hash) {
+        return waitFor(() => !!document.getElementById(to.hash.slice(1))).then(() => ({
+          el: to.hash,
+          behavior: 'smooth' as const,
+          top: convertRemToPixels(5)
+        }));
+      }
+      // Query or hash changes on the same page keep the scroll position
+      if (to.path === from.path) return false;
+      return { top: 0 };
     }
   });
 
   router.beforeEach(async (to, from) => {
     appStore.beginDeterminateLoading();
-
-    // Backend Redirection Handler
-    if (to.query?.r) {
-      router.replace({
-        path: to.query.r ? to.query.r.toString() : to.path,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        query: (({ r, ...q }) => q)(to.query),
-        hash: to.hash
-      });
-    }
 
     // Authentication guard
     if (to.meta.requiresAuth) {
