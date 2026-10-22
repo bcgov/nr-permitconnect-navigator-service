@@ -7,6 +7,7 @@ import { Initiative, RouteName } from '@/utils/enums/application';
 import { projectAuthorizationRouteNameKey } from '@/utils/keys';
 
 import { mountComponent } from '../../../mountComponent';
+import { testAuditFields } from '../../../fixtures';
 
 import type { SearchPermitsResponse, SourceSystemKind } from '@/types';
 
@@ -17,7 +18,7 @@ const testPermit: SearchPermitsResponse['permits'][number] = {
   activityId: 'activity-1',
   permitTypeId: 26,
   decisionDate: '2024-01-15',
-  stage: 'SUBMISSION',
+  stage: 'APPLICATION_SUBMISSION',
   state: 'IN_PROGRESS',
   statusLastChanged: '2024-01-10',
   submittedDate: '2024-01-01',
@@ -35,8 +36,9 @@ const testPermit: SearchPermitsResponse['permits'][number] = {
 const testSearchResponse: SearchPermitsResponse = { permits: [testPermit], totalRecords: 1 };
 
 const sampleSourceSystemKind: SourceSystemKind = {
+  ...testAuditFields,
   description: 'ATS Project Number',
-  kind: undefined,
+  kind: null,
   sourceSystem: 'ITSM-5314',
   sourceSystemKindId: 2,
   integrated: false,
@@ -59,7 +61,7 @@ function mountAuthorizationListNavigator(options: { initiative?: Initiative } = 
       code: {
         codes: {
           PermitState: [{ code: 'IN_PROGRESS', display: 'In Progress', active: true }],
-          PermitStage: [{ code: 'SUBMISSION', display: 'Submission', active: true }],
+          PermitStage: [{ code: 'APPLICATION_SUBMISSION', display: 'Application submission', active: true }],
           SourceSystem: [{ code: 'ITSM-5314', display: 'ATS', active: true }]
         }
       }
@@ -109,7 +111,7 @@ describe('AuthorizationListNavigator', () => {
         skip: 0,
         take: 10,
         sortField: 'submittedDate',
-        sortOrder: -1
+        sortOrder: '-1'
       });
     });
 
@@ -171,7 +173,7 @@ describe('AuthorizationListNavigator', () => {
       await vi.advanceTimersByTimeAsync(500);
 
       expect(searchPermitsSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ sortField: 'submittedDate', sortOrder: 1, skip: 0 })
+        expect.objectContaining({ sortField: 'submittedDate', sortOrder: '1', skip: 0 })
       );
     });
 

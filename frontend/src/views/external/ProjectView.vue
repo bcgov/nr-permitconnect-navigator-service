@@ -219,7 +219,9 @@ onBeforeMount(async () => {
       (x) => x.contactId === useContactStore().getContact?.contactId
     )?.role;
     if (userActivityRole)
-      isAdmin.value = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(userActivityRole);
+      isAdmin.value = ([ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN] as ActivityContactRole[]).includes(
+        userActivityRole
+      );
 
     loading.value = false;
   } catch (e) {

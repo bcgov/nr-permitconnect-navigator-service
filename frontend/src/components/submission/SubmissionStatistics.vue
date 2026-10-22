@@ -12,13 +12,7 @@ import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { ProjectService } from '@/types/services';
-import type {
-  InputEvent,
-  GetProjectStatisticsRequest,
-  ProjectStatistics,
-  User,
-  GetProjectPermitDataResponse
-} from '@/types';
+import type { InputEvent, ProjectStatistics, User } from '@/types';
 
 // Injections
 const projectService = inject<Ref<ProjectService<unknown>>>(projectServiceKey);
@@ -35,7 +29,7 @@ const NAV_GROUPS = [
 // State
 const assigneeOptions: Ref<User[]> = ref([]);
 const statistics = defineModel<ProjectStatistics | undefined>('statistics');
-const statisticFilters: Ref<GetProjectStatisticsRequest> = ref({});
+const statisticFilters: Ref<{ dateFrom?: Date; dateTo?: Date; monthYear?: Date; userId?: string }> = ref({});
 
 // Actions
 const getAssigneeOptionLabel = (e: User) => `${e.fullName} [${e.email}]`;
@@ -77,7 +71,7 @@ async function onDownloadProjectPermitData() {
     return;
   }
 
-  const headers = Object.keys(data[0]) as (keyof GetProjectPermitDataResponse)[];
+  const headers = Object.keys(data[0]) as (keyof (typeof data)[number])[];
   const csvRows = [];
 
   csvRows.push(headers.join(','));
@@ -135,8 +129,11 @@ watch(
     if (!isEmpty && !isValidUuid) return;
 
     if (projectService) {
+      const { dateFrom, dateTo, monthYear } = statisticFilters.value;
       const searchPayload = {
-        ...statisticFilters.value,
+        dateFrom: dateFrom?.toISOString(),
+        dateTo: dateTo?.toISOString(),
+        monthYear: monthYear?.toISOString(),
         userId: isEmpty ? undefined : userId
       };
       statistics.value = await projectService.value.getProjectStatistics(searchPayload);
@@ -259,7 +256,7 @@ watch(
           <td class="col-span-1 text-right">{{ statistics.state_completed }}</td>
           <td class="col-span-2 text-right">{{ getPercentage(statistics.state_completed) }}%</td>
         </tr>
-        <tr v-if="useAppStore().getInitiative === Initiative.HOUSING">
+        <tr v-if="'supported_bc' in statistics">
           <td class="col-span-9">
             Submissions by financially supported:
             <span class="font-bold">BC Housing</span>
@@ -267,7 +264,7 @@ watch(
           <td class="col-span-1 text-right">{{ statistics.supported_bc }}</td>
           <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_bc) }}%</td>
         </tr>
-        <tr v-if="useAppStore().getInitiative === Initiative.HOUSING">
+        <tr v-if="'supported_indigenous' in statistics">
           <td class="col-span-9">
             Submissions by financially supported:
             <span class="font-bold">Indigenous</span>
@@ -275,7 +272,7 @@ watch(
           <td class="col-span-1 text-right">{{ statistics.supported_indigenous }}</td>
           <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_indigenous) }}%</td>
         </tr>
-        <tr v-if="useAppStore().getInitiative === Initiative.HOUSING">
+        <tr v-if="'supported_non_profit' in statistics">
           <td class="col-span-9">
             Submissions by financially supported:
             <span class="font-bold">Non-profit</span>
@@ -283,7 +280,7 @@ watch(
           <td class="col-span-1 text-right">{{ statistics.supported_non_profit }}</td>
           <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_non_profit) }}%</td>
         </tr>
-        <tr v-if="useAppStore().getInitiative === Initiative.HOUSING">
+        <tr v-if="'supported_housing_coop' in statistics">
           <td class="col-span-9">
             Submissions by financially supported:
             <span class="font-bold">Co-operative</span>

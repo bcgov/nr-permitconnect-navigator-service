@@ -7,11 +7,13 @@ import i18n from '@/i18n';
 import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 import { t } from '../../../helpers';
+import { testAuditFields, testContactDefaults } from '../../../fixtures';
 
 import type { ActivityContact, Contact } from '@/types';
 import type { DOMWrapper } from '@vue/test-utils';
 
 const mockUserContact: Contact = {
+  ...testContactDefaults,
   contactId: 'user',
   userId: 'user-id-123',
   firstName: 'Admin',
@@ -19,18 +21,21 @@ const mockUserContact: Contact = {
   email: 'admin@test'
 };
 const mockManualContact: Contact = {
+  ...testContactDefaults,
   contactId: 'manual-entry',
   firstName: 'Manual',
   lastName: 'Entry',
   email: 'Manual@test'
 };
 const mockPrimaryContact: Contact = {
+  ...testContactDefaults,
   contactId: 'primary',
   firstName: 'Primary',
   lastName: 'Contact',
   email: 'primary@test'
 };
 const mockMemberContact: Contact = {
+  ...testContactDefaults,
   contactId: 'member',
   userId: 'yes',
   firstName: 'Standard',
@@ -39,14 +44,38 @@ const mockMemberContact: Contact = {
 };
 
 const activityContacts: ActivityContact[] = [
-  { activityId: 'activity1', contactId: 'user', role: ActivityContactRole.ADMIN, contact: mockUserContact },
-  { activityId: 'activity1', contactId: 'manual-entry', role: ActivityContactRole.MEMBER, contact: mockManualContact },
-  { activityId: 'activity1', contactId: 'primary', role: ActivityContactRole.PRIMARY, contact: mockPrimaryContact },
-  { activityId: 'activity1', contactId: 'member', role: ActivityContactRole.MEMBER, contact: mockMemberContact }
+  {
+    ...testAuditFields,
+    activityId: 'activity1',
+    contactId: 'user',
+    role: ActivityContactRole.ADMIN,
+    contact: mockUserContact
+  },
+  {
+    ...testAuditFields,
+    activityId: 'activity1',
+    contactId: 'manual-entry',
+    role: ActivityContactRole.MEMBER,
+    contact: mockManualContact
+  },
+  {
+    ...testAuditFields,
+    activityId: 'activity1',
+    contactId: 'primary',
+    role: ActivityContactRole.PRIMARY,
+    contact: mockPrimaryContact
+  },
+  {
+    ...testAuditFields,
+    activityId: 'activity1',
+    contactId: 'member',
+    role: ActivityContactRole.MEMBER,
+    contact: mockMemberContact
+  }
 ];
 
 const wrapperSettings = (
-  zone = Zone.INTERNAL,
+  zone: Zone = Zone.INTERNAL,
   customContacts = activityContacts,
   currentUser = mockUserContact,
   customActivityContact = activityContacts[0]
@@ -54,7 +83,9 @@ const wrapperSettings = (
   props: {
     activityContacts: customContacts,
     currentUserActivityContact: customActivityContact,
-    isAdmin: [ActivityContactRole.ADMIN, ActivityContactRole.PRIMARY].includes(customActivityContact.role)
+    isAdmin: ([ActivityContactRole.ADMIN, ActivityContactRole.PRIMARY] as ActivityContactRole[]).includes(
+      customActivityContact.role
+    )
   },
   global: {
     plugins: [

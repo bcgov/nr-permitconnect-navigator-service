@@ -20,15 +20,18 @@ import SubmissionStateSection from '@/components/form/section/SubmissionStateSec
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { generalProjectService, mapService, userService } from '@/services';
 import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
+import { APPLICATION_STATUS_LIST, AREA_LIST, REGION_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
 import { ApplicationStatus, Area, FormState, FormType, Region } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
-import { scrollToFirstError } from '@/utils/utils';
+import { scrollToFirstError, toOneOf } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { createProjectFormNavigatorSchema } from '@/validators/general/projectFormNavigatorSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { Ref } from 'vue';
-import type { Contact, DeepPartial, GeneralProject, OrgBookOption, PatchGeneralProjectRequest, User } from '@/types';
+import type { Contact, DeepPartial, GeneralProject, OrgBookOption, User } from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectFormNavigatorSchema';
 import type { BusinessArea } from '@/utils/enums/codeEnums';
 
@@ -85,16 +88,7 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
   if (project.assignedUserId) assigneeOptions = await userService.searchUsers({ userId: [project.assignedUserId] });
 
   return {
-    contact: {
-      contactId: getPrimaryActivityContact.value?.contactId,
-      firstName: getPrimaryActivityContact.value?.firstName,
-      lastName: getPrimaryActivityContact.value?.lastName,
-      phoneNumber: getPrimaryActivityContact.value?.phoneNumber,
-      email: getPrimaryActivityContact.value?.email,
-      contactApplicantRelationship: getPrimaryActivityContact.value?.contactApplicantRelationship,
-      contactPreference: getPrimaryActivityContact.value?.contactPreference,
-      userId: getPrimaryActivityContact.value?.userId
-    },
+    contact: toContactFormValues(getPrimaryActivityContact.value),
 
     location: {
       locationAddress: [project.streetAddress, project.locality, project.province]
@@ -104,8 +98,9 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
       locality: project.locality,
       province: project.province,
       locationPids: project.locationPids,
-      latitude: project.latitude,
-      longitude: project.longitude,
+      // The API sends decimals as strings
+      latitude: project.latitude === null ? null : Number(project.latitude),
+      longitude: project.longitude === null ? null : Number(project.longitude),
       geomarkUrl: project.geomarkUrl,
       naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO
     },
@@ -115,13 +110,13 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
     companyProjectName: {
       companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
-      projectName: project.projectName,
+      projectName: project.projectName ?? undefined,
       projectNumber: project.projectNumber,
       activityType: project.activityType ?? 'Other'
     },
 
     // Additional Info
-    projectDescription: { description: project.projectDescription },
+    projectDescription: { description: project.projectDescription ?? undefined },
 
     // Location
     locationDescription: { description: project.projectLocationDescription },
@@ -131,12 +126,14 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
 
     // Submission state
     submissionState: {
-      queuePriority: project.queuePriority,
-      submissionType: project.submissionType,
+      queuePriority: project.queuePriority ?? undefined,
+      // Narrowed to the navigator submission types; any other stored type fails validation
+      submissionType: project.submissionType as FormSchemaType['submissionState']['submissionType'],
       assignedUser: assigneeOptions[0] ?? null,
-      applicationStatus: project.applicationStatus,
-      region: String(project.region),
-      area: String(project.area)
+      // Unknown stored values are dropped, so the form asks for them again
+      applicationStatus: toOneOf(APPLICATION_STATUS_LIST, project.applicationStatus),
+      region: toOneOf(REGION_LIST, project.region),
+      area: toOneOf(AREA_LIST, project.area)
     },
 
     // ATS link
@@ -183,21 +180,21 @@ function onReOpen() {
     acceptLabel: t('i.common.projectForm.reopenAccept'),
     rejectLabel: t('i.common.projectForm.reopenReject'),
     rejectProps: { outlined: true },
-    accept: () => {
+    accept: async () => {
       formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
-      if (formRef.value?.values) onSubmit(formRef.value?.values);
+      const result = await formRef.value?.validate();
+      if (result?.valid && result.values) onSubmit(result.values);
+      else if (result) onInvalidSubmit(result);
     }
   });
 }
 
 const onSubmit = async (formValues: GenericObject) => {
   try {
-    // vee-validate doesn't get transformed data from yup so
-    // manually run the form values through it here
-    const values: FormSchemaType = projectFormNavigatorSchema.cast(formValues);
+    const values = formValues as FormSchemaType;
 
     // Generate final payload
-    const payload: PatchGeneralProjectRequest = {
+    const payload: Parameters<typeof generalProjectService.patchProject>[0] = {
       projectId: project.projectId,
 
       // Company and Project Information
@@ -258,12 +255,14 @@ const onSubmit = async (formValues: GenericObject) => {
   }
 };
 
-const projectFormNavigatorSchema = createProjectFormNavigatorSchema({
-  initiative: getInitiative.value,
-  t,
-  codeList,
-  orgBookOptions: orgBookOptions.value
-});
+const projectFormNavigatorSchema = toTypedSchema(
+  createProjectFormNavigatorSchema({
+    initiative: getInitiative.value,
+    t,
+    codeList,
+    orgBookOptions: orgBookOptions.value
+  })
+);
 
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {
@@ -293,7 +292,7 @@ watch(getPrimaryActivityContact, (newContact, oldContact) => {
 onMounted(async () => {
   useFormStore().setFormType(FormType.NAVIGATOR);
   useFormStore().setFormState(FormState.UNLOCKED);
-  locationPidsAuto.value = await mapService.getPids({ projectId: project.generalProjectId });
+  locationPidsAuto.value = (await mapService.getPids({ projectId: project.generalProjectId })) ?? '';
 
   // `formRef` is a template ref, only guaranteed
   // populated once the component has mounted

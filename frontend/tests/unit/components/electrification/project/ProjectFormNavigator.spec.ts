@@ -16,10 +16,19 @@ import { updateLiveNameKey } from '@/utils/keys';
 
 import { mockAxiosResponse } from '../../../../helpers';
 import { mountComponent } from '../../../../mountComponent';
+import { testAuditFields, testContactDefaults } from '../../../../fixtures';
 
-import type { AtsClientResource, AtsEnquiryResource, ElectrificationProject } from '@/types';
+import type { AtsClientResource, AtsEnquiryResource, DeepPartial, ElectrificationProject } from '@/types';
+import type { FormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
 
 // Mocks
+
+const mockConfirmRequire = vi.fn();
+
+vi.mock('@/lib/primevue', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  useConfirm: () => ({ require: mockConfirmRequire })
+}));
 
 const createAtsClientSpy = vi.spyOn(atsService, 'createAtsClient');
 const createAtsEnquirySpy = vi.spyOn(atsService, 'createAtsEnquiry');
@@ -30,6 +39,7 @@ const patchProjectSpy = vi.spyOn(electrificationProjectService, 'patchProject');
 const currentDate = new Date().toISOString();
 
 const exampleContact = {
+  ...testContactDefaults,
   contactId: 'contact123',
   firstName: 'John',
   lastName: 'Doe',
@@ -40,18 +50,17 @@ const testProject: ElectrificationProject = {
   electrificationProjectId: 'proj123',
   projectId: 'proj123',
   activityId: 'activity123',
+  assignedUserId: null,
   submittedAt: currentDate,
   applicationStatus: ApplicationStatus.IN_PROGRESS,
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Test Co',
-  hasRelatedEnquiry: false,
   queuePriority: 1,
   // The navigator form's schema (unlike intake's) only allows a submission
   // type of GUIDANCE/INAPPLICABLE -- ASSISTANCE et al. are intake-only.
   submissionType: SubmissionType.GUIDANCE,
   projectName: 'Test Project',
   projectDescription: 'Description',
-  multiPermitsNeeded: 'No',
   astNotes: 'Notes',
   atsClientId: null,
   atsEnquiryId: null,
@@ -61,13 +70,15 @@ const testProject: ElectrificationProject = {
   projectCategory: null,
   bcHydroNumber: null,
   hasEpa: BasicResponse.NO,
-  megawatts: 100,
+  megawatts: '100',
   bcEnvironmentAssessNeeded: BasicResponse.NO,
-  contacts: [exampleContact],
+  locationDescription: null,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
+  updatedAt: currentDate,
+  deletedBy: null,
+  deletedAt: null
 };
 
 // A primary activity contact backing `getPrimaryActivityContact`, so the
@@ -92,7 +103,7 @@ function mountProjectFormNavigator(options: { project?: ElectrificationProject; 
   const { wrapper } = mountComponent(ProjectFormNavigator, {
     props: { project, editable },
     piniaState: {
-      project: { activityContacts: [primaryActivityContact] },
+      project: { project, activityContacts: [primaryActivityContact] },
       code: {
         codes: {
           ElectrificationProjectType: [{ code: ElectrificationProjectType.IPP_SOLAR, display: 'Solar', active: true }]
@@ -169,6 +180,19 @@ describe('ProjectFormNavigator', () => {
       await flushPromises();
 
       expect(wrapper.text()).toContain(testProject.companyNameRegistered);
+    });
+
+    it('seeds decimals as numbers and drops a missing status', async () => {
+      const { wrapper } = mountProjectFormNavigator({
+        project: { ...testProject, megawatts: '2.5', applicationStatus: null }
+      });
+      await flushPromises();
+
+      const values = (
+        wrapper.vm as unknown as { formRef: { getValues: () => DeepPartial<FormSchemaType> } }
+      ).formRef.getValues();
+      expect(values.electrification?.megawatts).toBe(2.5);
+      expect(values.submissionState?.applicationStatus).toBeUndefined();
     });
   });
 
@@ -269,6 +293,43 @@ describe('ProjectFormNavigator', () => {
     });
   });
 
+  describe('reopen', () => {
+    const completedProject = { ...testProject, applicationStatus: ApplicationStatus.COMPLETED };
+
+    async function reopen(project: ElectrificationProject) {
+      const { wrapper } = mountProjectFormNavigator({ project });
+      await flushPromises();
+      await wrapper
+        .findComponent({ name: 'CompanyProjectNamePanel' })
+        .vm.$emit('org-book-options', [
+          { registeredId: testProject.companyIdRegistered, registeredName: testProject.companyNameRegistered }
+        ]);
+
+      await wrapper
+        .findAll('button')
+        .find((b) => b.text() === 'Re-open submission')
+        ?.trigger('click');
+      await mockConfirmRequire.mock.calls[0]?.[0].accept();
+      await flushPromises();
+    }
+
+    it('validates and saves the project as in progress', async () => {
+      patchProjectSpy.mockResolvedValue(testProject);
+
+      await reopen(completedProject);
+
+      expect(patchProjectSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: testProject.projectId, applicationStatus: ApplicationStatus.IN_PROGRESS })
+      );
+    });
+
+    it('does not save when the form is invalid', async () => {
+      await reopen({ ...completedProject, projectName: '' });
+
+      expect(patchProjectSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('watchers', () => {
     it('updates ContactCardNavForm when the primary contact changes in the store', async () => {
       const { wrapper } = mountProjectFormNavigator();
@@ -277,6 +338,7 @@ describe('ProjectFormNavigator', () => {
       const store = useProjectStore();
       store.activityContacts = [
         {
+          ...testAuditFields,
           contactId: 'new-contact-999',
           activityId: testProject.activityId,
           role: ActivityContactRole.PRIMARY,

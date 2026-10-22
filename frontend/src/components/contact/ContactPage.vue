@@ -95,7 +95,7 @@ onBeforeMount(async () => {
     ]);
 
     projectsEnquiries.value = projectsEnquiries.value
-      .concat(searchProjectsResponses.flatMap((r) => r.projects))
+      .concat(searchProjectsResponses.flatMap((r): Project[] => r.projects))
       .concat(enquiries);
   }
 
@@ -110,7 +110,7 @@ onBeforeMount(async () => {
     if (idpCfg) {
       const users = await userService.searchUsers({ userId: userIds, idp: [idpCfg.idp] });
       users.forEach((u: User) => {
-        assignedUsers.value[u.userId] = u.fullName;
+        assignedUsers.value[u.userId] = u.fullName ?? '';
       });
     }
   }

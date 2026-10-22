@@ -52,7 +52,9 @@ const onSaveGeoJson = () => {
 };
 
 onBeforeMount(async () => {
-  if (getProject.value && 'geoJson' in getProject.value) geoJson.value = getProject.value?.geoJson ?? null;
+  // Stored from the map's drawn shape
+  if (getProject.value && 'geoJson' in getProject.value)
+    geoJson.value = (getProject.value.geoJson as GeoJSON | undefined) ?? null;
 });
 </script>
 

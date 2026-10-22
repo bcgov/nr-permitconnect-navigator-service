@@ -3,7 +3,6 @@ import { isAxiosError } from 'axios';
 import { Form } from 'vee-validate';
 import { computed, inject, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { boolean, number, object, string, type InferType } from 'yup';
 
 import { CancelButton, EditableSelect, FormNavigationGuard, TextArea } from '@/components/form';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
@@ -12,19 +11,15 @@ import ATSInfo from '@/components/ats/ATSInfo.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
 import { atsService, enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
-import {
-  APPLICATION_STATUS_LIST,
-  ATS_MANAGING_REGION,
-  ENQUIRY_SUBMITTED_METHOD,
-  ENQUIRY_TYPE_LIST
-} from '@/utils/constants/projectCommon';
+import { APPLICATION_STATUS_LIST, ATS_MANAGING_REGION, ENQUIRY_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
-import { scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
-import { atsClientIdValidator } from '@/validators';
-import { assignedToValidator } from '@/validators/common';
+import { scrollToFirstError, setEmptyStringsToNull, toOneOf } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
+import { createEnquiryFormSchema } from '@/validators/enquiryFormSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { SelectChangeEvent } from 'primevue/select';
 import type { GenericObject } from 'vee-validate';
@@ -37,12 +32,11 @@ import type {
   DeepPartial,
   Enquiry,
   InputEvent,
-  PatchEnquiryRequest,
   Project,
   ProjectService,
   User
 } from '@/types';
-import { createContactCardNavFormSchema } from '@/validators/navigator';
+import type { FormSchemaType } from '@/validators/enquiryFormSchema';
 
 // Props
 const { editable = true, enquiry } = defineProps<{
@@ -64,27 +58,7 @@ const confirm = useConfirm();
 const toast = useToast();
 
 // Form validation schema
-const enquiryFormSchema = object({
-  ...createContactCardNavFormSchema({ t }),
-  relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
-  enquiryDescription: string().required().label('Enquiry detail'),
-  addedToAts: boolean().required().label('Authorized Tracking System (ATS) updated'),
-  atsInfo: object({
-    atsClientId: atsClientIdValidator(t('validators.atsClientId.label')),
-    atsEnquiryId: number().nullable()
-  }),
-  submissionState: object({
-    submittedMethod: string().oneOf(ENQUIRY_SUBMITTED_METHOD).label('Submitted method'),
-    submissionType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
-    assignedUser: assignedToValidator(
-      t('validators.submissionState.assignedToMsg'),
-      t('validators.submissionState.assignedTo')
-    ),
-    enquiryStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state')
-  })
-});
-
-export type FormSchemaType = InferType<typeof enquiryFormSchema>;
+const enquiryFormSchema = toTypedSchema(createEnquiryFormSchema({ t }));
 
 // Store
 const enquiryStore = useEnquiryStore();
@@ -185,23 +159,15 @@ async function initializeFormValues(): Promise<DeepPartial<FormSchemaType>> {
 
   return {
     relatedActivityId: enquiry?.relatedActivityId,
-    enquiryDescription: enquiry?.enquiryDescription,
-    contact: {
-      contactId: primaryContact.value?.contactId,
-      firstName: primaryContact.value?.firstName,
-      lastName: primaryContact.value?.lastName,
-      phoneNumber: primaryContact.value?.phoneNumber,
-      email: primaryContact.value?.email,
-      contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
-      contactPreference: primaryContact.value?.contactPreference,
-      userId: primaryContact.value?.userId
-    },
+    enquiryDescription: enquiry?.enquiryDescription ?? undefined,
+    contact: toContactFormValues(primaryContact.value),
 
     submissionState: {
       assignedUser: assigneeOptions[0] ?? null,
-      enquiryStatus: enquiry?.enquiryStatus,
+      // Unknown stored values are dropped, so the form asks for them again
+      enquiryStatus: toOneOf(APPLICATION_STATUS_LIST, enquiry?.enquiryStatus),
       submittedMethod: enquiry?.submittedMethod,
-      submissionType: enquiry?.submissionType
+      submissionType: toOneOf(ENQUIRY_TYPE_LIST, enquiry?.submissionType)
     },
 
     atsInfo: {
@@ -269,23 +235,21 @@ function onReOpen() {
     acceptLabel: t('enquiryForm.reopenAccept'),
     rejectLabel: t('enquiryForm.reopenReject'),
     rejectProps: { outlined: true },
-    accept: () => {
+    accept: async () => {
       formRef.value?.setFieldValue('submissionState.enquiryStatus', ApplicationStatus.IN_PROGRESS);
-      if (formRef.value?.values) onSubmit(formRef.value?.values);
+      const result = await formRef.value?.validate();
+      if (result?.valid && result.values) onSubmit(result.values);
+      else if (result) onInvalidSubmit(result);
     }
   });
 }
 
 const onSubmit = async (formValues: GenericObject) => {
   try {
-    // vee-validate doesn't get transformed data from yup so
-    // manually run the form values through it here
-    const transformed: FormSchemaType = enquiryFormSchema.cast(formValues);
-
-    const values: FormSchemaType = await setAtsSubmitData(transformed);
+    const values = await setAtsSubmitData(formValues as FormSchemaType);
 
     // Generate final payload
-    const payload: PatchEnquiryRequest = {
+    const payload: Parameters<typeof enquiryService.patchEnquiry>[0] = {
       enquiryId: enquiry.enquiryId,
 
       // Enquiry description

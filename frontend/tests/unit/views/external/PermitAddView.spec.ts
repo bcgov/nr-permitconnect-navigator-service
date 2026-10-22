@@ -11,7 +11,7 @@ import PermitAddView from '@/views/external/PermitAddView.vue';
 import { mockRouter, resetMockRouter } from '../../../mockRouter';
 import { mountComponent } from '../../../mountComponent';
 
-import type { ElectrificationProject, GeneralProject, HousingProject, ProjectBase } from '@/types';
+import type { ElectrificationProject, GeneralProject, HousingProject } from '@/types';
 
 // Mocks
 
@@ -44,11 +44,11 @@ const AppliedPermitsCardStub = {
 
 // Fixtures
 
-const testProject: ProjectBase = {
+const testProject = {
   activityId: 'activity456',
   projectId: 'project789',
   projectName: 'Project Alpha'
-} as ProjectBase;
+};
 
 // Mount
 
@@ -167,7 +167,7 @@ describe('PermitAddView', () => {
       await flushPromises();
 
       expect(permitService.intakePermits).toHaveBeenCalledWith([
-        expect.objectContaining({ activityId: testProject.activityId, permitTypeId: '5' })
+        expect.objectContaining({ activityId: testProject.activityId, permitTypeId: 5 })
       ]);
       expect(mockToastSuccess).toHaveBeenCalled();
       expect(mockRouter.push).toHaveBeenCalledWith({

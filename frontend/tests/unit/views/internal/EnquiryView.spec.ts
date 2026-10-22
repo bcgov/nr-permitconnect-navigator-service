@@ -60,7 +60,7 @@ vi.mock('@/services/userService', () => ({
 }));
 
 // Default component mounting wrapper settings
-const wrapperSettings = (initiative = Initiative.HOUSING) => ({
+const wrapperSettings = (initiative: Initiative = Initiative.HOUSING) => ({
   props: {
     enquiryId: '1'
   },

@@ -20,7 +20,7 @@ const {
   helpText?: string;
   name: string;
   disabled?: boolean;
-  options: (RadioOptionObject | string)[] | undefined;
+  options: readonly (RadioOptionObject | string)[] | undefined;
 }>();
 
 // Emits

@@ -1,124 +1,142 @@
-export enum AccessRequestStatus {
-  APPROVED = 'Approved',
-  PENDING = 'Pending',
-  REJECTED = 'Rejected'
-}
+export const AccessRequestStatus = {
+  APPROVED: 'Approved',
+  PENDING: 'Pending',
+  REJECTED: 'Rejected'
+} as const;
 
-export enum Action {
-  CREATE = 'CREATE',
-  READ = 'READ',
-  UPDATE = 'UPDATE',
-  DELETE = 'DELETE',
-  ROLEOVERRIDE = 'ROLEOVERRIDE'
-}
+export type AccessRequestStatus = (typeof AccessRequestStatus)[keyof typeof AccessRequestStatus];
 
-export enum ATSCreateTypes {
-  CLIENT = 'CLIENT',
-  CLIENT_ENQUIRY = 'CLIENT_ENQUIRY',
-  ENQUIRY = 'ENQUIRY'
-}
+export const Action = {
+  CREATE: 'CREATE',
+  READ: 'READ',
+  UPDATE: 'UPDATE',
+  DELETE: 'DELETE',
+  ROLEOVERRIDE: 'ROLEOVERRIDE'
+} as const;
 
-export enum BasicResponse {
-  YES = 'Yes',
-  NO = 'No',
-  UNSURE = 'Unsure'
-}
+export type Action = (typeof Action)[keyof typeof Action];
 
-export enum ButtonMode {
-  BUTTON,
-  ICON
-}
+export const ATSCreateTypes = {
+  CLIENT: 'CLIENT',
+  CLIENT_ENQUIRY: 'CLIENT_ENQUIRY',
+  ENQUIRY: 'ENQUIRY'
+} as const;
 
-export enum FileCategory {
-  COMPRESSED = 'compressed',
-  DOC = 'doc',
-  EMAIL = 'email',
-  FILE = 'file',
-  IMAGE = 'image',
-  PDF = 'pdf',
-  SHAPE = 'shape',
-  SPREADSHEET = 'spreadsheet'
-}
+export type ATSCreateTypes = (typeof ATSCreateTypes)[keyof typeof ATSCreateTypes];
 
-export enum GroupName {
-  DEVELOPER = 'DEVELOPER',
-  PROPONENT = 'PROPONENT',
-  NAVIGATOR = 'NAVIGATOR',
-  NAVIGATOR_READ_ONLY = 'NAVIGATOR_READ_ONLY',
-  SUPERVISOR = 'SUPERVISOR',
-  ADMIN = 'ADMIN'
-}
+export const BasicResponse = {
+  YES: 'Yes',
+  NO: 'No',
+  UNSURE: 'Unsure'
+} as const;
 
-export enum Initiative {
-  PCNS = 'PCNS',
-  ELECTRIFICATION = 'ELECTRIFICATION',
-  GENERAL = 'GENERAL',
-  HOUSING = 'HOUSING'
-}
+export type BasicResponse = (typeof BasicResponse)[keyof typeof BasicResponse];
 
-export enum Regex {
+export const ButtonMode = {
+  BUTTON: 0,
+  ICON: 1
+} as const;
+
+export type ButtonMode = (typeof ButtonMode)[keyof typeof ButtonMode];
+
+export const FileCategory = {
+  COMPRESSED: 'compressed',
+  DOC: 'doc',
+  EMAIL: 'email',
+  FILE: 'file',
+  IMAGE: 'image',
+  PDF: 'pdf',
+  SHAPE: 'shape',
+  SPREADSHEET: 'spreadsheet'
+} as const;
+
+export type FileCategory = (typeof FileCategory)[keyof typeof FileCategory];
+
+export const GroupName = {
+  DEVELOPER: 'DEVELOPER',
+  PROPONENT: 'PROPONENT',
+  NAVIGATOR: 'NAVIGATOR',
+  NAVIGATOR_READ_ONLY: 'NAVIGATOR_READ_ONLY',
+  SUPERVISOR: 'SUPERVISOR',
+  ADMIN: 'ADMIN'
+} as const;
+
+export type GroupName = (typeof GroupName)[keyof typeof GroupName];
+
+export const Initiative = {
+  PCNS: 'PCNS',
+  ELECTRIFICATION: 'ELECTRIFICATION',
+  GENERAL: 'GENERAL',
+  HOUSING: 'HOUSING'
+} as const;
+
+export type Initiative = (typeof Initiative)[keyof typeof Initiative];
+
+export const Regex = {
   // https://emailregex.com/
   // HTML5 - Modified to require domain of at least 2 characters
-  EMAIL = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]{2,})+$'
-}
+  EMAIL: '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]{2,})+$'
+} as const;
 
-export enum RouteName {
-  CONTACT = 'contact',
-  DEVELOPER = 'developer',
-  FORBIDDEN = 'forbidden',
-  HOME = 'home',
-  LOGIN = 'login',
+export type Regex = (typeof Regex)[keyof typeof Regex];
+
+export const RouteName = {
+  CONTACT: 'contact',
+  DEVELOPER: 'developer',
+  FORBIDDEN: 'forbidden',
+  HOME: 'home',
+  LOGIN: 'login',
 
   /*
    * External route names
    */
-  EXT_ELECTRIFICATION = 'ext_electrification',
-  EXT_ELECTRIFICATION_INTAKE = 'ext_electrification_intake',
-  EXT_ELECTRIFICATION_INTAKE_CONFIRMATION = 'ext_electrification_intake_confirmation',
-  EXT_ELECTRIFICATION_GUIDE = 'ext_electrification_guide',
-  EXT_ELECTRIFICATION_PROJECT = 'ext_electrification_project',
-  EXT_ELECTRIFICATION_PROJECT_ENQUIRY = 'ext_electrification_project_enquiry',
-  EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION = 'ext_electrification_project_enquiry_confirmation',
-  EXT_ELECTRIFICATION_PROJECT_INTAKE = 'ext_electrification_project_intake',
-  EXT_ELECTRIFICATION_PROJECT_PERMIT = 'ext_electrification_project_permit',
-  EXT_ELECTRIFICATION_PROJECT_PERMIT_ADD = 'ext_electrification_project_permit_add',
-  EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY = 'ext_electrification_project_permit_enquiry',
-  EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION = 'ext_electrification_project_permit_enquiry_confirmation',
-  EXT_ELECTRIFICATION_PROJECT_RELATED_ENQUIRY = 'ext_electrification_project_related_enquiry',
+  EXT_ELECTRIFICATION: 'ext_electrification',
+  EXT_ELECTRIFICATION_INTAKE: 'ext_electrification_intake',
+  EXT_ELECTRIFICATION_INTAKE_CONFIRMATION: 'ext_electrification_intake_confirmation',
+  EXT_ELECTRIFICATION_GUIDE: 'ext_electrification_guide',
+  EXT_ELECTRIFICATION_PROJECT: 'ext_electrification_project',
+  EXT_ELECTRIFICATION_PROJECT_ENQUIRY: 'ext_electrification_project_enquiry',
+  EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION: 'ext_electrification_project_enquiry_confirmation',
+  EXT_ELECTRIFICATION_PROJECT_INTAKE: 'ext_electrification_project_intake',
+  EXT_ELECTRIFICATION_PROJECT_PERMIT: 'ext_electrification_project_permit',
+  EXT_ELECTRIFICATION_PROJECT_PERMIT_ADD: 'ext_electrification_project_permit_add',
+  EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY: 'ext_electrification_project_permit_enquiry',
+  EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION: 'ext_electrification_project_permit_enquiry_confirmation',
+  EXT_ELECTRIFICATION_PROJECT_RELATED_ENQUIRY: 'ext_electrification_project_related_enquiry',
 
-  EXT_GENERAL = 'ext_general',
-  EXT_GENERAL_ENQUIRY_CONFIRMATION = 'ext_general_enquiry_confirmation',
-  EXT_GENERAL_ENQUIRY = 'ext_general_enquiry',
-  EXT_GENERAL_ENQUIRY_INTAKE = 'ext_general_enquiry_intake',
-  EXT_GENERAL_INTAKE = 'ext_general_intake',
-  EXT_GENERAL_INTAKE_CONFIRMATION = 'ext_general_intake_confirmation',
-  EXT_GENERAL_GUIDE = 'ext_general_guide',
-  EXT_GENERAL_PROJECT = 'ext_general_project',
-  EXT_GENERAL_PROJECT_ENQUIRY = 'ext_general_project_enquiry',
-  EXT_GENERAL_PROJECT_ENQUIRY_CONFIRMATION = 'ext_general_project_enquiry_confirmation',
-  EXT_GENERAL_PROJECT_INTAKE = 'ext_general_project_intake',
-  EXT_GENERAL_PROJECT_PERMIT = 'ext_general_project_permit',
-  EXT_GENERAL_PROJECT_PERMIT_ADD = 'ext_general_project_permit_add',
-  EXT_GENERAL_PROJECT_PERMIT_ENQUIRY = 'ext_general_project_permit_enquiry',
-  EXT_GENERAL_PROJECT_PERMIT_ENQUIRY_CONFIRMATION = 'ext_general_project_permit_enquiry_confirmation',
-  EXT_GENERAL_PROJECT_RELATED_ENQUIRY = 'ext_general_project_related_enquiry',
+  EXT_GENERAL: 'ext_general',
+  EXT_GENERAL_ENQUIRY_CONFIRMATION: 'ext_general_enquiry_confirmation',
+  EXT_GENERAL_ENQUIRY: 'ext_general_enquiry',
+  EXT_GENERAL_ENQUIRY_INTAKE: 'ext_general_enquiry_intake',
+  EXT_GENERAL_INTAKE: 'ext_general_intake',
+  EXT_GENERAL_INTAKE_CONFIRMATION: 'ext_general_intake_confirmation',
+  EXT_GENERAL_GUIDE: 'ext_general_guide',
+  EXT_GENERAL_PROJECT: 'ext_general_project',
+  EXT_GENERAL_PROJECT_ENQUIRY: 'ext_general_project_enquiry',
+  EXT_GENERAL_PROJECT_ENQUIRY_CONFIRMATION: 'ext_general_project_enquiry_confirmation',
+  EXT_GENERAL_PROJECT_INTAKE: 'ext_general_project_intake',
+  EXT_GENERAL_PROJECT_PERMIT: 'ext_general_project_permit',
+  EXT_GENERAL_PROJECT_PERMIT_ADD: 'ext_general_project_permit_add',
+  EXT_GENERAL_PROJECT_PERMIT_ENQUIRY: 'ext_general_project_permit_enquiry',
+  EXT_GENERAL_PROJECT_PERMIT_ENQUIRY_CONFIRMATION: 'ext_general_project_permit_enquiry_confirmation',
+  EXT_GENERAL_PROJECT_RELATED_ENQUIRY: 'ext_general_project_related_enquiry',
 
-  EXT_HOUSING = 'ext_housing',
-  EXT_HOUSING_ENQUIRY_CONFIRMATION = 'ext_housing_enquiry_confirmation',
-  EXT_HOUSING_ENQUIRY = 'ext_housing_enquiry',
-  EXT_HOUSING_ENQUIRY_INTAKE = 'ext_housing_enquiry_intake',
-  EXT_HOUSING_INTAKE = 'ext_housing_intake',
-  EXT_HOUSING_INTAKE_CONFIRMATION = 'ext_housing_intake_confirmation',
-  EXT_HOUSING_GUIDE = 'ext_housing_guide',
-  EXT_HOUSING_PROJECT = 'ext_housing_project',
-  EXT_HOUSING_PROJECT_ENQUIRY = 'ext_housing_project_enquiry',
-  EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION = 'ext_housing_project_enquiry_confirmation',
-  EXT_HOUSING_PROJECT_INTAKE = 'ext_housing_project_intake',
-  EXT_HOUSING_PROJECT_PERMIT = 'ext_housing_project_permit',
-  EXT_HOUSING_PROJECT_PERMIT_ADD = 'ext_housing_project_permit_add',
-  EXT_HOUSING_PROJECT_PERMIT_ENQUIRY = 'ext_housing_project_permit_enquiry',
-  EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION = 'ext_housing_project_permit_enquiry_confirmation',
-  EXT_HOUSING_PROJECT_RELATED_ENQUIRY = 'ext_housing_project_related_enquiry',
+  EXT_HOUSING: 'ext_housing',
+  EXT_HOUSING_ENQUIRY_CONFIRMATION: 'ext_housing_enquiry_confirmation',
+  EXT_HOUSING_ENQUIRY: 'ext_housing_enquiry',
+  EXT_HOUSING_ENQUIRY_INTAKE: 'ext_housing_enquiry_intake',
+  EXT_HOUSING_INTAKE: 'ext_housing_intake',
+  EXT_HOUSING_INTAKE_CONFIRMATION: 'ext_housing_intake_confirmation',
+  EXT_HOUSING_GUIDE: 'ext_housing_guide',
+  EXT_HOUSING_PROJECT: 'ext_housing_project',
+  EXT_HOUSING_PROJECT_ENQUIRY: 'ext_housing_project_enquiry',
+  EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION: 'ext_housing_project_enquiry_confirmation',
+  EXT_HOUSING_PROJECT_INTAKE: 'ext_housing_project_intake',
+  EXT_HOUSING_PROJECT_PERMIT: 'ext_housing_project_permit',
+  EXT_HOUSING_PROJECT_PERMIT_ADD: 'ext_housing_project_permit_add',
+  EXT_HOUSING_PROJECT_PERMIT_ENQUIRY: 'ext_housing_project_permit_enquiry',
+  EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION: 'ext_housing_project_permit_enquiry_confirmation',
+  EXT_HOUSING_PROJECT_RELATED_ENQUIRY: 'ext_housing_project_related_enquiry',
   /*
    * End External route names
    */
@@ -126,109 +144,123 @@ export enum RouteName {
   /*
    * Internal route names
    */
-  INT_ELECTRIFICATION = 'int_electrification',
-  INT_ELECTRIFICATION_CONTACT = 'int_electrification_contact',
-  INT_ELECTRIFICATION_CONTACT_PAGE = 'int_electrification_contact_page',
-  INT_ELECTRIFICATION_ENQUIRY = 'int_electrification_enquiry',
-  INT_ELECTRIFICATION_ENQUIRY_NOTE = 'int_electrification_enquiry_note',
-  INT_ELECTRIFICATION_PROJECT = 'int_electrification_project',
-  INT_ELECTRIFICATION_PROJECT_AUTHORIZATION = 'int_electrification_project_authorization',
-  INT_ELECTRIFICATION_PROJECT_ENQUIRY = 'int_electrification_project_enquiry',
-  INT_ELECTRIFICATION_PROJECT_ENQUIRY_NOTE = 'int_electrification_project_enquiry_note',
-  INT_ELECTRIFICATION_PROJECT_NOTE = 'int_electrification_project_note',
-  INT_ELECTRIFICATION_PROJECT_PROPONENT = 'int_electrification_project_proponent',
-  INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT = 'int_electrification_project_proponent_permit',
-  INT_ELECTRIFICATION_USER_MANAGEMENT = 'int_electrification_user_management',
+  INT_ELECTRIFICATION: 'int_electrification',
+  INT_ELECTRIFICATION_CONTACT: 'int_electrification_contact',
+  INT_ELECTRIFICATION_CONTACT_PAGE: 'int_electrification_contact_page',
+  INT_ELECTRIFICATION_ENQUIRY: 'int_electrification_enquiry',
+  INT_ELECTRIFICATION_ENQUIRY_NOTE: 'int_electrification_enquiry_note',
+  INT_ELECTRIFICATION_PROJECT: 'int_electrification_project',
+  INT_ELECTRIFICATION_PROJECT_AUTHORIZATION: 'int_electrification_project_authorization',
+  INT_ELECTRIFICATION_PROJECT_ENQUIRY: 'int_electrification_project_enquiry',
+  INT_ELECTRIFICATION_PROJECT_ENQUIRY_NOTE: 'int_electrification_project_enquiry_note',
+  INT_ELECTRIFICATION_PROJECT_NOTE: 'int_electrification_project_note',
+  INT_ELECTRIFICATION_PROJECT_PROPONENT: 'int_electrification_project_proponent',
+  INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT: 'int_electrification_project_proponent_permit',
+  INT_ELECTRIFICATION_USER_MANAGEMENT: 'int_electrification_user_management',
 
-  INT_GENERAL = 'int_general',
-  INT_GENERAL_CONTACT = 'int_general_contact',
-  INT_GENERAL_CONTACT_PAGE = 'int_general_contact_page',
-  INT_GENERAL_ENQUIRY = 'int_general_enquiry',
-  INT_GENERAL_ENQUIRY_NOTE = 'int_general_enquiry_note',
-  INT_GENERAL_PROJECT = 'int_general_project',
-  INT_GENERAL_PROJECT_AUTHORIZATION = 'int_general_project_authorization',
-  INT_GENERAL_PROJECT_ENQUIRY = 'int_general_project_enquiry',
-  INT_GENERAL_PROJECT_ENQUIRY_NOTE = 'int_general_project_enquiry_note',
-  INT_GENERAL_PROJECT_NOTE = 'int_general_project_note',
-  INT_GENERAL_PROJECT_PROPONENT = 'int_general_project_proponent',
-  INT_GENERAL_PROJECT_PROPONENT_PERMIT = 'int_general_project_proponent_permit',
-  INT_GENERAL_USER_MANAGEMENT = 'int_general_user_management',
+  INT_GENERAL: 'int_general',
+  INT_GENERAL_CONTACT: 'int_general_contact',
+  INT_GENERAL_CONTACT_PAGE: 'int_general_contact_page',
+  INT_GENERAL_ENQUIRY: 'int_general_enquiry',
+  INT_GENERAL_ENQUIRY_NOTE: 'int_general_enquiry_note',
+  INT_GENERAL_PROJECT: 'int_general_project',
+  INT_GENERAL_PROJECT_AUTHORIZATION: 'int_general_project_authorization',
+  INT_GENERAL_PROJECT_ENQUIRY: 'int_general_project_enquiry',
+  INT_GENERAL_PROJECT_ENQUIRY_NOTE: 'int_general_project_enquiry_note',
+  INT_GENERAL_PROJECT_NOTE: 'int_general_project_note',
+  INT_GENERAL_PROJECT_PROPONENT: 'int_general_project_proponent',
+  INT_GENERAL_PROJECT_PROPONENT_PERMIT: 'int_general_project_proponent_permit',
+  INT_GENERAL_USER_MANAGEMENT: 'int_general_user_management',
 
-  INT_HOUSING = 'int_housing',
-  INT_HOUSING_CONTACT = 'int_housing_contact',
-  INT_HOUSING_CONTACT_PAGE = 'int_housing_contact_page',
-  INT_HOUSING_ENQUIRY = 'int_housing_enquiry',
-  INT_HOUSING_ENQUIRY_NOTE = 'int_housing_enquiry_note',
-  INT_HOUSING_PROJECT = 'int_housing_project',
-  INT_HOUSING_PROJECT_AUTHORIZATION = 'int_housing_project_authorization',
-  INT_HOUSING_PROJECT_ENQUIRY = 'int_housing_project_enquiry',
-  INT_HOUSING_PROJECT_ENQUIRY_NOTE = 'int_housing_project_enquiry_note',
-  INT_HOUSING_PROJECT_NOTE = 'int_housing_project_note',
-  INT_HOUSING_PROJECT_PROPONENT = 'int_housing_project_proponent',
-  INT_HOUSING_PROJECT_PROPONENT_PERMIT = 'int_housing_project_proponent_permit',
-  INT_HOUSING_USER_MANAGEMENT = 'int_housing_user_management',
+  INT_HOUSING: 'int_housing',
+  INT_HOUSING_CONTACT: 'int_housing_contact',
+  INT_HOUSING_CONTACT_PAGE: 'int_housing_contact_page',
+  INT_HOUSING_ENQUIRY: 'int_housing_enquiry',
+  INT_HOUSING_ENQUIRY_NOTE: 'int_housing_enquiry_note',
+  INT_HOUSING_PROJECT: 'int_housing_project',
+  INT_HOUSING_PROJECT_AUTHORIZATION: 'int_housing_project_authorization',
+  INT_HOUSING_PROJECT_ENQUIRY: 'int_housing_project_enquiry',
+  INT_HOUSING_PROJECT_ENQUIRY_NOTE: 'int_housing_project_enquiry_note',
+  INT_HOUSING_PROJECT_NOTE: 'int_housing_project_note',
+  INT_HOUSING_PROJECT_PROPONENT: 'int_housing_project_proponent',
+  INT_HOUSING_PROJECT_PROPONENT_PERMIT: 'int_housing_project_proponent_permit',
+  INT_HOUSING_USER_MANAGEMENT: 'int_housing_user_management',
 
   /*
    * End Internal route names
    */
 
-  NOT_FOUND = 'not_found',
+  NOT_FOUND: 'not_found',
 
-  OIDC_CALLBACK = 'oidc_callback',
-  OIDC_LOGIN = 'oidc_login',
-  OIDC_LOGOUT = 'oidc_logout'
-}
+  OIDC_CALLBACK: 'oidc_callback',
+  OIDC_LOGIN: 'oidc_login',
+  OIDC_LOGOUT: 'oidc_logout'
+} as const;
 
-export enum IdentityProviderKind {
-  AZUREIDIR = 'azureidir',
-  BCEID = 'bceidbasic',
-  BCEIDBUSINESS = 'bceidbusiness',
-  BCSC = 'bcsc'
-}
+export type RouteName = (typeof RouteName)[keyof typeof RouteName];
 
-export enum Resource {
-  ACCESS_REQUEST = 'ACCESS_REQUEST',
-  ACTIVITY_CONTACT = 'ACTIVITY_CONTACT',
-  ATS = 'ATS',
-  CONTACT = 'CONTACT',
-  DOCUMENT = 'DOCUMENT',
-  ELECTRIFICATION_PROJECT = 'ELECTRIFICATION_PROJECT',
-  ENQUIRY = 'ENQUIRY',
-  GENERAL_PROJECT = 'GENERAL_PROJECT',
-  HOUSING_PROJECT = 'HOUSING_PROJECT',
-  NOTE = 'NOTE',
-  PEACH = 'PEACH',
-  PERMIT = 'PERMIT',
-  REPORTING = 'REPORTING',
-  ROADMAP = 'ROADMAP',
-  SSO = 'SSO',
-  USER = 'USER',
-  YARS = 'YARS'
-}
+export const IdentityProviderKind = {
+  AZUREIDIR: 'azureidir',
+  BCEID: 'bceidbasic',
+  BCEIDBUSINESS: 'bceidbusiness',
+  BCSC: 'bcsc'
+} as const;
 
-export enum StorageKey {
-  AUTH = 'entrypoint',
-  BF_ACCORDION_IDX = 'bf_accordion_idx',
-  CONFIG = 'config',
-  CONTACT_REDIRECT = 'contact_redirect'
-}
+export type IdentityProviderKind = (typeof IdentityProviderKind)[keyof typeof IdentityProviderKind];
 
-export enum ToastTimeout {
-  ERROR = 5000,
-  INFO = 3000,
-  STICKY = 0,
-  SUCCESS = 3000, // eslint-disable-line @typescript-eslint/no-duplicate-enum-values
-  WARNING = 5000 // eslint-disable-line @typescript-eslint/no-duplicate-enum-values
-}
+export const Resource = {
+  ACCESS_REQUEST: 'ACCESS_REQUEST',
+  ACTIVITY_CONTACT: 'ACTIVITY_CONTACT',
+  ATS: 'ATS',
+  CONTACT: 'CONTACT',
+  DOCUMENT: 'DOCUMENT',
+  ELECTRIFICATION_PROJECT: 'ELECTRIFICATION_PROJECT',
+  ENQUIRY: 'ENQUIRY',
+  GENERAL_PROJECT: 'GENERAL_PROJECT',
+  HOUSING_PROJECT: 'HOUSING_PROJECT',
+  NOTE: 'NOTE',
+  PEACH: 'PEACH',
+  PERMIT: 'PERMIT',
+  REPORTING: 'REPORTING',
+  ROADMAP: 'ROADMAP',
+  SSO: 'SSO',
+  USER: 'USER',
+  YARS: 'YARS'
+} as const;
 
-export enum UserSearchParams {
-  FIRST_NAME = 'First name',
-  LAST_NAME = 'Last name',
-  EMAIL = 'Email'
-}
+export type Resource = (typeof Resource)[keyof typeof Resource];
 
-export enum Zone {
-  EXTERNAL = 'external',
-  GLOBAL = 'global',
-  INTERNAL = 'internal'
-}
+export const StorageKey = {
+  AUTH: 'entrypoint',
+  BF_ACCORDION_IDX: 'bf_accordion_idx',
+  CONFIG: 'config',
+  CONTACT_REDIRECT: 'contact_redirect'
+} as const;
+
+export type StorageKey = (typeof StorageKey)[keyof typeof StorageKey];
+
+export const ToastTimeout = {
+  ERROR: 5000,
+  INFO: 3000,
+  STICKY: 0,
+  SUCCESS: 3000,
+  WARNING: 5000
+} as const;
+
+export type ToastTimeout = (typeof ToastTimeout)[keyof typeof ToastTimeout];
+
+export const UserSearchParams = {
+  FIRST_NAME: 'First name',
+  LAST_NAME: 'Last name',
+  EMAIL: 'Email'
+} as const;
+
+export type UserSearchParams = (typeof UserSearchParams)[keyof typeof UserSearchParams];
+
+export const Zone = {
+  EXTERNAL: 'external',
+  GLOBAL: 'global',
+  INTERNAL: 'internal'
+} as const;
+
+export type Zone = (typeof Zone)[keyof typeof Zone];

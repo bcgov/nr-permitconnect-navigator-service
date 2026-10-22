@@ -285,16 +285,26 @@
         "underInvestigation": "Under investigation"
       },
       "userManagementView": {
+        "accessApproved": "User's access request has been approved",
+        "accessDenied": "User's access request has been denied",
         "cancel": "Cancel",
         "confirm": "Confirm",
         "createUser": "Create new user",
         "errorIdpCfg": "Failed to obtain IDP config",
+        "errorLoad": "Failed to load access requests",
+        "errorMissingIdentity": "User is missing identity details",
+        "errorNoAccessRequest": "No access request returned",
+        "errorNoGroup": "User has no group",
+        "errorNotInTable": "User not found in table",
         "header": "User Management",
         "requestError": "Failed to request access",
         "requestSuccess": "Access requested",
+        "revocationApproved": "User's revocation request has been approved",
+        "revocationDenied": "User's revocation request has been denied",
         "revokeAdmin1": "The user will now lose all access to the system.",
         "revokeAdmin2": "The user will be revoked from the system upon the approval of an admin.",
         "revokeError": "Error revoking user access",
+        "revokeHeader": "Revoke user",
         "revokeRequested": "Revoke requested",
         "searchPlaceholder": "Search all",
         "tab0": "Manage users",
@@ -322,7 +332,6 @@
         "failedSaveIntake": "Failed to save intake",
         "formSaved": "Form saved",
         "projectDescriptionCard": "Help us learn more about your project",
-        "projectDescriptionCardOptional": "Help us learn more about your project (optional)",
         "projectNameCard": "What is the name of your project?",
         "projectTypeCard": "What is your project type?",
         "provideDetails": "Provide us with additional information - short description about the project and/or project website link",
@@ -366,10 +375,10 @@
       },
       "atsUserLinkModal": {
         "atsClientLink": "ATS Client Link",
-        "clientNo": "ATS client # (optional)",
-        "email": "Email (optional)",
+        "clientNo": "ATS client #",
+        "email": "Email",
         "linkToPCNS": "Link to PCNS",
-        "phone": "Phone (optional)",
+        "phone": "Phone",
         "search": "Search"
       },
       "common": {
@@ -838,7 +847,8 @@
     "confirm": "Confirm",
     "confirmCreateHeader": "Confirm create submission",
     "confirmCreateMsg": "Please confirm that you want to create a new submission.",
-    "failedSubmission": "Failed to create new submission"
+    "failedSubmission": "Failed to create new submission",
+    "incompleteContact": "Add your phone number, relationship to project and preferred contact method to your contact details first."
   },
   "enquiryListProponent": {
     "createdByFailed": "Failed to load created by users",
@@ -886,7 +896,7 @@
         "parcel": "Parcel ID (PID Number)"
       }
     },
-    "header": "Provide additional location details (optional)",
+    "header": "Provide additional location details",
     "help": "List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522",
     "labels": {
       "geomark": "Open Geomark Web Service",
@@ -897,7 +907,7 @@
     }
   },
   "locationDescriptionCard": {
-    "header": "Is there anything else you would like to tell us about this project's location? (optional)"
+    "header": "Is there anything else you would like to tell us about this project's location?"
   },
   "loginButton": {
     "login": "Log in",
@@ -1033,8 +1043,7 @@
   },
   "projectDescriptionCard": {
     "headers": {
-      "required": "Help us learn more about your project",
-      "optional": "Help us learn more about your project (optional)"
+      "required": "Help us learn more about your project"
     },
     "labels": {
       "projectDescription": "Provide additional information"
@@ -1065,7 +1074,7 @@
     "header": "What is your project type?"
   },
   "bcHydroNumberCard": {
-    "header": "What is your BC Hydro Call for Power project number? (optional)"
+    "header": "What is your BC Hydro Call for Power project number?"
   },
   "appliedPermitsCard": {
     "header": "Have you applied for any provincial permits for this project?",
@@ -1078,7 +1087,7 @@
     }
   },
   "investigatePermitsCard": {
-    "header": "Select all provincially issued permits you plan to submit (optional)",
+    "header": "Select all provincially issued permits you plan to submit",
     "headerTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
     "placeholders": {
       "permitTypeId": "Select Permit type"

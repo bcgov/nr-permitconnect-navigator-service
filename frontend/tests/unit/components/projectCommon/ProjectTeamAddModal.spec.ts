@@ -10,6 +10,7 @@ import { contactService } from '@/services';
 import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 import { t } from '../../../helpers';
+import { testAuditFields, testContactDefaults } from '../../../fixtures';
 
 import type * as VeeValidate from 'vee-validate';
 import type { Contact, ActivityContact } from '@/types';
@@ -18,21 +19,28 @@ vi.mock('@/services', () => ({
   contactService: { matchContacts: vi.fn() }
 }));
 
+// Set per test to run the real useForm and validation schema instead of the canned submit
+const veeValidateMode = vi.hoisted(() => ({ real: false }));
+
 vi.mock('vee-validate', async (importOriginal) => {
   const actual = await importOriginal<typeof VeeValidate>();
   return {
     ...actual,
-    useForm: () => ({
-      handleSubmit: (fn: (values: VeeValidate.GenericObject) => void) => (e?: Event) => {
-        if (e?.preventDefault) e.preventDefault();
-        fn({ firstName: 'Manual', lastName: 'User' });
-      },
-      resetForm: vi.fn()
-    })
+    useForm: (...args: Parameters<typeof actual.useForm>) =>
+      veeValidateMode.real
+        ? actual.useForm(...args)
+        : {
+            handleSubmit: (fn: (values: VeeValidate.GenericObject) => void) => (e?: Event) => {
+              if (e?.preventDefault) e.preventDefault();
+              fn({ firstName: 'Manual', lastName: 'User' });
+            },
+            resetForm: vi.fn()
+          }
   };
 });
 
 const mockContact: Contact = {
+  ...testContactDefaults,
   contactId: 'contact1',
   firstName: 'John',
   lastName: 'Doe',
@@ -41,13 +49,14 @@ const mockContact: Contact = {
 };
 
 const mockActivityContact: ActivityContact = {
+  ...testAuditFields,
   activityId: 'activity1',
   contactId: 'contact1',
   role: ActivityContactRole.MEMBER,
   contact: mockContact
 };
 
-const wrapperSettings = (zone = Zone.INTERNAL, activityContacts: ActivityContact[] = []) => ({
+const wrapperSettings = (zone: Zone = Zone.INTERNAL, activityContacts: ActivityContact[] = []) => ({
   props: {
     activityContacts,
     visible: true,
@@ -80,6 +89,7 @@ const wrapperSettings = (zone = Zone.INTERNAL, activityContacts: ActivityContact
 describe('ProjectTeamAddModal.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    veeValidateMode.real = false;
   });
 
   describe('Search Logic & UI Bindings', () => {
@@ -144,7 +154,7 @@ describe('ProjectTeamAddModal.vue', () => {
 
     it('populates search results in the datatable covering true/false userId paths', async () => {
       const contactWithUser = { ...mockContact, userId: 'user-123' };
-      const contactWithoutUser = { ...mockContact, contactId: 'contact2', userId: undefined };
+      const contactWithoutUser = { ...mockContact, contactId: 'contact2', userId: null };
 
       vi.mocked(contactService.matchContacts).mockResolvedValue([contactWithUser, contactWithoutUser]);
 
@@ -161,6 +171,31 @@ describe('ProjectTeamAddModal.vue', () => {
   });
 
   describe('Adding & Removing Users', () => {
+    // Runs the real schema through useForm
+    it('does not add a manual entry that fails validation', async () => {
+      veeValidateMode.real = true;
+      vi.mocked(contactService.matchContacts).mockResolvedValue([]);
+      const wrapper = mount(ProjectTeamAddModal, wrapperSettings(Zone.INTERNAL));
+
+      const searchInput = wrapper.find('input');
+      await searchInput.setValue('John Doe');
+      await searchInput.trigger('keydown.enter');
+      await flushPromises();
+
+      const toggleBtn = wrapper.findAll('button').find((b) => b.text().includes(t('projectTeamAddModal.manualEntry')));
+      await toggleBtn?.trigger('click');
+      await flushPromises();
+
+      await wrapper.find('form').trigger('submit');
+      await flushPromises();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
+
+      const selectedTable = wrapper.findAllComponents({ name: 'DataTable' })[1];
+      expect(selectedTable?.props('value') ?? []).toEqual([]);
+      expect(wrapper.text()).toContain('First name is a required field');
+    });
+
     it('checks manualEntry addition via Form submit', async () => {
       vi.mocked(contactService.matchContacts).mockResolvedValue([]);
       const wrapper = mount(ProjectTeamAddModal, wrapperSettings(Zone.INTERNAL));

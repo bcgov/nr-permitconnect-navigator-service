@@ -8,9 +8,3 @@ export interface CreateSchemaOptions {
   codeList?: Record<CodeTableName, string[]>;
   orgBookOptions?: OrgBookOption[];
 }
-
-declare module 'yup' {
-  interface StringSchema<TType, TContext, TDefault, TFlags> {
-    emptyToNull(): StringSchema<TType | null, TContext, TDefault, TFlags>;
-  }
-}

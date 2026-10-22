@@ -27,31 +27,24 @@ describe('submitElectrificationProjectDraft validator', () => {
   function validBody(project: Record<string, unknown>) {
     return {
       contact: validContact,
-      basic: { projectName: 'Test', registeredName: 'Acme' },
+      basic: { projectName: 'Test', registeredName: 'Acme', projectDescription: 'desc' },
       project
     };
   }
 
-  it('requires projectDescription when projectType is OTHER', () => {
-    const result = schema.submitElectrificationProjectDraft.body.safeParse(validBody({ projectType: 'OTHER' }));
-    expect(result.success).toBe(false);
-    expect(
-      !result.success && result.error.issues.some((i) => i.message.match(/"projectDescription" is required/))
-    ).toBe(true);
-  });
-
-  it('passes when projectType is OTHER and projectDescription is provided', () => {
-    const result = schema.submitElectrificationProjectDraft.body.safeParse({
-      contact: validContact,
-      basic: { projectName: 'Test', registeredName: 'Acme', projectDescription: 'desc' },
-      project: { projectType: 'OTHER' }
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it('does not require projectDescription for a non-OTHER projectType', () => {
+  it('passes with a projectDescription', () => {
     const result = schema.submitElectrificationProjectDraft.body.safeParse(validBody({ projectType: 'IPP_SOLAR' }));
     expect(result.success).toBe(true);
+  });
+
+  it.each([undefined, null, '', '  '])('requires projectDescription for any projectType (%j)', (projectDescription) => {
+    const body = validBody({ projectType: 'IPP_SOLAR' });
+    const result = schema.submitElectrificationProjectDraft.body.safeParse({
+      ...body,
+      basic: { ...body.basic, projectDescription }
+    });
+    expect(result.success).toBe(false);
+    expect(!result.success && result.error.issues[0].path).toEqual(['basic', 'projectDescription']);
   });
 
   it('requires basic, contact, and project', () => {
@@ -62,7 +55,7 @@ describe('submitElectrificationProjectDraft validator', () => {
   it('requires registeredName on basic', () => {
     const result = schema.submitElectrificationProjectDraft.body.safeParse({
       contact: validContact,
-      basic: { projectName: 'Test' },
+      basic: { projectName: 'Test', projectDescription: 'desc' },
       project: { projectType: 'IPP_SOLAR' }
     });
     expect(result.success).toBe(false);
@@ -73,7 +66,7 @@ describe('submitElectrificationProjectDraft validator', () => {
     delete contactWithoutId.contactId;
     const result = schema.submitElectrificationProjectDraft.body.safeParse({
       contact: contactWithoutId,
-      basic: { projectName: 'Test', registeredName: 'Acme' },
+      basic: { projectName: 'Test', registeredName: 'Acme', projectDescription: 'desc' },
       project: { projectType: 'IPP_SOLAR' }
     });
     expect(result.success).toBe(false);
@@ -84,7 +77,7 @@ describe('submitElectrificationProjectDraft validator', () => {
     delete contactWithoutPreference.contactPreference;
     const result = schema.submitElectrificationProjectDraft.body.safeParse({
       contact: contactWithoutPreference,
-      basic: { projectName: 'Test', registeredName: 'Acme' },
+      basic: { projectName: 'Test', registeredName: 'Acme', projectDescription: 'desc' },
       project: { projectType: 'IPP_SOLAR' }
     });
     expect(result.success).toBe(false);
@@ -93,7 +86,7 @@ describe('submitElectrificationProjectDraft validator', () => {
   it('rejects unrecognized fields on contact', () => {
     const result = schema.submitElectrificationProjectDraft.body.safeParse({
       contact: { ...validContact, notARealField: true },
-      basic: { projectName: 'Test', registeredName: 'Acme' },
+      basic: { projectName: 'Test', registeredName: 'Acme', projectDescription: 'desc' },
       project: { projectType: 'IPP_SOLAR' }
     });
     expect(result.success).toBe(false);
@@ -116,11 +109,8 @@ describe('patchElectrificationProject validator', () => {
     expect(result.success).toBe(true);
   });
 
-  it('still requires projectDescription when projectType is OTHER', () => {
-    const result = schema.patchElectrificationProject.body.safeParse({ projectType: 'OTHER' });
+  it.each([null, '', '  '])('rejects clearing projectDescription (%j)', (projectDescription) => {
+    const result = schema.patchElectrificationProject.body.safeParse({ projectDescription });
     expect(result.success).toBe(false);
-    expect(
-      !result.success && result.error.issues.some((i) => i.message.match(/"projectDescription" is required/))
-    ).toBe(true);
   });
 });

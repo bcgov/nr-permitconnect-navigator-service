@@ -5,7 +5,6 @@ import { Form, type GenericObject } from 'vee-validate';
 import { computed, inject, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { array, boolean, date, number, object, string, type InferType } from 'yup';
 
 import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
 import AuthorizationFirstNationConsultationCard from '@/components/authorization/AuthorizationFirstNationConsultationCard.vue';
@@ -15,25 +14,19 @@ import { FormNavigationGuard } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { peachService, permitService, sourceSystemKindService, userService } from '@/services';
 import { useAppStore, useAuthZStore, useCodeStore, useFeatureStore, useProjectStore } from '@/store';
-import { PERMIT_NEEDED_LIST, VALID_STATE_STAGES } from '@/utils/constants/permit';
+import { VALID_STATE_STAGES } from '@/utils/constants/permit';
 import { Action, Resource } from '@/utils/enums/application';
 import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey } from '@/utils/keys';
 import { combineDateTime, omit, scrollToFirstError, setEmptyStringsToNull, splitDateTime } from '@/utils/utils';
-import { notInFutureValidator } from '@/validators/common';
+import { toTypedSchema } from '@/utils/zodSchema';
+import { createAuthorizationFormSchema } from '@/validators/authorizationFormSchema';
 
 import type { Ref } from 'vue';
-import type {
-  AuditFields,
-  Permit,
-  PermitTracking,
-  PermitType,
-  SourceSystemKind,
-  UpsertPermitRequest,
-  User
-} from '@/types';
+import type { ApiInitiative, Permit, PermitTracking, RequestBody, SourceSystemKind, User } from '@/types';
+import type { FormSchemaType as AuthorizationFormSchemaType } from '@/validators/authorizationFormSchema';
 
 // Props
 const { authorization = undefined, editable } = defineProps<{
@@ -60,72 +53,8 @@ const { isPeachEnabled } = storeToRefs(featureStore);
 const { getProject } = storeToRefs(projectStore);
 
 // Types
-const formSchema = object({
-  permitNote: string()
-    .when('stage', {
-      is: (stage: string) => stage !== initialFormValues.value?.stage,
-      then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
-    })
-    .when('state', {
-      is: (state: string) => state !== initialFormValues.value?.state,
-      then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
-    }),
-  authorizationType: object().required().label(t('authorization.authorizationForm.authorizationType')),
-  consultationStartDate: date().nullable(),
-  consultationEndDate: date()
-    .nullable()
-    .test(
-      'consultationEndDate > consultationStartDate',
-      t('authorization.authorizationFirstNationConsultation.consultationEndDateInvalid'),
-      function (value) {
-        const { consultationStartDate } = this.parent;
-        if (!value || !consultationStartDate) return true;
-        return value >= consultationStartDate;
-      }
-    ),
-  needed: string()
-    .required()
-    .oneOf(PERMIT_NEEDED_LIST)
-    .label(t('authorization.authorizationForm.needed'))
-    .test('valid-needed', t('authorization.authorizationForm.neededCondition'), function (value) {
-      const { state } = this.parent;
-      return (
-        (value === PermitNeeded.UNDER_INVESTIGATION && state === PermitState.NONE) ||
-        value !== PermitNeeded.UNDER_INVESTIGATION
-      );
-    }),
-  stage: string().required().oneOf(Object.values(PermitStage)).label(t('authorization.common.applicationStage')),
-  issuedPermitId: string().nullable(),
-  permitId: string(),
-  permitTracking: array().of(
-    object({
-      sourceSystemKindId: number().label(t('authorization.authorizationForm.trackingIdType')),
-      trackingId: string().max(255).label(t('authorization.authorizationForm.trackingId')),
-      shownToProponent: boolean()
-        .oneOf([true, false])
-        .default(false)
-        .label(t('authorization.authorizationForm.shownToProponent'))
-    })
-  ),
-  state: string()
-    .required()
-    .oneOf(Object.values(PermitState))
-    .label(t('authorization.authorizationForm.authorizationStatus'))
-    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionInvalid'), function (value) {
-      const { stage } = this.parent;
-      return VALID_STATE_STAGES[value]?.includes(stage) || stage === undefined;
-    }),
-
-  submittedDate: notInFutureValidator.nullable().label(t('authorization.common.submittedDate')),
-  decisionDate: notInFutureValidator.nullable().label(t('authorization.common.decisionDate')),
-  statusLastVerified: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastVerified')),
-  statusLastChanged: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastChanged')),
-  targetDate: date().nullable(),
-  targetDateDescription: string().nullable(),
-  technicalReviewer: string().nullable().max(255)
-});
-
-type FormSchemaType = InferType<typeof formSchema> & { authorizationType: PermitType } & AuditFields;
+type FormSchemaType = AuthorizationFormSchemaType &
+  Partial<Pick<Permit, 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'>>;
 
 // State
 const disableFormNavigationGuard: Ref<boolean> = ref(false);
@@ -135,6 +64,8 @@ const peachDialogResolver: Ref<((value: boolean) => void) | null> = ref(null);
 const noPeachDataModalVisible = defineModel<boolean>('visible');
 const sourceSystemKinds: Ref<SourceSystemKind[]> = ref([]);
 const updatedBy: Ref<User | undefined> = ref(undefined);
+
+const formSchema = computed(() => toTypedSchema(createAuthorizationFormSchema({ t }, initialFormValues.value)));
 
 const isPeachIntegratedAuthType = computed(() =>
   checkIfPeachIntegratedAuthType(formRef.value?.values?.authorizationType?.sourceSystem)
@@ -159,10 +90,10 @@ const sortForDisplayOrder = (a: SourceSystemKind, b: SourceSystemKind) => {
     const srcSysCompare = sourceA.localeCompare(sourceB, locale.value, { sensitivity: 'base' });
     if (srcSysCompare !== 0) return srcSysCompare;
   }
-  return a.description.localeCompare(b.description, locale.value, { sensitivity: 'base' });
+  return (a.description ?? '').localeCompare(b.description ?? '', locale.value, { sensitivity: 'base' });
 };
 
-function checkIfPeachIntegratedAuthType(sourceSystem: string): boolean {
+function checkIfPeachIntegratedAuthType(sourceSystem: string | null): boolean {
   const sourceSystemKind = sourceSystemKinds.value.find((ssk) => ssk.integrated && ssk.sourceSystem === sourceSystem);
   return !!sourceSystemKind;
 }
@@ -339,7 +270,7 @@ async function onSubmit(data: GenericObject) {
     const consultationEnd = splitDateTime(data.consultationEndDate);
 
     const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
-    const permitData: UpsertPermitRequest = {
+    const permitData: RequestBody<`upsert${ApiInitiative}Permit`> = {
       ...rest,
       activityId: getProject.value!.activityId,
       permitTypeId: authorizationType.permitTypeId,
@@ -365,7 +296,8 @@ async function onSubmit(data: GenericObject) {
       checkIfPeachIntegratedAuthType(authorizationType.sourceSystem) &&
       checkIfPeachIntegratedTrackingId(data.permitTracking)
     ) {
-      const response = await getPeachSummary(permitData?.permitTracking ?? []);
+      // PEACH only reads the tracking ids and source systems, which match between the request and resource shapes
+      const response = await getPeachSummary((permitData?.permitTracking ?? []) as PermitTracking[]);
       if (response) {
         permitData.decisionDate = response.decisionDate;
         permitData.state = response.state;
@@ -457,7 +389,7 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
     <AuthorizationCardIntake
       :editable="editable"
       :source-system-kinds="
-        sourceSystemKinds.filter((ssk) => ssk.permitTypeIds.includes(values?.authorizationType?.permitTypeId))
+        sourceSystemKinds.filter((ssk) => ssk.permitTypeIds?.includes(values?.authorizationType?.permitTypeId))
       "
       class="mt-6"
       @update:uncheck-shown-to-proponent="

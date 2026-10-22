@@ -9,8 +9,6 @@ import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { useAppStore, useFormStore } from '@/store';
 import { storeToRefs } from 'pinia';
 import { Initiative } from '@/utils/enums/application';
-import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
-import { useFormValues } from 'vee-validate';
 
 // Props
 const {
@@ -25,7 +23,6 @@ const {
 
 // Composables
 const { t } = useI18n();
-const values = useFormValues();
 
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
@@ -33,15 +30,6 @@ const { getEditable } = storeToRefs(useFormStore());
 
 // State
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);
-const header = computed(() => {
-  if (getInitiative.value === Initiative.ELECTRIFICATION) {
-    if (values.value.project.projectType === ElectrificationProjectType.OTHER)
-      return t('projectDescriptionCard.headers.required');
-    else return t('projectDescriptionCard.headers.optional');
-  } else {
-    return t('projectDescriptionCard.headers.required');
-  }
-});
 
 const textAreaPlaceholder = computed(() => {
   if (getInitiative.value === Initiative.GENERAL) {
@@ -62,7 +50,7 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
         class="section-header"
         aria-level="2"
       >
-        {{ header }}
+        {{ t('projectDescriptionCard.headers.required') }}
       </h6>
       <Divider type="solid" />
     </template>

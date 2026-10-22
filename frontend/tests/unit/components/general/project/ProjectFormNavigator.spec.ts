@@ -3,7 +3,7 @@ import { flushPromises } from '@vue/test-utils';
 import ProjectFormNavigator from '@/components/general/project/ProjectFormNavigator.vue';
 import { generalProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
-import { Initiative } from '@/utils/enums/application';
+import { BasicResponse, Initiative } from '@/utils/enums/application';
 import {
   ActivityContactRole,
   Area,
@@ -16,11 +16,21 @@ import {
 } from '@/utils/enums/projectCommon';
 import { updateLiveNameKey } from '@/utils/keys';
 
+import { t } from '../../../../helpers';
 import { mountComponent } from '../../../../mountComponent';
+import { testAuditFields, testContactDefaults } from '../../../../fixtures';
 
-import type { GeneralProject, User } from '@/types';
+import type { DeepPartial, GeneralProject, User } from '@/types';
+import type { FormSchemaType } from '@/validators/general/projectFormNavigatorSchema';
 
 // Mocks
+
+const mockConfirmRequire = vi.fn();
+
+vi.mock('@/lib/primevue', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  useConfirm: () => ({ require: mockConfirmRequire })
+}));
 
 const getPidsSpy = vi.spyOn(mapService, 'getPids');
 const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
@@ -31,6 +41,7 @@ const patchProjectSpy = vi.spyOn(generalProjectService, 'patchProject');
 const currentDate = new Date().toISOString();
 
 const exampleContact = {
+  ...testContactDefaults,
   contactId: 'contact123',
   firstName: 'John',
   lastName: 'Doe',
@@ -45,31 +56,42 @@ const testProject: GeneralProject = {
   applicationStatus: ApplicationStatus.IN_PROGRESS,
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Test Co',
-  hasRelatedEnquiry: false,
   queuePriority: 1,
   // The navigator form's schema (unlike intake's) only allows a submission
   // type of GUIDANCE/INAPPLICABLE -- ASSISTANCE et al. are intake-only.
   submissionType: SubmissionType.GUIDANCE,
   projectName: 'Test Project',
   projectDescription: 'Description',
-  multiPermitsNeeded: 'No',
   astNotes: 'Notes',
   atsClientId: null,
   atsEnquiryId: null,
   aaiUpdated: false,
-  addedToAts: false,
   projectApplicantType: ProjectApplicant.INDIVIDUAL,
   projectLocation: 'Test Location',
   activityType: 'Other',
   region: Region.CARIBOO,
   area: Area.COAST,
   naturalDisaster: false,
-  hasAppliedProvincialPermits: false,
-  contacts: [exampleContact],
+  hasAppliedProvincialPermits: BasicResponse.NO,
+  assignedUserId: null,
+  locationPids: null,
+  streetAddress: null,
+  relatedPermits: null,
+  projectNumber: null,
+  projectLocationDescription: null,
+  locality: null,
+  province: null,
+  checkProvincialPermits: null,
+  geomarkUrl: null,
+  businessArea: null,
+  latitude: null,
+  longitude: null,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
+  updatedAt: currentDate,
+  deletedBy: null,
+  deletedAt: null
 };
 
 // A primary activity contact backing `getPrimaryActivityContact`, so the
@@ -95,7 +117,7 @@ function mountProjectFormNavigator(options: { project?: GeneralProject; editable
     props: { project, editable },
     piniaState: {
       app: { initiative: Initiative.GENERAL },
-      project: { activityContacts: [primaryActivityContact] }
+      project: { project, activityContacts: [primaryActivityContact] }
     },
     provide: { [updateLiveNameKey]: () => {} },
     stubs: {
@@ -172,6 +194,19 @@ describe('ProjectFormNavigator', () => {
       expect(wrapper.isVisible()).toBe(true);
       expect(getPidsSpy).toHaveBeenCalledExactlyOnceWith({ projectId: testProject.generalProjectId });
     });
+
+    it('seeds decimals as numbers and drops missing codes', async () => {
+      const { wrapper } = mountProjectFormNavigator({
+        project: { ...testProject, latitude: '49.5', longitude: '-123.25', region: null, area: null }
+      });
+      await flushPromises();
+
+      const values = (
+        wrapper.vm as unknown as { formRef: { getValues: () => DeepPartial<FormSchemaType> } }
+      ).formRef.getValues();
+      expect(values.location).toMatchObject({ latitude: 49.5, longitude: -123.25 });
+      expect(values.submissionState).toMatchObject({ region: undefined, area: undefined });
+    });
   });
 
   describe('form submission', () => {
@@ -187,6 +222,38 @@ describe('ProjectFormNavigator', () => {
     });
   });
 
+  describe('reopen', () => {
+    const completedProject = { ...testProject, applicationStatus: ApplicationStatus.COMPLETED };
+
+    async function reopen(project: GeneralProject) {
+      const { wrapper } = mountProjectFormNavigator({ project });
+      await flushPromises();
+
+      const reopenButton = wrapper
+        .findAll('button')
+        .find((b) => b.text() === t('i.housing.project.projectForm.reopenSubmission'));
+      await reopenButton?.trigger('click');
+      await mockConfirmRequire.mock.calls[0]?.[0].accept();
+      await flushPromises();
+    }
+
+    it('validates and saves the project as in progress', async () => {
+      patchProjectSpy.mockResolvedValue(testProject);
+
+      await reopen(completedProject);
+
+      expect(patchProjectSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: testProject.projectId, applicationStatus: ApplicationStatus.IN_PROGRESS })
+      );
+    });
+
+    it('does not save when the form is invalid', async () => {
+      await reopen({ ...completedProject, projectName: '' });
+
+      expect(patchProjectSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('watchers', () => {
     it('updates ContactCardNavForm when the primary contact changes in the store', async () => {
       const { wrapper } = mountProjectFormNavigator();
@@ -195,6 +262,7 @@ describe('ProjectFormNavigator', () => {
       const store = useProjectStore();
       store.activityContacts = [
         {
+          ...testAuditFields,
           contactId: 'new-contact-999',
           activityId: testProject.activityId,
           role: ActivityContactRole.PRIMARY,

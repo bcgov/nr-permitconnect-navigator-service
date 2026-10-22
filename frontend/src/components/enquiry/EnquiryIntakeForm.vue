@@ -18,12 +18,14 @@ import {
   enquiryRouteNameKey
 } from '@/utils/keys';
 import { generalErrorHandler } from '@/utils/utils';
-import { enquirySchema } from '@/validators/enquiry';
+import { toTypedSchema } from '@/utils/zodSchema';
+import { enquiryIntakeFormSchema } from '@/validators/enquiryIntakeFormSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { CreateEnquiryRequest, Enquiry, Permit, Project } from '@/types';
-import type { FormSchemaType } from '@/validators/enquiry';
+import type { ApiInitiative, Enquiry, Permit, Project, RequestBody } from '@/types';
+import type { FormSchemaType } from '@/validators/enquiryIntakeFormSchema';
 
 // Props
 const {
@@ -55,6 +57,7 @@ const formStore = useFormStore();
 const { getEditable } = storeToRefs(formStore);
 
 // State
+const validationSchema = toTypedSchema(enquiryIntakeFormSchema);
 const initialFormValues: Ref<undefined | GenericObject> = ref(undefined);
 const isOnlyProjectRelated: Ref<boolean> = computed(() => Boolean(project && !permit));
 const isPermitRelated: Ref<boolean> = computed(() => Boolean(permit));
@@ -107,10 +110,18 @@ async function onSubmit(values: FormSchemaType) {
   formStore.setFormState(FormState.LOCKED);
 
   try {
-    let payload: CreateEnquiryRequest = {
+    let payload: RequestBody<`create${ApiInitiative}Enquiry`> = {
       enquiryDescription: values.basic.enquiryDescription,
       relatedActivityId: project?.activityId ?? undefined,
-      contact: values.contacts
+      contact: {
+        contactId: values.contacts.contactId,
+        firstName: values.contacts.firstName,
+        lastName: values.contacts.lastName,
+        email: values.contacts.email,
+        phoneNumber: values.contacts.phoneNumber,
+        contactApplicantRelationship: values.contacts.contactApplicantRelationship,
+        contactPreference: values.contacts.contactPreference
+      }
     };
 
     if (permit) {
@@ -154,15 +165,7 @@ onBeforeMount(async () => {
     initialFormValues.value = {
       activityId: response?.activityId,
       enquiryId: response?.enquiryId,
-      contacts: {
-        firstName: primaryContact?.firstName,
-        lastName: primaryContact?.lastName,
-        phoneNumber: primaryContact?.phoneNumber,
-        email: primaryContact?.email,
-        contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-        contactPreference: primaryContact?.contactPreference,
-        contactId: primaryContact?.contactId
-      },
+      contacts: toContactFormValues(primaryContact),
       basic: {
         relatedActivityId: response?.relatedActivityId,
         enquiryDescription: response?.enquiryDescription
@@ -225,7 +228,7 @@ onBeforeMount(async () => {
       v-if="initialFormValues"
       keep-values
       :initial-values="initialFormValues"
-      :validation-schema="enquirySchema"
+      :validation-schema="validationSchema"
       @invalid-submit="onInvalidSubmit"
       @submit="confirmSubmit"
     >

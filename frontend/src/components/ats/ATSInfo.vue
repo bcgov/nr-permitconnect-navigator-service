@@ -158,7 +158,9 @@ function onNewATSEnquiry() {
       v-if="
         atsClientId &&
         !atsEnquiryId &&
-        ![ATSCreateTypes.CLIENT_ENQUIRY, ATSCreateTypes.ENQUIRY].includes(atsCreateType as ATSCreateTypes)
+        !([ATSCreateTypes.CLIENT_ENQUIRY, ATSCreateTypes.ENQUIRY] as ATSCreateTypes[]).includes(
+          atsCreateType as ATSCreateTypes
+        )
       "
       class="ats-button mt-4 w-full"
       :aria-label="t('i.ats.atsInfo.atsNewEnquiryBtn')"

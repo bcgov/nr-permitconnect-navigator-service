@@ -21,13 +21,14 @@ import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { electrificationProjectService } from '@/services';
 import { useCodeStore, useContactStore, useFormStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
-import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { DeepPartial, Draft, ElectrificationProject, ElectrificationProjectIntake, OrgBookOption } from '@/types';
+import type { DeepPartial, Draft, ElectrificationProject, OrgBookOption } from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
 // Props
@@ -54,7 +55,7 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const validationSchema = computed(() => {
-  return createProjectIntakeSchema(codeList, orgBookOptions.value);
+  return toTypedSchema(createProjectIntakeSchema(codeList, orgBookOptions.value));
 });
 
 // Actions
@@ -102,7 +103,7 @@ async function onSubmit(data: FormSchemaType) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    const payload: ElectrificationProjectIntake = {
+    const payload: Parameters<typeof electrificationProjectService.submitDraft>[0] = {
       activityId: draft.value?.activityId,
       basic: {
         registeredId: data.basic.registeredId,
@@ -122,7 +123,7 @@ async function onSubmit(data: FormSchemaType) {
       draftId: draft.value?.draftId,
       project: {
         bcHydroNumber: data.project.bcHydroNumber,
-        projectType: data.project.projectType as ElectrificationProjectType
+        projectType: data.project.projectType
       }
     };
 
@@ -166,37 +167,21 @@ onBeforeMount(async () => {
 
       initialFormValues.value = {
         basic: {
-          registeredName: project.companyNameRegistered,
+          registeredName: project.companyNameRegistered ?? undefined,
           registeredId: project.companyIdRegistered,
-          projectName: project.projectName,
-          projectDescription: project.projectDescription
+          projectName: project.projectName ?? undefined,
+          projectDescription: project.projectDescription ?? undefined
         },
-        contacts: {
-          firstName: primaryContact?.firstName,
-          lastName: primaryContact?.lastName,
-          phoneNumber: primaryContact?.phoneNumber,
-          email: primaryContact?.email,
-          contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-          contactPreference: primaryContact?.contactPreference,
-          contactId: primaryContact?.contactId
-        },
+        contacts: toContactFormValues(primaryContact),
         project: {
           bcHydroNumber: project.bcHydroNumber,
-          projectType: project.projectType
+          projectType: project.projectType ?? undefined
         }
       };
     } else {
       const userContact = useContactStore().getContact;
       initialFormValues.value = {
-        contacts: {
-          contactId: userContact?.contactId,
-          firstName: userContact?.firstName,
-          lastName: userContact?.lastName,
-          email: userContact?.email,
-          phoneNumber: userContact?.phoneNumber,
-          contactApplicantRelationship: userContact?.contactApplicantRelationship,
-          contactPreference: userContact?.contactPreference
-        }
+        contacts: toContactFormValues(userContact)
       };
     }
   } catch (e) {

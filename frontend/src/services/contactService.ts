@@ -1,13 +1,7 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type {
-  Contact,
-  DeleteContactRequest,
-  GetContactRequest,
-  ListContactsRequest,
-  UpsertContactRequest
-} from '@/types';
+import type { Contact, QueryParams, RequestBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -29,7 +23,7 @@ const contactRoutes = {
  * @param req - The request payload containing the contact ID and optional activity inclusion flag.
  * @returns A promise resolving to the requested `Contact` resource.
  */
-export function getContact(req: GetContactRequest): Promise<Contact> {
+export function getContact(req: { contactId: string } & QueryParams<'getContact'>): Promise<Contact> {
   const { contactId, includeActivities = false } = req;
 
   return api.get<Contact>(contactRoutes.byId(contactId), {
@@ -50,7 +44,7 @@ export function getCurrentUserContact(): Promise<Contact> {
  * @param req - The request payload containing the contact ID.
  * @returns A promise resolving when the operation completes.
  */
-export function deleteContact(req: DeleteContactRequest): Promise<void> {
+export function deleteContact(req: { contactId: string }): Promise<void> {
   const { contactId } = req;
 
   return api.delete(contactRoutes.byId(contactId));
@@ -61,7 +55,7 @@ export function deleteContact(req: DeleteContactRequest): Promise<void> {
  * @param req - The request payload containing matching criteria.
  * @returns A promise resolving to an array of matching `Contact` resources.
  */
-export function matchContacts(req: ListContactsRequest): Promise<Contact[]> {
+export function matchContacts(req: RequestBody<'matchContacts'>): Promise<Contact[]> {
   return api.post<Contact[]>(contactRoutes.match(), req);
 }
 
@@ -70,7 +64,7 @@ export function matchContacts(req: ListContactsRequest): Promise<Contact[]> {
  * @param req - The request payload containing search criteria.
  * @returns A promise resolving to an array of `Contact` resources.
  */
-export function searchContacts(req: ListContactsRequest): Promise<Contact[]> {
+export function searchContacts(req: RequestBody<'searchContacts'>): Promise<Contact[]> {
   return api.post<Contact[]>(contactRoutes.search(), req);
 }
 
@@ -79,7 +73,7 @@ export function searchContacts(req: ListContactsRequest): Promise<Contact[]> {
  * @param req - The request payload containing the contact data.
  * @returns A promise resolving to the saved `Contact` resource.
  */
-export function upsertContact(req: UpsertContactRequest): Promise<Contact> {
+export function upsertContact(req: RequestBody<'upsertContact'>): Promise<Contact> {
   return api.post<Contact>(contactRoutes.root(), req);
 }
 

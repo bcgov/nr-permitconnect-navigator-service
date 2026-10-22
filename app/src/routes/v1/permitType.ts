@@ -19,6 +19,7 @@ router.use(requireSomeGroup);
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/',
+  operationId: 'listPermitTypes',
   summary: 'Get a list of permit types',
   tags: ['Permit Type'],
   schema: schema.listPermitTypes,

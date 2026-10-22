@@ -1,160 +1,101 @@
-import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
+import { z } from 'zod';
+
+import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
-import { IntakeFormCategory, ProjectApplicant } from '@/utils/enums/projectCommon';
-import { contactSchema, locationValidator, permitsValidator } from '@/validators';
-import { boolean, object, string, type InferType } from 'yup';
+import { IntakeFormCategory } from '@/utils/enums/projectCommon';
+import {
+  addIssue,
+  evenWithIssues,
+  formSection,
+  maxMessage,
+  optionalTextSchema,
+  requiredMessage,
+  requiredOneOf,
+  requiredString,
+  requiredTextSchema
+} from '@/utils/zodSchema';
+import {
+  locationFormSchema,
+  permitsFormSchema,
+  refineBusinessRegistration,
+  requireFinanceDescriptions,
+  requireUnits,
+  unitsSchema
+} from '@/validators/common';
+import { contactFormSchema } from '@/validators/contact';
 
 import type { OrgBookOption } from '@/types';
-import { optionalText } from '../common';
-
-const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
+import type { FormValues } from '@/utils/zodSchema';
 
 export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
-  return object({
-    [IntakeFormCategory.BASIC]: object({
-      consentToFeedback: boolean().required().label('Consent to feedback'),
-      projectApplicantType: string().required().oneOf(PROJECT_APPLICANT_LIST).label('Project developed'),
-      isDevelopedInBc: string().when('projectApplicantType', {
-        is: (value: string) => value === ProjectApplicant.BUSINESS,
-        then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC'),
-        otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
-      }),
-      registeredId: optionalText().when('isDevelopedInBc', {
-        is: (value: string) => value === BasicResponse.YES,
-        then: (schema) =>
-          schema
-            .required()
-            .max(255)
-            .test(
-              'valid-business-id',
-              'Failed to set the business ID, try selecting the business name again',
-              (value) => {
-                if (!value) return false;
-                return orgBookOptions.some((option) => option.registeredId === value);
-              }
-            )
-            .label('Business ID'),
-        otherwise: (schema) => schema.notRequired().nullable().label('Business ID')
-      }),
-      registeredName: optionalText().when('isDevelopedInBc', {
-        is: (value: string) => value === BasicResponse.YES,
-        then: (schema) =>
-          schema
-            .required()
-            .max(255)
-            .test(
-              'valid-business-name',
-              'Business name must be a valid value from the list of suggestions',
-              (value) => {
-                if (!value) return false;
-                return orgBookOptions.some((option) => option.registeredName === value);
-              }
-            )
-            .label('Business name'),
-        otherwise: (schema) => schema.notRequired().nullable().label('Business name')
-      }),
-      projectName: string().required().max(255).label('Project name'),
-      projectDescription: string().required().label('Project description')
-    }),
-    [IntakeFormCategory.CONTACTS]: contactSchema,
-    [IntakeFormCategory.HOUSING]: object().shape(
-      {
-        hasRentalUnits: YesNoUnsureSchema.label('Rental units'),
-        financiallySupportedBc: YesNoUnsureSchema.label('BC Housing'),
-        financiallySupportedIndigenous: YesNoUnsureSchema.label('Indigenous Housing Provider'),
-        financiallySupportedNonProfit: YesNoUnsureSchema.label('Non-profit housing society'),
-        financiallySupportedHousingCoop: YesNoUnsureSchema.label('Housing co-operative'),
-        rentalUnits: string().when('hasRentalUnits', {
-          is: (value: string) => value === BasicResponse.YES,
-          then: () => string().oneOf(NUM_RESIDENTIAL_UNITS_LIST).required().label('Expected rental units'),
-          otherwise: () => string().nullable()
-        }),
-        indigenousDescription: string().when('financiallySupportedIndigenous', {
-          is: (value: string) => value === BasicResponse.YES,
-          then: () => string().required().max(255).label('Indigenous housing provider'),
-          otherwise: () => string().nullable()
-        }),
-        nonProfitDescription: string().when('financiallySupportedNonProfit', {
-          is: (value: string) => value === BasicResponse.YES,
-          then: () => string().required().max(255).label('Non-profit housing society'),
-          otherwise: () => string().nullable()
-        }),
-        housingCoopDescription: string().when('financiallySupportedHousingCoop', {
-          is: (value: string) => value === BasicResponse.YES,
-          then: () => string().required().max(255).label('Housing co-operative'),
-          otherwise: () => string().nullable()
-        }),
-        singleFamilySelected: boolean().when(['multiFamilySelected', 'otherSelected'], {
-          is: (multi: boolean, other: boolean) => !(multi || other),
-          then: (schema) => {
-            return schema.test('housing-checkbox-test', '\n', function (value) {
-              if (value) return true;
-              else return false;
-            });
-          },
-          otherwise: (schema) => schema.notRequired()
-        }),
-        singleFamilyUnits: string()
-          .nullable()
-          .oneOf(NUM_RESIDENTIAL_UNITS_LIST)
-          .when('singleFamilySelected', {
-            is: (value: boolean) => value,
-            then: (schema) => schema.required().label('Expected number of single-family units'),
-            otherwise: () => string().nullable()
-          }),
-        multiFamilySelected: boolean().when(['singleFamilySelected', 'otherSelected'], {
-          is: (single: boolean, other: boolean) => !(single || other),
-          then: (schema) => {
-            return schema.test('housing-checkbox-test', '\n', function (value) {
-              if (value) return true;
-              else return false;
-            });
-          },
-          otherwise: (schema) => schema.notRequired()
-        }),
-        multiFamilyUnits: string()
-          .nullable()
-          .oneOf(NUM_RESIDENTIAL_UNITS_LIST)
-          .when('multiFamilySelected', {
-            is: (value: boolean) => value,
-            then: (schema) => schema.required().label('Expected number of multi-family units'),
-            otherwise: () => string().nullable()
-          }),
-        otherSelected: boolean().when(['singleFamilySelected', 'multiFamilySelected'], {
-          is: (single: boolean, multi: boolean) => !(single || multi),
-          then: (schema) => {
-            return schema.test('housing-checkbox-test', '\n', function (value) {
-              if (value) return true;
-              else return false;
-            });
-          },
-          otherwise: (schema) => schema.notRequired()
-        }),
-        otherUnitsDescription: optionalText().when('otherSelected', {
-          is: (value: boolean) => value,
-          then: (schema) => schema.required().label('Description of units'),
-          otherwise: () => string().nullable()
-        }),
-        otherUnits: string()
-          .nullable()
-          .oneOf(NUM_RESIDENTIAL_UNITS_LIST)
-          .when('otherSelected', {
-            is: (value: boolean) => value,
-            then: (schema) => schema.required().label('Expected number of other units'),
-            otherwise: () => string().nullable()
-          })
-      },
-      [
-        ['multiFamilySelected', 'otherSelected'],
-        ['singleFamilySelected', 'otherSelected'],
-        ['singleFamilySelected', 'multiFamilySelected']
-      ]
-    ),
-    [IntakeFormCategory.LOCATION]: locationValidator,
-    [IntakeFormCategory.PERMITS]: permitsValidator
+  const basic = z
+    .looseObject({
+      consentToFeedback: z.boolean(requiredMessage('Consent to feedback')),
+      projectApplicantType: requiredOneOf('Project developed', PROJECT_APPLICANT_LIST),
+      isDevelopedInBc: z.string().nullish(),
+      registeredId: optionalTextSchema('Business ID'),
+      registeredName: optionalTextSchema('Business name'),
+      projectName: requiredString('Project name').max(255, maxMessage('Project name', 255)),
+      projectDescription: requiredTextSchema('Project description')
+    })
+    .superRefine(refineBusinessRegistration(orgBookOptions), evenWithIssues);
+
+  const housing = z
+    .looseObject({
+      hasRentalUnits: requiredOneOf('Rental units', YES_NO_UNSURE_LIST),
+      financiallySupportedBc: requiredOneOf('BC Housing', YES_NO_UNSURE_LIST),
+      financiallySupportedIndigenous: requiredOneOf('Indigenous Housing Provider', YES_NO_UNSURE_LIST),
+      financiallySupportedNonProfit: requiredOneOf('Non-profit housing society', YES_NO_UNSURE_LIST),
+      financiallySupportedHousingCoop: requiredOneOf('Housing co-operative', YES_NO_UNSURE_LIST),
+      rentalUnits: unitsSchema('Expected rental units'),
+      indigenousDescription: z.string().nullish(),
+      nonProfitDescription: z.string().nullish(),
+      housingCoopDescription: z.string().nullish(),
+      singleFamilySelected: z.boolean().optional(),
+      multiFamilySelected: z.boolean().optional(),
+      otherSelected: z.boolean().optional(),
+      singleFamilyUnits: unitsSchema('Expected number of single-family units'),
+      multiFamilyUnits: unitsSchema('Expected number of multi-family units'),
+      otherUnitsDescription: optionalTextSchema('Description of units'),
+      otherUnits: unitsSchema('Expected number of other units')
+    })
+    .superRefine((value, ctx) => {
+      if (value.hasRentalUnits === BasicResponse.YES) {
+        requireUnits(ctx, 'rentalUnits', 'Expected rental units', value.rentalUnits);
+      }
+      requireFinanceDescriptions(ctx, value, {
+        indigenous: 'Indigenous housing provider',
+        nonProfit: 'Non-profit housing society',
+        housingCoop: 'Housing co-operative'
+      });
+
+      // unitTypes is a field ResidentialUnitsCard registers to show this message only once validated;
+      // the blank checkbox issues let useFormErrorWatcher jump invalid submits to the card's tab
+      if (!value.singleFamilySelected && !value.multiFamilySelected && !value.otherSelected) {
+        addIssue(ctx, 'unitTypes', 'At least one residential unit type must be selected');
+        for (const key of ['singleFamilySelected', 'multiFamilySelected', 'otherSelected']) addIssue(ctx, key, '\n');
+      }
+      if (value.singleFamilySelected) {
+        requireUnits(ctx, 'singleFamilyUnits', 'Expected number of single-family units', value.singleFamilyUnits);
+      }
+      if (value.multiFamilySelected) {
+        requireUnits(ctx, 'multiFamilyUnits', 'Expected number of multi-family units', value.multiFamilyUnits);
+      }
+      if (value.otherSelected) {
+        if (!value.otherUnitsDescription)
+          addIssue(ctx, 'otherUnitsDescription', requiredMessage('Description of units'));
+        requireUnits(ctx, 'otherUnits', 'Expected number of other units', value.otherUnits);
+      }
+    }, evenWithIssues);
+
+  return z.looseObject({
+    [IntakeFormCategory.BASIC]: formSection(basic),
+    [IntakeFormCategory.CONTACTS]: formSection(contactFormSchema),
+    [IntakeFormCategory.HOUSING]: formSection(housing),
+    [IntakeFormCategory.LOCATION]: formSection(locationFormSchema),
+    [IntakeFormCategory.PERMITS]: formSection(permitsFormSchema)
   });
 }
 
-export type FormSchemaType = InferType<ReturnType<typeof createProjectIntakeSchema>>;
+export type FormSchemaType = FormValues<z.infer<ReturnType<typeof createProjectIntakeSchema>>>;

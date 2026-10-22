@@ -10,7 +10,7 @@ import { useAppStore, useCodeStore, usePermitStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 import { formatDateOnly } from '@/utils/formatters';
 import { projectAuthorizationRouteNameKey } from '@/utils/keys';
-import { generalErrorHandler } from '@/utils/utils';
+import { generalErrorHandler, toIsoRange } from '@/utils/utils';
 
 import type { DataTableSortEvent } from 'primevue/datatable';
 import type { Ref } from 'vue';
@@ -31,7 +31,7 @@ const { getInitiativePermitTypes } = storeToRefs(usePermitStore());
 // State
 const authorizationTracking: Ref<PermitTracking | undefined> = ref(undefined);
 const authorizationType: Ref<PermitType | undefined> = ref(undefined);
-const dateRange: Ref<[Date, Date] | undefined> = ref(undefined);
+const dateRange: Ref<(Date | null)[] | null | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const pagination: Ref<Pagination> = ref({
   rows: 10,
@@ -47,7 +47,7 @@ const sourceSystemKinds: Ref<SourceSystemKind[]> = ref([]);
 const getPermitTrackingOptions = computed(() =>
   authorizationType.value
     ? sourceSystemKinds.value.filter(
-        (ssk) => authorizationType.value && ssk.permitTypeIds.includes(authorizationType.value.permitTypeId)
+        (ssk) => authorizationType.value && ssk.permitTypeIds?.includes(authorizationType.value.permitTypeId)
       )
     : undefined
 );
@@ -77,14 +77,15 @@ async function searchPermits() {
         loading.value = true;
         permitService
           .searchPermits({
-            dateRange: dateRange.value,
-            permitTypeId: authorizationType.value?.permitTypeId,
-            sourceSystemKindId: authorizationTracking.value?.sourceSystemKindId,
+            dateRange: toIsoRange(dateRange.value),
+            permitTypeId: authorizationType.value?.permitTypeId?.toString(),
+            sourceSystemKindId: authorizationTracking.value?.sourceSystemKindId?.toString(),
             searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
             skip: pagination.value.page && pagination.value.rows ? pagination.value.page * pagination.value.rows : 0,
             take: pagination.value.rows,
             sortField: pagination.value.field,
-            sortOrder: pagination.value.order
+            // DataTable sort orders are -1, 0 or 1
+            sortOrder: pagination.value.order?.toString() as '-1' | '0' | '1' | undefined
           })
           .then((res) => {
             searchResponse.value = res;
@@ -179,7 +180,7 @@ onBeforeMount(async () => {
               :max-date="new Date()"
               hide-on-range-selection
               show-clear
-              @value-change="searchPermits()"
+              @value-change="(value) => (!value || toIsoRange(value as (Date | null)[])) && searchPermits()"
             />
           </div>
           <div>

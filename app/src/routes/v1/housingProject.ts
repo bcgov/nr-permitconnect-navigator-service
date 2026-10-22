@@ -37,6 +37,7 @@ router.use(requireSomeGroup);
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/',
+  operationId: 'listHousingProjects',
   summary: 'Gets a list of housing projects',
   tags: TAGS,
   responses: {
@@ -51,6 +52,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/activityIds',
+  operationId: 'listHousingProjectActivityIds',
   summary: 'Get a list of all the activityIds',
   tags: TAGS,
   responses: {
@@ -65,6 +67,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/search',
+  operationId: 'searchHousingProjects',
   summary: 'Search housing projects',
   tags: TAGS,
   schema: schema.searchHousingProjects,
@@ -81,6 +84,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/statistics',
+  operationId: 'getHousingProjectStatistics',
   summary: 'Gets housing project statistics',
   tags: TAGS,
   schema: schema.getStatistics,
@@ -97,6 +101,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/draft/:draftId',
+  operationId: 'getHousingProjectDraft',
   summary: 'Get a specific housing project draft',
   tags: TAGS,
   schema: schema.getDraft,
@@ -113,6 +118,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/draft',
+  operationId: 'listHousingProjectDrafts',
   summary: 'Gets a list of housing project drafts',
   tags: TAGS,
   responses: {
@@ -127,6 +133,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/draft',
+  operationId: 'upsertHousingProjectDraft',
   summary: 'Creates or updates an intake and set status to Draft',
   tags: TAGS,
   schema: schema.upsertDraft,
@@ -144,6 +151,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/draft/submit',
+  operationId: 'submitHousingProjectDraft',
   summary: 'Creates or updates an intake and set status to Submitted',
   tags: TAGS,
   schema: schema.submitHousingProjectDraft,
@@ -160,6 +168,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/',
+  operationId: 'createHousingProject',
   summary: 'Creates a blank housing project',
   tags: TAGS,
   schema: schema.createHousingProject,
@@ -176,6 +185,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'delete',
   path: '/draft/:draftId',
+  operationId: 'deleteHousingProjectDraft',
   summary: 'Hard deletes a housing project draft',
   tags: TAGS,
   schema: schema.deleteDraft,
@@ -192,6 +202,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/:housingProjectId',
+  operationId: 'getHousingProject',
   summary: 'Gets a specific housing project',
   tags: TAGS,
   schema: schema.getHousingProject,
@@ -208,6 +219,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'patch',
   path: '/:housingProjectId',
+  operationId: 'patchHousingProject',
   summary: 'Patches a housing project',
   tags: TAGS,
   schema: schema.patchHousingProject,
@@ -224,6 +236,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'delete',
   path: '/:housingProjectId',
+  operationId: 'deleteHousingProject',
   summary: 'Deletes a housing project',
   tags: TAGS,
   schema: schema.deleteHousingProject,

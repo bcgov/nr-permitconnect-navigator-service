@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ErrorMessage, useFormErrors, useFormValues, useIsFormTouched } from 'vee-validate';
+import { useField, useFormValues } from 'vee-validate';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -20,8 +20,8 @@ const { tab = 0 } = defineProps<{
 
 // Composables
 const { t } = useI18n();
-const errors = useFormErrors();
-const touched = useIsFormTouched();
+// Carries only the group error, so it stays hidden until the form validates it
+const { errorMessage: unitTypesError } = useField('housing.unitTypes');
 const values = useFormValues();
 
 // Store
@@ -55,7 +55,6 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
             label="Single-family"
             :bold="false"
             :disabled="!getEditable"
-            :invalid="!!errors.housing && touched"
           />
         </div>
         <Select
@@ -74,7 +73,6 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
               label="Multi-family"
               :bold="false"
               :disabled="!getEditable"
-              :invalid="!!errors.housing && touched"
             />
             <Tooltip
               class="pl-2"
@@ -98,8 +96,13 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
             label="Other"
             :bold="false"
             :disabled="!getEditable"
-            :invalid="!!errors?.housing && touched"
           />
+          <div
+            v-if="unitTypesError"
+            class="mt-2 app-error-message"
+          >
+            {{ unitTypesError }}
+          </div>
         </div>
         <InputText
           v-if="values.housing?.otherSelected"
@@ -108,7 +111,10 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
           :disabled="!getEditable || !values.housing?.otherSelected"
           :placeholder="t('projectIntakeForm.residentialUnitsCard.typesOfHousing')"
         />
-        <div class="col-span-6" />
+        <div
+          v-if="values.housing?.otherSelected"
+          class="col-span-6"
+        />
         <Select
           v-if="values.housing?.otherSelected"
           class="col-span-6"
@@ -116,11 +122,6 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
           :disabled="!getEditable || !values.housing?.otherSelected"
           :options="NUM_RESIDENTIAL_UNITS_LIST"
           :placeholder="t('projectIntakeForm.common.noOfExpectedUnits')"
-        />
-        <ErrorMessage
-          v-if="touched"
-          class="col-span-12"
-          name="housing"
         />
       </div>
     </template>

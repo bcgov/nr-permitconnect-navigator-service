@@ -1,7 +1,7 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type { GetProjectPermitDataResponse } from '@/types';
+import type { ResponseBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -20,24 +20,24 @@ const reportingRoutes = {
  * Retrieves permit data for electrification projects.
  * @returns A promise resolving to the electrification project permit data.
  */
-export function getElectrificationProjectPermitData(): Promise<GetProjectPermitDataResponse[]> {
-  return api.get<GetProjectPermitDataResponse[]>(reportingRoutes.electrificationProjectPermit());
+export function getElectrificationProjectPermitData(): Promise<ResponseBody<'getElectrificationProjectPermitReport'>> {
+  return api.get<ResponseBody<'getElectrificationProjectPermitReport'>>(reportingRoutes.electrificationProjectPermit());
 }
 
 /**
  * Retrieves permit data for general projects.
  * @returns A promise resolving to the general project permit data.
  */
-export function getGeneralProjectPermitData(): Promise<GetProjectPermitDataResponse[]> {
-  return api.get<GetProjectPermitDataResponse[]>(reportingRoutes.generalProjectPermit());
+export function getGeneralProjectPermitData(): Promise<ResponseBody<'getGeneralProjectPermitReport'>> {
+  return api.get<ResponseBody<'getGeneralProjectPermitReport'>>(reportingRoutes.generalProjectPermit());
 }
 
 /**
  * Retrieves permit data for housing projects.
  * @returns A promise resolving to the housing project permit data.
  */
-export function getHousingProjectPermitData(): Promise<GetProjectPermitDataResponse[]> {
-  return api.get<GetProjectPermitDataResponse[]>(reportingRoutes.housingProjectPermit());
+export function getHousingProjectPermitData(): Promise<ResponseBody<'getHousingProjectPermitReport'>> {
+  return api.get<ResponseBody<'getHousingProjectPermitReport'>>(reportingRoutes.housingProjectPermit());
 }
 
 /**

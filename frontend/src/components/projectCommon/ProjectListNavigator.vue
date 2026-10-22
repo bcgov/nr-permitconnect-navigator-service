@@ -25,7 +25,7 @@ import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
 import { Action, BasicResponse, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
-import { generalErrorHandler, toNumber } from '@/utils/utils';
+import { generalErrorHandler, toIsoRange, toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Pagination, Project, ProjectService, SearchProjectsResponse } from '@/types';
@@ -65,7 +65,7 @@ const emit = defineEmits(['submission:delete']);
 const authzStore = useAuthZStore();
 
 // State
-const dateRange: Ref<[Date, Date] | undefined> = ref(undefined);
+const dateRange: Ref<(Date | null)[] | null | undefined> = ref(undefined);
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
@@ -190,16 +190,14 @@ async function searchProjects() {
         loading.value = true;
         const res = await projectService?.value.searchProjects({
           applicationStatus: applicationStatus.value ? applicationStatus.value.statuses : undefined,
-          dateRange: dateRange.value,
+          dateRange: toIsoRange(dateRange.value),
           includeUser: true,
           searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
-          skip: (pagination.value.page && pagination.value.rows
-            ? pagination.value.page * pagination.value.rows
-            : 0
-          ).toString(),
-          take: pagination.value.rows?.toString(),
+          skip: pagination.value.page && pagination.value.rows ? pagination.value.page * pagination.value.rows : 0,
+          take: pagination.value.rows,
           sortField: pagination.value.field,
-          sortOrder: pagination.value.order?.toString()
+          // DataTable sort orders are -1, 0 or 1
+          sortOrder: pagination.value.order?.toString() as '-1' | '0' | '1' | undefined
         });
         if (res) searchResponse.value = res;
       } catch (e) {

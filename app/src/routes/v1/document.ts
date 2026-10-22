@@ -27,6 +27,7 @@ export default function createDocumentRouter(basePath: string, tagPrefix: string
   openapiRoute(basePath, router, {
     method: 'post',
     path: '/',
+    operationId: `create${tagPrefix}Document`,
     summary: 'Create a document',
     tags: [`${tagPrefix} Document`],
     schema: schema.createDocument,
@@ -43,6 +44,7 @@ export default function createDocumentRouter(basePath: string, tagPrefix: string
   openapiRoute(basePath, router, {
     method: 'delete',
     path: '/:documentId',
+    operationId: `delete${tagPrefix}Document`,
     summary: 'Delete a document',
     tags: [`${tagPrefix} Document`],
     schema: schema.deleteDocument,
@@ -59,6 +61,7 @@ export default function createDocumentRouter(basePath: string, tagPrefix: string
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/list/:activityId',
+    operationId: `list${tagPrefix}Documents`,
     summary: 'Get a list of documents',
     tags: [`${tagPrefix} Document`],
     schema: schema.listDocuments,

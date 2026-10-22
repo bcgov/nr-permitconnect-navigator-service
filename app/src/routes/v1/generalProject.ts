@@ -37,6 +37,7 @@ const TAGS = ['General Project'];
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/',
+  operationId: 'listGeneralProjects',
   summary: 'Gets a list of general projects',
   tags: TAGS,
   responses: {
@@ -51,6 +52,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/activityIds',
+  operationId: 'listGeneralProjectActivityIds',
   summary: 'Get a list of all the activityIds',
   tags: TAGS,
   responses: {
@@ -65,6 +67,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/search',
+  operationId: 'searchGeneralProjects',
   summary: 'Search general projects',
   tags: TAGS,
   schema: schema.searchGeneralProjects,
@@ -84,6 +87,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/statistics',
+  operationId: 'getGeneralProjectStatistics',
   summary: 'Gets general project statistics',
   tags: TAGS,
   schema: schema.getStatistics,
@@ -100,6 +104,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/draft/:draftId',
+  operationId: 'getGeneralProjectDraft',
   summary: 'Get a specific general project draft',
   tags: TAGS,
   schema: schema.getDraft,
@@ -116,6 +121,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/draft',
+  operationId: 'listGeneralProjectDrafts',
   summary: 'Gets a list of general project drafts',
   tags: TAGS,
   responses: {
@@ -130,6 +136,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/draft',
+  operationId: 'upsertGeneralProjectDraft',
   summary: 'Creates or updates an intake and set status to Draft',
   tags: TAGS,
   schema: schema.upsertDraft,
@@ -147,6 +154,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/draft/submit',
+  operationId: 'submitGeneralProjectDraft',
   summary: 'Creates or updates an intake and set status to Submitted',
   tags: TAGS,
   schema: schema.submitGeneralProjectDraft,
@@ -163,6 +171,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/',
+  operationId: 'createGeneralProject',
   summary: 'Creates a blank general project',
   tags: TAGS,
   schema: schema.createGeneralProject,
@@ -179,6 +188,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'delete',
   path: '/draft/:draftId',
+  operationId: 'deleteGeneralProjectDraft',
   summary: 'Hard deletes a general project draft',
   tags: TAGS,
   schema: schema.deleteDraft,
@@ -195,6 +205,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/:generalProjectId',
+  operationId: 'getGeneralProject',
   summary: 'Gets a specific general project',
   tags: TAGS,
   schema: schema.getGeneralProject,
@@ -211,6 +222,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'patch',
   path: '/:generalProjectId',
+  operationId: 'patchGeneralProject',
   summary: 'Patches a general project',
   tags: TAGS,
   schema: schema.patchGeneralProject,
@@ -227,6 +239,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'delete',
   path: '/:generalProjectId',
+  operationId: 'deleteGeneralProject',
   summary: 'Deletes a general project',
   tags: TAGS,
   schema: schema.deleteGeneralProject,

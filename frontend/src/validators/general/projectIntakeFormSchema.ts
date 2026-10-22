@@ -1,67 +1,41 @@
-import { YES_NO_LIST } from '@/utils/constants/application';
+import { z } from 'zod';
+
 import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
-import { BasicResponse } from '@/utils/enums/application';
-import { IntakeFormCategory, ProjectApplicant } from '@/utils/enums/projectCommon';
-import { contactSchema, locationValidator, permitsValidator } from '@/validators';
-import { object, string, type InferType } from 'yup';
+import { IntakeFormCategory } from '@/utils/enums/projectCommon';
+import {
+  evenWithIssues,
+  formSection,
+  maxMessage,
+  requiredOneOf,
+  requiredString,
+  requiredTextSchema
+} from '@/utils/zodSchema';
+import { locationFormSchema, permitsFormSchema, refineBusinessRegistration } from '@/validators/common';
+import { contactFormSchema } from '@/validators/contact';
 
 import type { OrgBookOption } from '@/types';
+import type { FormValues } from '@/utils/zodSchema';
 
 export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
-  return object({
-    [IntakeFormCategory.CONTACTS]: contactSchema,
-    [IntakeFormCategory.BASIC]: object({
-      projectApplicantType: string().required().oneOf(PROJECT_APPLICANT_LIST).label('Project developed'),
-      isDevelopedInBc: string().when('projectApplicantType', {
-        is: (value: string) => value === ProjectApplicant.BUSINESS,
-        then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC'),
-        otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
-      }),
-      registeredId: string()
-        .nullable()
-        .when('isDevelopedInBc', {
-          is: (value: string) => value === BasicResponse.YES,
-          then: (schema) =>
-            schema
-              .required()
-              .max(255)
-              .test(
-                'valid-business-id',
-                'Failed to set the business ID, try selecting the business name again',
-                (value) => {
-                  if (!value) return false;
-                  return orgBookOptions.some((option) => option.registeredId === value);
-                }
-              )
-              .label('Business ID'),
-          otherwise: (schema) => schema.notRequired().nullable().label('Business ID')
-        }),
-      registeredName: string()
-        .nullable()
-        .when('isDevelopedInBc', {
-          is: (value: string) => value === BasicResponse.YES,
-          then: (schema) =>
-            schema
-              .required()
-              .max(255)
-              .test(
-                'valid-business-name',
-                'Business name must be a valid value from the list of suggestions',
-                (value) => {
-                  if (!value) return false;
-                  return orgBookOptions.some((option) => option.registeredName === value);
-                }
-              )
-              .label('Business name'),
-          otherwise: (schema) => schema.notRequired().nullable().label('Business name')
-        }),
-      projectName: string().required().max(255).label('Project name'),
-      projectDescription: string().required().label('Project description'),
-      projectNumber: string().max(255).label('Project number')
-    }),
-    [IntakeFormCategory.LOCATION]: locationValidator,
-    [IntakeFormCategory.PERMITS]: permitsValidator
+  const basic = z
+    .looseObject({
+      projectApplicantType: requiredOneOf('Project developed', PROJECT_APPLICANT_LIST),
+      isDevelopedInBc: z.string().nullish(),
+      // Unlike housing, these are not trimmed
+      registeredId: z.string().nullish(),
+      registeredName: z.string().nullish(),
+      projectName: requiredString('Project name').max(255, maxMessage('Project name', 255)),
+      projectDescription: requiredTextSchema('Project description'),
+      projectNumber: z.string().max(255, maxMessage('Project number', 255)).optional()
+    })
+    .superRefine(refineBusinessRegistration(orgBookOptions), evenWithIssues);
+
+  return z.looseObject({
+    [IntakeFormCategory.CONTACTS]: formSection(contactFormSchema),
+    [IntakeFormCategory.BASIC]: formSection(basic),
+    [IntakeFormCategory.LOCATION]: formSection(locationFormSchema),
+    [IntakeFormCategory.PERMITS]: formSection(permitsFormSchema)
   });
 }
 
-export type FormSchemaType = InferType<ReturnType<typeof createProjectIntakeSchema>>;
+export type FormSchemaType = FormValues<z.infer<ReturnType<typeof createProjectIntakeSchema>>>;

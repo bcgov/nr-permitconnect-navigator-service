@@ -19,12 +19,16 @@ import {
 } from '@/lib/primevue';
 import { enquiryService } from '@/services';
 import { useAppStore, useAuthZStore, useContactStore } from '@/store';
-import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
+import {
+  APPLICATION_STATUS_LIST,
+  CONTACT_PREFERENCE_LIST,
+  PROJECT_RELATIONSHIP_LIST
+} from '@/utils/constants/projectCommon';
 import { Action, Resource } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { enquiryRouteNameKey } from '@/utils/keys';
-import { toNumber } from '@/utils/utils';
+import { isOneOf, toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Enquiry, Pagination } from '@/types';
@@ -80,7 +84,7 @@ const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]!);
 
 const filteredEnquiries = computed(() => {
   return enquiries?.filter((element) => {
-    return selectedFilter.value.statuses.includes(element.enquiryStatus);
+    return !!element.enquiryStatus && selectedFilter.value.statuses.includes(element.enquiryStatus);
   });
 });
 
@@ -101,15 +105,29 @@ function handleCreateNewActivity() {
       try {
         const userContact = useContactStore().getContact;
         if (!userContact) throw new Error('No contact');
+
+        // The API requires these, but a stored contact can lack them or hold an unknown option
+        const { firstName, email, phoneNumber, contactApplicantRelationship, contactPreference } = userContact;
+        if (
+          !firstName ||
+          !email ||
+          !phoneNumber ||
+          !isOneOf(PROJECT_RELATIONSHIP_LIST, contactApplicantRelationship) ||
+          !isOneOf(CONTACT_PREFERENCE_LIST, contactPreference)
+        ) {
+          toast.error(t('enquiryListNavigator.failedSubmission'), t('enquiryListNavigator.incompleteContact'));
+          return;
+        }
+
         const response = await enquiryService.createEnquiry({
           contact: {
             contactId: userContact.contactId,
-            firstName: userContact.firstName,
+            firstName,
             lastName: userContact.lastName,
-            phoneNumber: userContact.phoneNumber,
-            email: userContact.email,
-            contactApplicantRelationship: userContact.contactApplicantRelationship,
-            contactPreference: userContact.contactPreference
+            phoneNumber,
+            email,
+            contactApplicantRelationship,
+            contactPreference
           }
         });
         if (response?.activityId) {

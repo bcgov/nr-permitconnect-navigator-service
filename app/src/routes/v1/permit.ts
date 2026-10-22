@@ -35,6 +35,7 @@ export default function createPermitRouter(basePath: string, tagPrefix: string):
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/',
+    operationId: `list${tagPrefix}Permits`,
     summary: 'Get a list of permits',
     tags: [`${tagPrefix} Permit`],
     schema: schema.listPermits,
@@ -51,6 +52,7 @@ export default function createPermitRouter(basePath: string, tagPrefix: string):
   openapiRoute(basePath, router, {
     method: 'post',
     path: '/',
+    operationId: `upsert${tagPrefix}Permit`,
     summary: 'Create or update a permit',
     tags: [`${tagPrefix} Permit`],
     schema: schema.upsertPermit,
@@ -67,6 +69,7 @@ export default function createPermitRouter(basePath: string, tagPrefix: string):
   openapiRoute(basePath, router, {
     method: 'delete',
     path: '/:permitId',
+    operationId: `delete${tagPrefix}Permit`,
     summary: 'Delete a permit',
     tags: [`${tagPrefix} Permit`],
     schema: schema.deletePermit,
@@ -83,6 +86,7 @@ export default function createPermitRouter(basePath: string, tagPrefix: string):
   openapiRoute(basePath, router, {
     method: 'post',
     path: '/intake',
+    operationId: `create${tagPrefix}IntakePermits`,
     summary: 'Create multiple permit records',
     tags: [`${tagPrefix} Permit`],
     schema: schema.intakePermit,
@@ -99,6 +103,7 @@ export default function createPermitRouter(basePath: string, tagPrefix: string):
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/search',
+    operationId: `search${tagPrefix}Permits`,
     summary: 'Get a list of permits based on search criteria',
     tags: [`${tagPrefix} Permit`],
     schema: schema.searchPermits,
@@ -115,6 +120,7 @@ export default function createPermitRouter(basePath: string, tagPrefix: string):
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/:permitId',
+    operationId: `get${tagPrefix}Permit`,
     summary: 'Get a permit',
     tags: [`${tagPrefix} Permit`],
     schema: schema.getPermit,

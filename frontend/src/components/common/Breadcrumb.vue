@@ -53,7 +53,7 @@ function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
       case 'project': {
         const project = getProject;
         if (project.value) {
-          return project.value.projectName;
+          return project.value.projectName ?? '';
         } else {
           return '...Loading';
         }

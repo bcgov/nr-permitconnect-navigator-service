@@ -6,6 +6,7 @@ import { permitTypeSchema } from './permitType.ts';
 import { sourceSystemKindSchema } from './sourceSystemKind.ts';
 import '#src/schemas/openapi';
 import { permitModelSchema, permit_noteModelSchema, permit_trackingModelSchema } from '#prismaZod';
+import { PermitStage, PermitState, PiesOnHold } from '#src/db/codes/enums';
 
 // activity.activityContact as included by listPermits (raw, no nested contact)
 const activityWithContactsSchema = activityBaseSchema.extend({
@@ -37,6 +38,13 @@ export const permitSchema = permitModelSchema
     permitType: permitTypeSchema.optional(),
     permitNote: z.array(permitNoteSchema).optional(),
     permitTracking: z.array(permitTrackingSchema).optional(),
+    // Foreign keys to code tables, so the spec lists their codes; the database guarantees them
+    stage: z.string().openapi({ enum: Object.values(PermitStage) }),
+    state: z.string().openapi({ enum: Object.values(PermitState) }),
+    onHoldCode: z
+      .string()
+      .nullable()
+      .openapi({ enum: Object.values(PiesOnHold) }),
     // permitStatusDatesTransform (a Prisma result extension, see
     // src/db/extensions/permitStatusDates.ts) serializes these 8 columns to date/time strings on
     // every read - the generated pure model types them as Date, which doesn't reflect that.
@@ -65,8 +73,8 @@ const searchPermitResultSchema = z.object({
   // permitStatusDatesTransform serializes these to strings on every read - see the comment on
   // permitSchema above.
   decisionDate: z.string().nullable(),
-  stage: z.string(),
-  state: z.string(),
+  stage: z.string().openapi({ enum: Object.values(PermitStage) }),
+  state: z.string().openapi({ enum: Object.values(PermitState) }),
   statusLastChanged: z.string().nullable(),
   submittedDate: z.string().nullable(),
   permitType: permitTypeSchema.pick({ businessDomain: true, name: true }),

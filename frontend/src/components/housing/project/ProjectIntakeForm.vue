@@ -31,24 +31,22 @@ import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFor
 import { Button, Step, StepList, Stepper, StepPanel, StepPanels, useConfirm, useToast } from '@/lib/primevue';
 import { housingProjectService } from '@/services';
 import { useContactStore, useFormStore, useProjectStore } from '@/store';
+import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
+import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitStage } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
-import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
-import { generalErrorHandler } from '@/utils/utils';
+import { NumResidentialUnits } from '@/utils/enums/housing';
+import { ActivityContactRole, FormState, FormType, ProjectLocation } from '@/utils/enums/projectCommon';
+import { generalErrorHandler, toOneOf } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { GeoJSON } from 'geojson';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type {
-  DeepPartial,
-  Draft,
-  HousingProject,
-  HousingProjectIntake,
-  OrgBookOption,
-  Permit,
-  PermitTracking
-} from '@/types';
+import type { DeepPartial, Draft, HousingProject, RequestBody, OrgBookOption, Permit } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 // Props
@@ -76,7 +74,7 @@ const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(unde
 const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const validationSchema = computed(() => {
-  return createProjectIntakeSchema(orgBookOptions.value);
+  return toTypedSchema(createProjectIntakeSchema(orgBookOptions.value));
 });
 
 // Actions
@@ -126,7 +124,7 @@ async function onSubmit(data: FormSchemaType) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    const payload: HousingProjectIntake = {
+    const payload: RequestBody<'submitHousingProjectDraft'> = {
       activityId: draft.value?.activityId,
       basic: {
         consentToFeedback: data.basic.consentToFeedback,
@@ -151,19 +149,20 @@ async function onSubmit(data: FormSchemaType) {
         singleFamilySelected: data.housing.singleFamilySelected,
         multiFamilySelected: data.housing.multiFamilySelected,
         otherSelected: data.housing.otherSelected,
-        singleFamilyUnits: data.housing.singleFamilyUnits,
-        multiFamilyUnits: data.housing.multiFamilyUnits,
-        otherUnitsDescription: data.housing.otherUnitsDescription,
-        otherUnits: data.housing.otherUnits,
+        // Hidden fields can keep a null initial value, which the API rejects
+        singleFamilyUnits: data.housing.singleFamilyUnits ?? undefined,
+        multiFamilyUnits: data.housing.multiFamilyUnits ?? undefined,
+        otherUnitsDescription: data.housing.otherUnitsDescription ?? undefined,
+        otherUnits: data.housing.otherUnits ?? undefined,
         hasRentalUnits: data.housing.hasRentalUnits,
         financiallySupportedBc: data.housing.financiallySupportedBc,
         financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
         financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
         financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
-        rentalUnits: data.housing.rentalUnits,
-        indigenousDescription: data.housing.indigenousDescription,
-        nonProfitDescription: data.housing.nonProfitDescription,
-        housingCoopDescription: data.housing.housingCoopDescription
+        rentalUnits: data.housing.rentalUnits ?? undefined,
+        indigenousDescription: data.housing.indigenousDescription ?? undefined,
+        nonProfitDescription: data.housing.nonProfitDescription ?? undefined,
+        housingCoopDescription: data.housing.housingCoopDescription ?? undefined
       },
       location: {
         naturalDisaster: data.location.naturalDisaster,
@@ -181,7 +180,7 @@ async function onSubmit(data: FormSchemaType) {
       permits: {
         appliedPermits: data.permits.appliedPermits?.map((x) => ({
           submittedDate: x.submittedDate?.toISOString(),
-          permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId } as PermitTracking],
+          permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId }],
           permitTypeId: x.permitTypeId
         })),
         hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
@@ -240,51 +239,46 @@ onBeforeMount(() => {
         ? project.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
         : useContactStore().getContact;
 
+      // Unknown stored values are dropped, so the form asks for them again
       initialFormValues.value = {
         basic: {
           consentToFeedback: project.consentToFeedback,
-          projectApplicantType: project.projectApplicantType,
+          projectApplicantType: toOneOf(PROJECT_APPLICANT_LIST, project.projectApplicantType),
           isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
-          registeredName: project.companyNameRegistered,
-          registeredId: project.companyIdRegistered,
-          projectName: project.projectName,
-          projectDescription: project.projectDescription
+          registeredName: project.companyNameRegistered ?? undefined,
+          registeredId: project.companyIdRegistered ?? undefined,
+          projectName: project.projectName ?? undefined,
+          projectDescription: project.projectDescription ?? undefined
         },
-        contacts: {
-          firstName: primaryContact?.firstName,
-          lastName: primaryContact?.lastName,
-          phoneNumber: primaryContact?.phoneNumber,
-          email: primaryContact?.email,
-          contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-          contactPreference: primaryContact?.contactPreference,
-          contactId: primaryContact?.contactId
-        },
+        contacts: toContactFormValues(primaryContact),
         housing: {
           singleFamilySelected: !!project.singleFamilyUnits,
           multiFamilySelected: !!project.multiFamilyUnits,
-          singleFamilyUnits: project.singleFamilyUnits,
-          multiFamilyUnits: project.multiFamilyUnits,
+          singleFamilyUnits: toOneOf(NUM_RESIDENTIAL_UNITS_LIST, project.singleFamilyUnits),
+          multiFamilyUnits: toOneOf(NUM_RESIDENTIAL_UNITS_LIST, project.multiFamilyUnits),
           otherSelected: !!project.otherUnits,
           otherUnitsDescription: project.otherUnitsDescription,
-          otherUnits: project.otherUnits,
-          hasRentalUnits: project.hasRentalUnits,
-          rentalUnits: project.rentalUnits,
-          financiallySupportedBc: project.financiallySupportedBc,
-          financiallySupportedIndigenous: project.financiallySupportedIndigenous,
+          otherUnits: toOneOf(NUM_RESIDENTIAL_UNITS_LIST, project.otherUnits),
+          hasRentalUnits: toOneOf(YES_NO_UNSURE_LIST, project.hasRentalUnits),
+          // Stored values come from this form, so they are one of the unit ranges / location types
+          rentalUnits: project.rentalUnits as NumResidentialUnits,
+          financiallySupportedBc: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedBc),
+          financiallySupportedIndigenous: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedIndigenous),
           indigenousDescription: project.indigenousDescription,
-          financiallySupportedNonProfit: project.financiallySupportedNonProfit,
+          financiallySupportedNonProfit: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedNonProfit),
           nonProfitDescription: project.nonProfitDescription,
-          financiallySupportedHousingCoop: project.financiallySupportedHousingCoop,
+          financiallySupportedHousingCoop: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedHousingCoop),
           housingCoopDescription: project.housingCoopDescription
         },
         location: {
           naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO,
-          projectLocation: project.projectLocation,
+          projectLocation: project.projectLocation as ProjectLocation,
           streetAddress: project.streetAddress,
           locality: project.locality,
           province: project.province,
-          latitude: project.latitude,
-          longitude: project.longitude,
+          // The API sends decimals as strings
+          latitude: project.latitude === null ? null : Number(project.latitude),
+          longitude: project.longitude === null ? null : Number(project.longitude),
           ltsaPidLookup: project.locationPids,
           geomarkUrl: project.geomarkUrl,
           projectLocationDescription: project?.projectLocationDescription,
@@ -297,7 +291,7 @@ onBeforeMount(() => {
               ...x,
               submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
             })),
-          hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ? BasicResponse.YES : BasicResponse.NO,
+          hasAppliedProvincialPermits: toOneOf(YES_NO_UNSURE_LIST, project.hasAppliedProvincialPermits),
           investigatePermits: useProjectStore().getPermits.filter(
             (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
           )
@@ -309,15 +303,7 @@ onBeforeMount(() => {
         basic: {
           consentToFeedback: false
         },
-        contacts: {
-          contactId: userContact?.contactId,
-          firstName: userContact?.firstName,
-          lastName: userContact?.lastName,
-          email: userContact?.email,
-          phoneNumber: userContact?.phoneNumber,
-          contactApplicantRelationship: userContact?.contactApplicantRelationship,
-          contactPreference: userContact?.contactPreference
-        },
+        contacts: toContactFormValues(userContact),
         housing: {
           singleFamilySelected: false,
           multiFamilySelected: false,

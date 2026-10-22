@@ -31,6 +31,8 @@ import { projectServiceKey } from '@/utils/keys';
 import type { Ref } from 'vue';
 import type { BringForward, Enquiry, Project, ProjectService, ProjectStatistics } from '@/types';
 
+type DatedBringForward = BringForward & { bringForwardDate: string };
+
 // Props
 const bringForward = defineModel<BringForward[]>('bringForward', { required: true });
 const enquiries = defineModel<Enquiry[]>('enquiries', { required: true });
@@ -52,23 +54,11 @@ const { getProfile } = storeToRefs(authnStore);
 // State
 const accordionIndex: Ref<string | null> = ref(null);
 const activeTab: Ref<number> = ref(0);
-const relevantBringForwards: Ref<BringForward[]> = ref([]);
+const relevantBringForwards: Ref<DatedBringForward[]> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
 
 // Actions
-function assignEnquiriesAndFullName() {
-  const relatedActivityIds = new Set();
-
-  enquiries.value.forEach((enquiry) => relatedActivityIds.add(enquiry.relatedActivityId));
-
-  projects.value.forEach((sub) => {
-    if (relatedActivityIds.has(sub.activityId)) {
-      sub.hasRelatedEnquiry = true;
-    } else {
-      sub.hasRelatedEnquiry = false;
-    }
-  });
-
+function assignFullNames() {
   projects.value.forEach((sub) => {
     if (sub.user) {
       sub.user.fullName =
@@ -79,7 +69,7 @@ function assignEnquiriesAndFullName() {
   });
 }
 
-function getBringForwardInterval(bf: BringForward) {
+function getBringForwardInterval(bf: DatedBringForward) {
   const today = startOfToday();
 
   const pastOrToday = isPast(bf.bringForwardDate) || isToday(bf.bringForwardDate);
@@ -95,7 +85,7 @@ function getBringForwardInterval(bf: BringForward) {
   return { pastOrToday, withinWeek, withinMonth };
 }
 
-function getBringForwardStyling(bf: BringForward) {
+function getBringForwardStyling(bf: DatedBringForward) {
   const { pastOrToday, withinWeek, withinMonth } = getBringForwardInterval(bf);
 
   if (pastOrToday) return 'pastOrToday';
@@ -158,7 +148,7 @@ function refreshStatistics() {
     });
 }
 
-function sortRelevantBringForwards(filteredBringForwards: BringForward[]) {
+function sortRelevantBringForwards(filteredBringForwards: DatedBringForward[]) {
   return filteredBringForwards.sort((a, b) => {
     const isPastA = isPast(a.bringForwardDate);
     const isPastB = isPast(b.bringForwardDate);
@@ -179,7 +169,7 @@ function sortRelevantBringForwards(filteredBringForwards: BringForward[]) {
 }
 
 onBeforeMount(async () => {
-  assignEnquiriesAndFullName();
+  assignFullNames();
 
   const profile = getProfile.value;
 
@@ -202,14 +192,16 @@ watch(accordionIndex, () => {
 });
 
 watchEffect(() => {
-  const filteredBringForwards = bringForward.value.filter((x) => {
-    const { pastOrToday, withinMonth } = getBringForwardInterval(x);
-    const assignedAndWithinMonth =
-      (x.createdByFullName === getProfile.value?.name || myAssignedTo.value.has(x.projectId ?? '')) &&
-      (pastOrToday || withinMonth);
-    const escalated = authzStore.isInGroup([GroupName.SUPERVISOR]) && x.escalateToSupervisor;
-    return assignedAndWithinMonth || escalated;
-  });
+  const filteredBringForwards = bringForward.value
+    .filter((bf): bf is DatedBringForward => !!bf.bringForwardDate)
+    .filter((bf) => {
+      const { pastOrToday, withinMonth } = getBringForwardInterval(bf);
+      const assignedAndWithinMonth =
+        (bf.createdByFullName === getProfile.value?.name || myAssignedTo.value.has(bf.projectId ?? '')) &&
+        (pastOrToday || withinMonth);
+      const escalated = authzStore.isInGroup([GroupName.SUPERVISOR]) && bf.escalateToSupervisor;
+      return assignedAndWithinMonth || escalated;
+    });
   relevantBringForwards.value = sortRelevantBringForwards(filteredBringForwards);
 });
 </script>

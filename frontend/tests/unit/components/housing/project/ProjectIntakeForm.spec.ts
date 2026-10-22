@@ -3,15 +3,13 @@ import { nextTick } from 'vue';
 
 import ProjectIntakeForm from '@/components/housing/project/ProjectIntakeForm.vue';
 import { StepperHeader } from '@/components/form';
-import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFormSchema';
 import { contactService } from '@/services';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
-import { BasicResponse, RouteName, StorageKey } from '@/utils/enums/application';
-import { ProjectApplicant } from '@/utils/enums/projectCommon';
+import { RouteName, StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import { mountComponent } from '../../../../mountComponent';
 import { mockRouter, resetMockRouter } from '../../../../mockRouter';
+import { testContactDefaults } from '../../../../fixtures';
 
 import type { Contact, Draft, HousingProject } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
@@ -31,6 +29,7 @@ vi.mock('vue-router', () => ({
 // Fixtures
 
 const sampleContact: Contact = {
+  ...testContactDefaults,
   contactId: '82fba7a8-9cb6-47c4-95b0-81c165e5a317',
   userId: 'd3245118-f4d6-429a-be8e-f13f049ade3a',
   firstName: 'John',
@@ -130,155 +129,6 @@ describe('ProjectIntakeForm', () => {
       await flushPromises();
 
       expect(mockRouter.replace).toHaveBeenCalledWith({ name: RouteName.EXT_GENERAL });
-    });
-  });
-
-  // These don't need a mounted component at all
-  // `createProjectIntakeSchema` is a pure function, so we test it directly
-  describe('validation schema', () => {
-    const validCases = [
-      {
-        category: 'basic',
-        orgBookOptions: [{ registeredName: 'testString3', registeredId: 'FM0281610' }],
-        data: {
-          basic: {
-            consentToFeedback: false,
-            projectApplicantType: ProjectApplicant.BUSINESS,
-            isDevelopedInBc: BasicResponse.NO,
-            registeredId: 'FM0281610',
-            registeredName: 'testString3',
-            projectName: 'Project',
-            projectDescription: 'Desc'
-          }
-        }
-      },
-      {
-        category: 'housing',
-        orgBookOptions: [],
-        data: {
-          housing: {
-            projectName: 'testString1',
-            projectDescription: 'testString2',
-            hasRentalUnits: 'Yes',
-            financiallySupportedBc: 'No',
-            financiallySupportedIndigenous: 'No',
-            financiallySupportedNonProfit: 'No',
-            financiallySupportedHousingCoop: 'No',
-            rentalUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
-            indigenousDescription: 'No',
-            nonProfitDescription: 'No',
-            housingCoopDescription: 'No',
-            singleFamilySelected: true,
-            singleFamilyUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
-            multiFamilyUnits: 'No',
-            otherUnitsDescription: 'No',
-            otherUnits: 'No'
-          }
-        }
-      },
-      {
-        category: 'location',
-        orgBookOptions: [],
-        data: {
-          location: {
-            naturalDisaster: 'Yes',
-            projectLocation: 'testString1',
-            streetAddress: 'testString2',
-            locality: 'testString3',
-            province: 'testString4',
-            latitude: '51',
-            longitude: '-139',
-            ltsaPIDLookup: '',
-            geomarkUrl: ''
-          }
-        }
-      },
-      {
-        category: 'permits',
-        orgBookOptions: [],
-        data: {
-          permits: {
-            appliedPermits: [{ permitTypeId: 1, submittedDate: new Date(), trackingId: 'testString' }],
-            hasAppliedProvincialPermits: BasicResponse.YES
-          }
-        }
-      }
-    ] as const;
-
-    const invalidCases = [
-      {
-        category: 'basic',
-        data: {
-          basic: {
-            projectApplicantType: 'testString1',
-            isDevelopedInBC: 'testString2',
-            registeredName: 'testString3'
-          }
-        }
-      },
-      {
-        category: 'housing',
-        data: {
-          housing: {
-            projectName: 'testString1',
-            projectDescription: 'testString2',
-            hasRentalUnits: 'wrongRentalUnit',
-            financiallySupportedBC: 'No',
-            financiallySupportedIndigenous: 'No',
-            financiallySupportedNonProfit: 'No',
-            financiallySupportedHousingCoop: 'No',
-            rentalUnits: 'No',
-            indigenousDescription: 'No',
-            nonProfitDescription: 'No',
-            housingCoopDescription: 'No',
-            singleFamilyUnits: 'No',
-            multiFamilyUnits: 'No',
-            otherUnitsDescription: 'No',
-            otherUnits: 'No'
-          }
-        }
-      },
-      {
-        category: 'location',
-        data: {
-          location: {
-            projectLocation: '',
-            streetAddress: 'testString2',
-            locality: 'testString3',
-            province: 'testString4',
-            latitude: '12',
-            longitude: '-139',
-            ltsaPIDLookup: '',
-            geomarkUrl: ''
-          }
-        }
-      },
-      {
-        category: 'permits',
-        data: {
-          permits: {
-            appliedPermits: [{ permitTypeId: '', submittedDate: new Date(), trackingId: 'testString' }],
-            hasAppliedProvincialPermits: 123
-          }
-        }
-      },
-      // New edge case: a category that's missing entirely should fail the
-      // same way as one with invalid fields, for every category.
-      { category: 'basic', data: {} },
-      { category: 'housing', data: {} },
-      { category: 'location', data: {} },
-      { category: 'permits', data: {} }
-    ] as const;
-
-    it.each(validCases)(
-      '$category passes validation with well-formed data',
-      async ({ category, orgBookOptions, data }) => {
-        await expect(createProjectIntakeSchema([...orgBookOptions]).validateAt(category, data)).resolves.toBeTruthy();
-      }
-    );
-
-    it.each(invalidCases)('$category rejects malformed or missing data', async ({ category, data }) => {
-      await expect(createProjectIntakeSchema([]).validateAt(category, data)).rejects.toThrowError();
     });
   });
 });

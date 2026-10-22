@@ -30,6 +30,7 @@ export default function createRoadmapRouter(basePath: string, tagPrefix: string)
   openapiRoute(basePath, router, {
     method: 'post',
     path: '/',
+    operationId: `send${tagPrefix}Roadmap`,
     summary: 'Send an email with the roadmap data',
     tags: [`${tagPrefix} Roadmap`],
     schema: schema.send,
@@ -46,6 +47,7 @@ export default function createRoadmapRouter(basePath: string, tagPrefix: string)
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/note',
+    operationId: `get${tagPrefix}RoadmapNote`,
     summary: 'Get the roadmap note for a project',
     tags: [`${tagPrefix} Roadmap`],
     schema: schema.getRoadmapNote,

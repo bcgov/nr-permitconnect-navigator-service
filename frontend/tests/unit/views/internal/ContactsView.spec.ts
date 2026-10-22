@@ -45,7 +45,7 @@ vi.mock('@/services/contactService', () => ({
 }));
 
 // Default component mounting wrapper settings
-const wrapperSettings = (initiative = Initiative.HOUSING) => ({
+const wrapperSettings = (initiative: Initiative = Initiative.HOUSING) => ({
   global: {
     plugins: [
       createTestingPinia({

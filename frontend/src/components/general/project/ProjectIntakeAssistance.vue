@@ -3,7 +3,7 @@ import { Button, useConfirm } from '@/lib/primevue';
 import { ref } from 'vue';
 
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
-import { contactSchema } from '@/validators';
+import { contactFormSchema } from '@/validators/contact';
 
 import type { Ref } from 'vue';
 
@@ -24,7 +24,7 @@ const confirm = useConfirm();
 const checkApplicantValuesValid = (values: Record<string, string>): boolean => {
   // Check applicant section is filled
   let applicant = values?.[IntakeFormCategory.CONTACTS];
-  return contactSchema.isValidSync(applicant);
+  return contactFormSchema.safeParse(applicant).success;
 };
 
 const confirmSubmit = () => {

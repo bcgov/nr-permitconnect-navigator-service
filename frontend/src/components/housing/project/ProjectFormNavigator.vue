@@ -23,13 +23,21 @@ import SubmissionStateSection from '@/components/form/section/SubmissionStateSec
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { atsService, housingProjectService, mapService, userService } from '@/services';
 import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
-import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
+import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
+import {
+  APPLICATION_STATUS_LIST,
+  ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX,
+  ATS_MANAGING_REGION
+} from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
 import { ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
-import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { scrollToFirstError, setEmptyStringsToNull, toOneOf, toTitleCase } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { createProjectFormNavigatorSchema } from '@/validators/housing/projectFormNavigatorSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { Ref } from 'vue';
 import type {
@@ -40,7 +48,6 @@ import type {
   DeepPartial,
   HousingProject,
   OrgBookOption,
-  PatchHousingProjectRequest,
   User
 } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
@@ -107,12 +114,14 @@ const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 const projectFormNavigatorSchema = computed(() => {
-  return createProjectFormNavigatorSchema({
-    initiative: getInitiative.value,
-    t,
-    codeList,
-    orgBookOptions: orgBookOptions.value
-  });
+  return toTypedSchema(
+    createProjectFormNavigatorSchema({
+      initiative: getInitiative.value,
+      t,
+      codeList,
+      orgBookOptions: orgBookOptions.value
+    })
+  );
 });
 
 // Actions
@@ -216,23 +225,15 @@ async function initializeFormValues(project: HousingProject): Promise<DeepPartia
   if (project.assignedUserId) assigneeOptions = await userService.searchUsers({ userId: [project.assignedUserId] });
 
   return {
-    contact: {
-      contactId: getPrimaryActivityContact.value?.contactId,
-      firstName: getPrimaryActivityContact.value?.firstName,
-      lastName: getPrimaryActivityContact.value?.lastName,
-      phoneNumber: getPrimaryActivityContact.value?.phoneNumber,
-      email: getPrimaryActivityContact.value?.email,
-      contactApplicantRelationship: getPrimaryActivityContact.value?.contactApplicantRelationship,
-      contactPreference: getPrimaryActivityContact.value?.contactPreference,
-      userId: getPrimaryActivityContact.value?.userId
-    },
+    contact: toContactFormValues(getPrimaryActivityContact.value),
+    // Unknown stored values are dropped, so the form asks for them again
     finance: {
-      financiallySupportedBc: project.financiallySupportedBc,
-      financiallySupportedIndigenous: project.financiallySupportedIndigenous,
+      financiallySupportedBc: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedBc),
+      financiallySupportedIndigenous: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedIndigenous),
       indigenousDescription: project.indigenousDescription,
-      financiallySupportedNonProfit: project.financiallySupportedNonProfit,
+      financiallySupportedNonProfit: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedNonProfit),
       nonProfitDescription: project.nonProfitDescription,
-      financiallySupportedHousingCoop: project.financiallySupportedHousingCoop,
+      financiallySupportedHousingCoop: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedHousingCoop),
       housingCoopDescription: project.housingCoopDescription
     },
     location: {
@@ -243,8 +244,9 @@ async function initializeFormValues(project: HousingProject): Promise<DeepPartia
       locality: project.locality,
       province: project.province,
       locationPids: project.locationPids,
-      latitude: project.latitude,
-      longitude: project.longitude,
+      // The API sends decimals as strings
+      latitude: project.latitude === null ? null : Number(project.latitude),
+      longitude: project.longitude === null ? null : Number(project.longitude),
       geomarkUrl: project.geomarkUrl,
       naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO
     },
@@ -252,11 +254,11 @@ async function initializeFormValues(project: HousingProject): Promise<DeepPartia
     companyProjectName: {
       companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
-      projectName: project.projectName
+      projectName: project.projectName ?? undefined
     },
 
     // Additional Info
-    projectDescription: { description: project.projectDescription },
+    projectDescription: { description: project.projectDescription ?? undefined },
 
     // Location
     locationDescription: { description: project.projectLocationDescription },
@@ -266,18 +268,19 @@ async function initializeFormValues(project: HousingProject): Promise<DeepPartia
 
     // Submission state
     submissionState: {
-      queuePriority: project.queuePriority,
-      submissionType: project.submissionType,
+      queuePriority: project.queuePriority ?? undefined,
+      // Narrowed to the navigator submission types; any other stored type fails validation
+      submissionType: project.submissionType as FormSchemaType['submissionState']['submissionType'],
       assignedUser: assigneeOptions[0] ?? null,
-      applicationStatus: project.applicationStatus
+      applicationStatus: toOneOf(APPLICATION_STATUS_LIST, project.applicationStatus)
     },
 
     units: {
-      singleFamilyUnits: project.singleFamilyUnits,
-      multiFamilyUnits: project.multiFamilyUnits,
+      singleFamilyUnits: toOneOf(NUM_RESIDENTIAL_UNITS_LIST, project.singleFamilyUnits),
+      multiFamilyUnits: toOneOf(NUM_RESIDENTIAL_UNITS_LIST, project.multiFamilyUnits),
       otherUnitsDescription: project.otherUnitsDescription,
       otherUnits: project.otherUnits,
-      hasRentalUnits: project.hasRentalUnits,
+      hasRentalUnits: toOneOf(YES_NO_UNSURE_LIST, project.hasRentalUnits),
       rentalUnits: project.rentalUnits
     },
 
@@ -332,18 +335,18 @@ function onReOpen() {
     acceptLabel: t('i.common.projectForm.reopenAccept'),
     rejectLabel: t('i.common.projectForm.reopenReject'),
     rejectProps: { outlined: true },
-    accept: () => {
+    accept: async () => {
       formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
-      if (formRef.value?.values) onSubmit(formRef.value?.values);
+      const result = await formRef.value?.validate();
+      if (result?.valid && result.values) onSubmit(result.values);
+      else if (result) onInvalidSubmit(result);
     }
   });
 }
 
 const onSubmit = async (formValues: GenericObject) => {
   try {
-    // vee-validate doesn't get transformed data from yup so
-    // manually run the form values through it here
-    const values: FormSchemaType = projectFormNavigatorSchema.value.cast(formValues);
+    const values = formValues as FormSchemaType;
 
     // Check for any ATS changes
     // Returns form values if no updates happen
@@ -354,7 +357,7 @@ const onSubmit = async (formValues: GenericObject) => {
     });
 
     // Generate final payload
-    const payload: PatchHousingProjectRequest = {
+    const payload: Parameters<typeof housingProjectService.patchProject>[0] = {
       projectId: project.projectId,
 
       // Company and Project Information
@@ -465,7 +468,7 @@ onMounted(async () => {
   useFormStore().setFormType(FormType.NAVIGATOR);
   useFormStore().setFormState(FormState.UNLOCKED);
 
-  locationPidsAuto.value = await mapService.getPids({ projectId: project.housingProjectId });
+  locationPidsAuto.value = (await mapService.getPids({ projectId: project.housingProjectId })) ?? '';
 
   // `formRef` is a template ref, only guaranteed
   // populated once the component has mounted

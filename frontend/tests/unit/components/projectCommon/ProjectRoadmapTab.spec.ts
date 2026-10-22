@@ -7,6 +7,15 @@ import ProjectRoadmapTab from '@/components/projectCommon/ProjectRoadmapTab.vue'
 import i18n from '@/i18n';
 import { roadmapService, userService } from '@/services';
 
+import { testAuditFields } from '../../../fixtures';
+
+const mockToastError = vi.fn();
+
+vi.mock('@/lib/primevue', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  useToast: () => ({ error: mockToastError, success: vi.fn() })
+}));
+
 vi.mock('@/services', () => ({
   roadmapService: { getRoadmapNote: vi.fn(), sendRoadmap: vi.fn() },
   userService: { searchUsers: vi.fn() }
@@ -17,6 +26,7 @@ describe('ProjectRoadmapTab.vue', () => {
     vi.mocked(roadmapService.getRoadmapNote).mockResolvedValue('Roadmap note');
     vi.mocked(userService.searchUsers).mockResolvedValue([
       {
+        ...testAuditFields,
         userId: 'user1',
         email: 'navigator@bcgov.bc.ca',
         firstName: 'Nav',
@@ -26,7 +36,6 @@ describe('ProjectRoadmapTab.vue', () => {
         idp: 'idir',
         active: true,
         groups: [],
-        elevatedRights: false,
         bceidBusinessName: ''
       }
     ]);
@@ -62,5 +71,30 @@ describe('ProjectRoadmapTab.vue', () => {
       'config2@bcgov.bc.ca',
       'navigator@bcgov.bc.ca'
     ]);
+  });
+
+  it('toasts a missing sender, which has no field to show its error', async () => {
+    vi.mocked(roadmapService.getRoadmapNote).mockResolvedValue('Roadmap note');
+
+    const wrapper = shallowMount(ProjectRoadmapTab, {
+      global: {
+        plugins: [
+          i18n,
+          ConfirmationService,
+          ToastService,
+          createTestingPinia({
+            initialState: { app: { initiative: 'Housing' }, project: { project: { activityId: 'activity1' } } }
+          })
+        ],
+        stubs: ['font-awesome-icon']
+      }
+    });
+    await flushPromises();
+
+    wrapper.findComponent({ name: 'Form' }).vm.$emit('invalid-submit', {
+      errors: { from: 'The roadmap has no valid sender email' }
+    });
+
+    expect(mockToastError).toHaveBeenCalledWith('Failed to send roadmap', 'The roadmap has no valid sender email');
   });
 });

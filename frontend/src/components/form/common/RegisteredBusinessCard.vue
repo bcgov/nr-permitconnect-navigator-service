@@ -9,7 +9,7 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import { InputText, RadioList } from '@/components/form';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Card, Divider } from '@/lib/primevue';
-import { useContactStore, useFormStore } from '@/store';
+import { useFormStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
 import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
@@ -36,7 +36,6 @@ const setRegisteredId = useSetFieldValue('basic.registeredId');
 // Store
 const formStore = useFormStore();
 const { getEditable } = storeToRefs(formStore);
-const { getContact } = storeToRefs(useContactStore());
 
 // State
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);
@@ -103,7 +102,7 @@ useFormErrorWatcher(formRef, 'RegisteredBusinessCard', tab);
             @on-change="
               () => {
                 setRegisteredId(null);
-                setRegisteredName(getContact?.bceidBusinessName);
+                setRegisteredName(null);
               }
             "
           />

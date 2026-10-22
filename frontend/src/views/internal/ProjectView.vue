@@ -160,7 +160,7 @@ onBeforeMount(async () => {
     projectStore.setRelatedEnquiries(relatedEnquiries);
     projectStore.setRoadmapNote(roadMapNote);
 
-    liveName.value = project.projectName;
+    liveName.value = project.projectName ?? '';
 
     // Batch lookup the users who have created notes
     const noteHistoryCreatedByUsers = getNoteHistory.value
