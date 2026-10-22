@@ -2268,8 +2268,8 @@ export interface components {
       onHoldCode: 'APPLICANT_REQUEST' | 'LEGAL_ACTION' | 'MISSING_INFORMATION' | 'PENDING_EXTERNAL_DECISION' | null;
       technicalReviewer: string | null;
       consultationStartDate: string | null;
-      consultationEndDate: string | null;
       consultationStartTime: string | null;
+      consultationEndDate: string | null;
       consultationEndTime: string | null;
       activity?: {
         activityId: string;

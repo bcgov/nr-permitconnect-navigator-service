@@ -1,9 +1,9 @@
 generator client {
   provider            = "prisma-client"
-  previewFeatures     = ["views"]
   output              = "../generated/client"
-  moduleFormat        = "esm"
+  previewFeatures     = ["views"]
   importFileExtension = "ts"
+  moduleFormat        = "esm"
 }
 
 generator zod {
@@ -218,8 +218,8 @@ model permit {
   onHoldCode             String?            @map("on_hold_code")
   technicalReviewer      String?            @map("technical_reviewer")
   consultationStartDate  DateTime?          @map("consultation_start_date") @db.Date
-  consultationEndDate    DateTime?          @map("consultation_end_date") @db.Date
   consultationStartTime  DateTime?          @map("consultation_start_time") @db.Timetz(6)
+  consultationEndDate    DateTime?          @map("consultation_end_date") @db.Date
   consultationEndTime    DateTime?          @map("consultation_end_time") @db.Timetz(6)
   activity               activity           @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
   piesOnHoldCode         pies_on_hold_code? @relation(fields: [onHoldCode], references: [code], map: "permit_on_hold_code_foreign")
