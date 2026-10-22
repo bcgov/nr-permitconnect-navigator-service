@@ -15,6 +15,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Deny by default; each job grants only what it needs
+permissions: {}
+
 jobs:
   tests-preflight:
     name: Preflight Check
@@ -23,7 +26,8 @@ jobs:
       PR_EXISTS: ${{ steps.pr-check.outputs.PR_EXISTS }}
     timeout-minutes: 10
     permissions:
-      contents: read
+      # List open PRs for this branch with gh pr list
+      pull-requests: read
     steps:
       - name: Short circuit if open PR exists for this branch (on push)
         id: pr-check
@@ -50,6 +54,13 @@ jobs:
     outputs:
       HAS_SONAR_SECRETS: ${{ steps.check-secrets.outputs.HAS_SONAR_SECRETS }}
     timeout-minutes: 10
+    permissions:
+      # Check out the repository
+      contents: read
+      # Post the coverage report comment on the PR
+      pull-requests: write
+      # Set the coverage commit status
+      statuses: write
     strategy:
       fail-fast: true
       matrix:
@@ -122,6 +133,13 @@ jobs:
     outputs:
       HAS_SONAR_SECRETS: ${{ steps.check-secrets.outputs.HAS_SONAR_SECRETS }}
     timeout-minutes: 10
+    permissions:
+      # Check out the repository
+      contents: read
+      # Post the coverage report comment on the PR
+      pull-requests: write
+      # Set the coverage commit status
+      statuses: write
     strategy:
       fail-fast: true
       matrix:
@@ -184,6 +202,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      # Check out the repository
       contents: read
     steps:
       - name: Checkout Repository
@@ -208,6 +227,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      # Check out the repository
       contents: read
     steps:
       - name: Checkout Repository

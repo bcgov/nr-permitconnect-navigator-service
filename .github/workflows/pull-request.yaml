@@ -18,13 +18,18 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Deny by default; each job grants only what it needs
+permissions: {}
+
 jobs:
   build:
     name: Build & Push
     if: github.event.pull_request.state == 'open' && !github.event.pull_request.head.repo.fork && contains(github.event.pull_request.labels.*.name, 'deploy')
     uses: ./.github/workflows/builder.yaml
     permissions:
+      # Builder checks out the repository
       contents: read
+      # Builder pushes images to GitHub Container Registry
       packages: write
     with:
       context: .
@@ -37,6 +42,7 @@ jobs:
     name: Deploy Instance
     needs: build
     permissions:
+      # Deployer checks out the repository
       contents: read
     uses: ./.github/workflows/deployer.yaml
     with:
@@ -59,6 +65,7 @@ jobs:
       name: pr
       deployment: false
     permissions:
+      # Check out the repository
       contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -89,6 +96,7 @@ jobs:
       - deploy-pr
       - seed-db
     permissions:
+      # Post the sticky release comment on the PR
       pull-requests: write
     runs-on: ubuntu-latest
     if: success()
@@ -119,8 +127,11 @@ jobs:
       name: pr
       deployment: false
     permissions:
+      # Check out the repository
       contents: read
+      # Delete the sticky release comment from the PR
       pull-requests: write
+      # Remove PR deployments from the pr environment
       deployments: write
     runs-on: ubuntu-latest
     timeout-minutes: 12

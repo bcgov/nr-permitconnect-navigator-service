@@ -3,11 +3,15 @@ name: Draft Release
 on:
   workflow_dispatch:
 
+# Deny by default; each job grants only what it needs
+permissions: {}
+
 jobs:
   draft:
     name: Draft Release
     runs-on: ubuntu-latest
     permissions:
+      # Create the draft GitHub release
       contents: write
     steps:
       - name: Checkout

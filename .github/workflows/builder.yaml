@@ -36,12 +36,17 @@ on:
         description: 'Docker image tag'
         value: ${{ jobs.builder.outputs.image_tag }}
 
+# Deny by default; each job grants only what it needs
+permissions: {}
+
 jobs:
   builder:
     name: Builder
     permissions:
+      # Check out the repository
       contents: read
-      packages: write # for docker/build-push-action to push images to GitHub Container Registry
+      # Push images to GitHub Container Registry
+      packages: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:

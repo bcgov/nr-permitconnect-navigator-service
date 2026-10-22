@@ -12,11 +12,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Deny by default; each job grants only what it needs
+permissions: {}
+
 jobs:
   lint:
     name: Helm Lint
     runs-on: ubuntu-latest
     permissions:
+      # Check out the repository
       contents: read
     steps:
       - name: Checkout
