@@ -68,15 +68,16 @@ export const buildNewPermitRecord = (params: {
 });
 
 /**
- * Builds the permit and tracker records for the permits section of a project intake
- * @param activityId - The activity the permits belong to
- * @param permits - The permits section of the intake submission
- * @returns Applied and investigate permit records, plus the trackers for the applied permits
+ * Builds applied permit records, plus trackers for their tracking IDs
+ * @param permits - The applied permits, each tied to an activity
+ * @returns Applied permit records and their trackers
  */
-export const buildIntakePermits = (activityId: string, permits: DraftPermitsInput) => {
+export const buildAppliedPermits = (
+  permits: (NonNullable<DraftPermitsInput['appliedPermits']>[number] & { activityId: string })[]
+) => {
   const appliedPermitTrackers: PermitTrackingCreateInput[] = [];
 
-  const appliedPermits = (permits.appliedPermits ?? []).map((x) => {
+  const appliedPermits = permits.map((x) => {
     const permitId = randomUUID();
 
     // Add each tracker for this permit with the proper permitId
@@ -95,7 +96,7 @@ export const buildIntakePermits = (activityId: string, permits: DraftPermitsInpu
     return buildNewPermitRecord({
       permitId,
       permitTypeId: x.permitTypeId,
-      activityId,
+      activityId: x.activityId,
       stage: PermitStage.APPLICATION_SUBMISSION,
       needed: PermitNeeded.YES,
       state: PermitState.IN_PROGRESS,
@@ -103,7 +104,18 @@ export const buildIntakePermits = (activityId: string, permits: DraftPermitsInpu
     });
   });
 
-  const investigatePermits = (permits.investigatePermits ?? []).map((x) =>
+  return { appliedPermits, appliedPermitTrackers };
+};
+
+/**
+ * Builds the permit and tracker records for the permits section of a project intake
+ * @param activityId - The activity the permits belong to
+ * @param permits - The permits section of the intake submission
+ * @returns Applied and investigate permit records, plus the trackers for the applied permits
+ */
+export const buildIntakePermits = (activityId: string, permits: DraftPermitsInput) => ({
+  ...buildAppliedPermits((permits.appliedPermits ?? []).map((x) => ({ ...x, activityId }))),
+  investigatePermits: (permits.investigatePermits ?? []).map((x) =>
     buildNewPermitRecord({
       permitId: randomUUID(),
       permitTypeId: x.permitTypeId,
@@ -112,10 +124,8 @@ export const buildIntakePermits = (activityId: string, permits: DraftPermitsInpu
       needed: PermitNeeded.UNDER_INVESTIGATION,
       state: PermitState.NONE
     })
-  );
-
-  return { appliedPermits, investigatePermits, appliedPermitTrackers };
-};
+  )
+});
 
 /**
  * Saves the permits and trackers built for an intake
