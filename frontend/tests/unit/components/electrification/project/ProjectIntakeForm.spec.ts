@@ -5,7 +5,7 @@ import RegisteredBusinessCard from '@/components/form/common/RegisteredBusinessC
 import ProjectIntakeForm from '@/components/electrification/project/ProjectIntakeForm.vue';
 import { electrificationProjectService } from '@/services';
 import { useFormStore } from '@/store';
-import { RouteName, StorageKey } from '@/utils/enums/application';
+import { BasicResponse, RouteName, StorageKey } from '@/utils/enums/application';
 import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import { ActivityContactRole, ContactPreference, FormType, ProjectRelationship } from '@/utils/enums/projectCommon';
 
@@ -60,6 +60,7 @@ const testProject = {
   projectDescription: 'A description',
   bcHydroNumber: '12345',
   projectType: ElectrificationProjectType.IPP_SOLAR,
+  hasAppliedProvincialPermits: BasicResponse.NO,
   activity: {
     activityContact: [{ role: ActivityContactRole.PRIMARY, contact: primaryContact }]
   }
@@ -196,6 +197,34 @@ describe('ProjectIntakeForm', () => {
       expect(wrapper.findComponent(RegisteredBusinessCard).props('orgBookOptions')).toEqual([]);
     });
 
+    it('restores applied permit submitted dates from a draft as Date objects', () => {
+      const draftWithPermits = {
+        ...testDraft,
+        data: {
+          ...testDraft.data,
+          permits: {
+            hasAppliedProvincialPermits: BasicResponse.YES,
+            appliedPermits: [
+              { permitTypeId: 1, submittedDate: '2024-01-01T00:00:00.000Z', permitTracking: [{ trackingId: 'TRK-1' }] }
+            ]
+          }
+        }
+      } as unknown as Draft<FormSchemaType>;
+
+      const { wrapper } = mountProjectIntakeForm({ props: { draft: draftWithPermits } });
+
+      expect(wrapper.findComponent({ name: 'Form' }).props('initialValues').permits).toEqual({
+        hasAppliedProvincialPermits: BasicResponse.YES,
+        appliedPermits: [
+          {
+            permitTypeId: 1,
+            submittedDate: new Date('2024-01-01T00:00:00.000Z'),
+            permitTracking: [{ trackingId: 'TRK-1' }]
+          }
+        ]
+      });
+    });
+
     it('populates initial values from a project primary contact', () => {
       const { wrapper } = mountProjectIntakeForm({ props: { project: testProject } });
 
@@ -276,7 +305,8 @@ describe('ProjectIntakeForm', () => {
             registeredName: testProject.companyNameRegistered,
             projectName: testProject.projectName
           }),
-          project: { bcHydroNumber: testProject.bcHydroNumber, projectType: testProject.projectType }
+          project: { bcHydroNumber: testProject.bcHydroNumber, projectType: testProject.projectType },
+          permits: { appliedPermits: [], hasAppliedProvincialPermits: BasicResponse.NO, investigatePermits: [] }
         })
       );
       expect(mockRouter.push).toHaveBeenCalledWith({

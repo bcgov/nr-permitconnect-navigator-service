@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { appliedPermit } from './appliedPermit.ts';
+import { intakePermits } from './appliedPermit.ts';
 import { atsEnquirySubmissionFields } from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
 import { housing } from './housing.ts';
@@ -52,13 +52,7 @@ export const schema = {
           }),
         housing,
         location,
-        permits: z
-          .object({
-            appliedPermits: z.array(appliedPermit).nullish(),
-            hasAppliedProvincialPermits: yesNoUnsure,
-            investigatePermits: z.array(z.object({ permitTypeId: z.number() }).strict()).nullish()
-          })
-          .strict()
+        permits: intakePermits
       })
       .strict()
   },

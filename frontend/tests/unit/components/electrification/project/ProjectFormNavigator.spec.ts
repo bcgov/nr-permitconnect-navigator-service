@@ -69,6 +69,7 @@ const testProject: ElectrificationProject = {
   projectType: ElectrificationProjectType.IPP_SOLAR,
   projectCategory: null,
   bcHydroNumber: null,
+  hasAppliedProvincialPermits: BasicResponse.NO,
   hasEpa: BasicResponse.NO,
   megawatts: '100',
   bcEnvironmentAssessNeeded: BasicResponse.NO,

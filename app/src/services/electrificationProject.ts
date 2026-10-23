@@ -5,6 +5,7 @@ import {
   createElectrificationProjectData,
   generateElectrificationProjectData
 } from '#src/domains/electrificationProject';
+import { createIntakePermits } from '#src/domains/permit';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
@@ -172,15 +173,27 @@ export const submitElectrificationProjectDraftService = async (
   currentContext: CurrentContext
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(
-    async ({ activity, activityContact, contact, draft, electrificationProject, initiative }) => {
-      const electrificationProjectData = await generateElectrificationProjectData(
+    async ({
+      activity,
+      activityContact,
+      contact,
+      draft,
+      electrificationProject,
+      initiative,
+      permit,
+      permitTracking
+    }) => {
+      const { electrificationProject: project, ...intakePermits } = await generateElectrificationProjectData(
         { activity, activityContact, contact, initiative },
         data,
         currentContext
       );
 
       // Create new electrification project
-      const response = await electrificationProject.create(electrificationProjectData);
+      const response = await electrificationProject.create(project);
+
+      // Create each permit and tracking IDs
+      await createIntakePermits({ permit, permitTracking }, intakePermits);
 
       // Delete old draft
       if (draftId) await draft.delete({ draftId });
@@ -190,8 +203,8 @@ export const submitElectrificationProjectDraftService = async (
 
       await emailProjectConfirmation(
         Initiative.ELECTRIFICATION,
-        electrificationProjectData.activityId,
-        electrificationProjectData.electrificationProjectId,
+        project.activityId,
+        project.electrificationProjectId,
         confirmationTemplateElectrificationSubmission,
         contactResponse
       );

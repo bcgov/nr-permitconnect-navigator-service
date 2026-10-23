@@ -1,27 +1,20 @@
 import { randomUUID } from 'node:crypto';
 
 import { ensureActivityWithPrimaryContact } from './activity.ts';
-import { buildNewPermitRecord } from './permit.ts';
-import { PermitStage, PermitState } from '#src/db/codes/enums';
+import { buildIntakePermits } from './permit.ts';
 import { jsonToPrismaInputJson } from '#src/db/utils/utils';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
-import { PermitNeeded } from '#src/utils/enums/permit';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type {
-  CurrentContext,
-  GeneralProjectCreateInput,
-  PermitTrackingCreateInput,
-  SubmitGeneralProjectDraftInput
-} from '#types';
+import type { CurrentContext, GeneralProjectCreateInput, SubmitGeneralProjectDraftInput } from '#types';
 
 /**
  * Builds a blank general project shell (POST / always sends an empty body - the frontend
  * fills fields in afterward via patch, or via generateGeneralProjectData for a full intake).
  * @param repositories - The required repositories
  * @param currentContext - The current context of the request
- * @returns A new, mostly-empty project and permit data
+ * @returns A new, mostly-empty project
  */
 export const createGeneralProjectData = async (
   repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
@@ -30,17 +23,12 @@ export const createGeneralProjectData = async (
   const activityId = await ensureActivityWithPrimaryContact(repositories, Initiative.GENERAL, currentContext);
 
   return {
-    generalProject: {
-      generalProjectId: randomUUID(),
-      activityId,
-      submittedAt: new Date(),
-      applicationStatus: ApplicationStatus.NEW,
-      submissionType: SubmissionType.GUIDANCE
-    } satisfies GeneralProjectCreateInput,
-    appliedPermits: [] as ReturnType<typeof buildNewPermitRecord>[],
-    investigatePermits: [] as ReturnType<typeof buildNewPermitRecord>[],
-    appliedPermitTrackers: [] as PermitTrackingCreateInput[]
-  };
+    generalProjectId: randomUUID(),
+    activityId,
+    submittedAt: new Date(),
+    applicationStatus: ApplicationStatus.NEW,
+    submissionType: SubmissionType.GUIDANCE
+  } satisfies GeneralProjectCreateInput;
 };
 
 /**
@@ -86,59 +74,12 @@ export const generateGeneralProjectData = async (
     province: data.location.province ?? null
   };
 
-  const permits = {
-    hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
-  };
-
-  let appliedPermits: ReturnType<typeof buildNewPermitRecord>[] = [];
-  let investigatePermits: ReturnType<typeof buildNewPermitRecord>[] = [];
-  const appliedPermitTrackers: PermitTrackingCreateInput[] = [];
-
-  if (data.permits.appliedPermits?.length) {
-    appliedPermits = data.permits.appliedPermits.map((x) => {
-      const permitId = randomUUID();
-
-      // Add each tracker for this permit with the proper permitId
-      x.permitTracking?.forEach((pt) =>
-        appliedPermitTrackers.push({
-          ...pt,
-          permitId,
-          permitTrackingId: pt.permitTrackingId ?? undefined,
-          shownToProponent: pt.shownToProponent ?? undefined
-        } satisfies PermitTrackingCreateInput)
-      );
-
-      return buildNewPermitRecord({
-        permitId,
-        permitTypeId: x.permitTypeId,
-        activityId,
-        stage: PermitStage.APPLICATION_SUBMISSION,
-        needed: PermitNeeded.YES,
-        state: PermitState.IN_PROGRESS,
-        submittedDate: x.submittedDate
-      });
-    });
-  }
-
-  if (data.permits.investigatePermits?.length) {
-    investigatePermits = data.permits.investigatePermits.map((x) =>
-      buildNewPermitRecord({
-        permitId: randomUUID(),
-        permitTypeId: x.permitTypeId,
-        activityId,
-        stage: PermitStage.PRE_SUBMISSION,
-        needed: PermitNeeded.UNDER_INVESTIGATION,
-        state: PermitState.NONE
-      })
-    );
-  }
-
   // Put new general project together
   const generalProjectData = {
     generalProject: {
       ...basic,
       ...location,
-      ...permits,
+      hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
       generalProjectId: randomUUID(),
       activityId: activityId,
       submittedAt: new Date(),
@@ -148,9 +89,7 @@ export const generateGeneralProjectData = async (
       assignedUserId: null,
       queuePriority: null
     } satisfies GeneralProjectCreateInput,
-    appliedPermits,
-    investigatePermits,
-    appliedPermitTrackers
+    ...buildIntakePermits(activityId, data.permits)
   };
 
   return generalProjectData;
