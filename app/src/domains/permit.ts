@@ -4,7 +4,6 @@ import { randomUUID } from 'node:crypto';
 import { getProjectByActivityId } from './project.ts';
 import { codeTable } from '#src/db/codes/cache';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
-import { email } from '#src/external/ches';
 import { formatDateOnly, toTitleCase } from '#src/utils/index';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
@@ -16,7 +15,7 @@ import {
 import { state } from '../../state.ts';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type { Permit, PermitCreateInput, PermitUpdateEmailParams, ProjectRepositoryKeys } from '#types';
+import type { Email, Permit, PermitCreateInput, PermitUpdateEmailParams, ProjectRepositoryKeys } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 /**
@@ -79,14 +78,15 @@ export const listPeachIntegratedTrackings = async (repositories: Pick<Repositori
 };
 
 /**
- * Sends out an email notification for the given update email params
+ * Builds the email content for a permit update notification, does not send it
  * @param repositories - The required repositories
  * @param params Email information for template and recipients
+ * @returns The email ready to be sent
  */
-export const sendPermitUpdateEmail = async (
+export const buildPermitUpdateEmail = async (
   repositories: Pick<Repositories, 'permitType'>,
   params: PermitUpdateEmailParams
-) => {
+): Promise<Email> => {
   const { permit, initiative, dearName, projectId, toEmails, emailTemplate } = params;
   const { permitId, activityId } = permit;
 
@@ -117,7 +117,7 @@ export const sendPermitUpdateEmail = async (
   let subject = `Updates for ${toTitleCase(initiative)} project ${activityId}, ${permitName}`;
   if (appEnv === 'dev' || appEnv === 'test') subject = `TEST -- ${subject} -- TEST`;
 
-  const emailData = {
+  return {
     to: toEmails,
     from: nrmPermitEmail,
     cc: [nrmPermitEmail],
@@ -125,23 +125,22 @@ export const sendPermitUpdateEmail = async (
     bodyType: 'html',
     body: emailBody
   };
-
-  await email(emailData);
 };
 
 /**
- * Creates update notes and sends out email notifications for updated permits
+ * Creates the update note and builds email notifications for an updated permit, does not send them
  * @param repositories - The required repositories
- * @param permit Permit to send notifications for
+ * @param permit Permit to prepare notifications for
  * @param fromPeachSync Indicates if the update is coming from a PEACH sync
  * @param note A permit note to be used in permit note creation, if given
+ * @returns The emails ready to be sent
  */
-export const sendPermitUpdateNotifications = async (
+export const prepareNotificationEmails = async (
   repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitNote' | 'permitType' | 'user'>,
   permit: Permit,
   fromPeachSync: boolean,
   note?: string
-) => {
+): Promise<Email[]> => {
   const permitUpdateEmails: PermitUpdateEmailParams[] = [];
 
   const project = await getProjectByActivityId(
@@ -218,8 +217,8 @@ export const sendPermitUpdateNotifications = async (
     });
   }
 
-  // Send out permit update emails
-  await Promise.all(
-    permitUpdateEmails.map((emailJob) => sendPermitUpdateEmail({ permitType: repositories.permitType }, emailJob))
+  // Build permit update emails, caller sends them once outside of the db transaction
+  return await Promise.all(
+    permitUpdateEmails.map((emailJob) => buildPermitUpdateEmail({ permitType: repositories.permitType }, emailJob))
   );
 };

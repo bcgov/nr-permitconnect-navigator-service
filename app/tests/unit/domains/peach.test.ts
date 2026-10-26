@@ -9,11 +9,30 @@ import {
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState, PiesOnHold } from '#src/db/codes/enums';
-import { findPriorityPermitTracking, syncPeachRecords } from '#src/domains/peach';
+import {
+  applyPeachUpdates,
+  fetchPeachRecords,
+  findPriorityPermitTracking,
+  getPeachTrackingRecords
+} from '#src/domains/peach';
 import * as permitDomain from '#src/domains/permit';
 import * as peachExternal from '#src/external/peach';
 import * as peachParser from '#src/parsers/peach';
 import { PeachIntegratedSystem } from '#src/utils/enums/permit';
+
+import type { Permit } from '#types';
+
+// Gives a permit a single integrated tracking record for the given system
+const withTracking = (permit: Permit, trackingId: string, sourceSystem: PeachIntegratedSystem) => ({
+  ...permit,
+  permitTracking: [
+    {
+      ...permit.permitTracking![0],
+      trackingId,
+      sourceSystemKind: { ...permit.permitTracking![0].sourceSystemKind, sourceSystem, integrated: true }
+    }
+  ]
+});
 
 vi.mock('../../../src/domains/permit.ts');
 vi.mock('../../../src/external/peach.ts');
@@ -198,107 +217,99 @@ describe('peach domain', () => {
     });
   });
 
-  describe('syncPeachRecords', () => {
+  describe('getPeachTrackingRecords', () => {
     it('should return empty array when no PEACH integrated permits found', async () => {
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([]);
 
-      const result = await syncPeachRecords(mockRepos);
-
-      expect(result).toEqual([]);
+      expect(await getPeachTrackingRecords(mockRepos)).toEqual([]);
     });
 
     it('should skip permits without permit tracking', async () => {
       const permit = { ...TEST_PERMIT_1, permitTracking: undefined };
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
 
-      const result = await syncPeachRecords(mockRepos);
-
-      expect(result).toEqual([]);
+      expect(await getPeachTrackingRecords(mockRepos)).toEqual([]);
     });
 
     it('should skip permits without priority tracking', async () => {
       const permit = { ...TEST_PERMIT_1, permitTracking: [] };
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
 
-      const result = await syncPeachRecords(mockRepos);
-
-      expect(result).toEqual([]);
+      expect(await getPeachTrackingRecords(mockRepos)).toEqual([]);
     });
 
-    it('should fetch and parse PEACH records with rate limiting', async () => {
-      const permit = {
-        ...TEST_PERMIT_2,
-        permitTracking: [
-          {
-            ...TEST_PERMIT_2.permitTracking![0],
-            trackingId: 'REC-SUB',
-            sourceSystemKind: {
-              ...TEST_PERMIT_2.permitTracking![0].sourceSystemKind,
-              sourceSystem: PeachIntegratedSystem.VFCBC,
-              integrated: true
-            }
-          }
-        ]
-      };
-
+    it('should return the priority tracking record id and system for each permit', async () => {
+      const permit = withTracking(TEST_PERMIT_1, 'REC-1', PeachIntegratedSystem.VFCBC);
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
+
+      expect(await getPeachTrackingRecords(mockRepos)).toEqual([
+        { recordId: 'REC-1', systemId: PeachIntegratedSystem.VFCBC, permit }
+      ]);
+    });
+  });
+
+  describe('fetchPeachRecords', () => {
+    it('should fetch and parse PEACH records with rate limiting', async () => {
+      const permit = withTracking(TEST_PERMIT_2, 'REC-SUB', PeachIntegratedSystem.VFCBC);
+      const parsedRecords = { [PeachIntegratedSystem.VFCBC + 'REC-SUB']: TEST_PEACH_SUMMARY };
+
       vi.spyOn(peachExternal, 'getPiesRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
-      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({
-        [PeachIntegratedSystem.VFCBC + 'REC-SUB']: TEST_PEACH_SUMMARY
-      } as never);
+      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue(parsedRecords as never);
 
-      mockRepos.permit.upsert.mockResolvedValue(permit as never);
-
-      const result = await syncPeachRecords(mockRepos);
+      const result = await fetchPeachRecords([
+        { recordId: 'REC-SUB', systemId: PeachIntegratedSystem.VFCBC, permit: permit as never }
+      ]);
 
       expect(peachExternal.getPiesRecord).toHaveBeenCalledWith('REC-SUB', PeachIntegratedSystem.VFCBC);
-      expect(peachParser.parsePiesRecords).toHaveBeenCalled();
-      expect(result.length).toBeGreaterThanOrEqual(0);
+      expect(peachParser.parsePiesRecords).toHaveBeenCalledWith([TEST_PEACH_RECORD_1]);
+      expect(result).toEqual(parsedRecords);
     });
 
-    it('should skip permits with no parsed summary', async () => {
-      const permit = {
-        ...TEST_PERMIT_2,
-        permitTracking: [
-          {
-            ...TEST_PERMIT_2.permitTracking![0],
-            trackingId: 'REC-SUB',
-            sourceSystemKind: {
-              ...TEST_PERMIT_2.permitTracking![0].sourceSystemKind,
-              sourceSystem: PeachIntegratedSystem.VFCBC,
-              integrated: true
-            }
-          }
-        ]
-      };
-
-      vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPiesRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
+    it('should handle PEACH fetch errors gracefully', async () => {
+      vi.spyOn(peachExternal, 'getPiesRecord').mockRejectedValue(new Error('PEACH fetch failed'));
       vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({});
 
-      const result = await syncPeachRecords(mockRepos);
+      const result = await fetchPeachRecords([
+        { recordId: 'REC-SUB', systemId: PeachIntegratedSystem.VFCBC, permit: TEST_PERMIT_2 as never }
+      ]);
 
+      expect(peachParser.parsePiesRecords).toHaveBeenCalledWith([]);
+      expect(result).toEqual({});
+    });
+
+    it('should fetch every record', async () => {
+      const getPiesRecordSpy = vi.spyOn(peachExternal, 'getPiesRecord');
+      getPiesRecordSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1 as never);
+      getPiesRecordSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_2 as never);
+      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({});
+
+      await fetchPeachRecords([
+        { recordId: 'REC-1', systemId: PeachIntegratedSystem.VFCBC, permit: TEST_PERMIT_1 as never },
+        { recordId: 'REC-2', systemId: PeachIntegratedSystem.WMA, permit: TEST_PERMIT_2 as never }
+      ]);
+
+      expect(getPiesRecordSpy).toHaveBeenCalledTimes(2);
+      expect(peachParser.parsePiesRecords).toHaveBeenCalledWith([TEST_PEACH_RECORD_1, TEST_PEACH_RECORD_2]);
+    });
+  });
+
+  describe('applyPeachUpdates', () => {
+    const trackingRecordFor = (permit: Permit) => ({
+      recordId: 'REC-SUB',
+      systemId: PeachIntegratedSystem.VFCBC,
+      permit
+    });
+    const key = PeachIntegratedSystem.VFCBC + 'REC-SUB';
+
+    it('should skip permits with no parsed summary', async () => {
+      const result = await applyPeachUpdates(mockRepos, [trackingRecordFor({ ...TEST_PERMIT_2 } as never)], {});
+
+      expect(mockRepos.permit.upsert).not.toHaveBeenCalled();
       expect(result).toEqual([]);
     });
 
     it('should update permit when stage differs', async () => {
-      const permit = {
-        ...TEST_PERMIT_1,
-        stage: PermitStage.PRE_SUBMISSION,
-        state: PermitState.NONE,
-        permitTracking: [
-          {
-            ...TEST_PERMIT_1.permitTracking![0],
-            trackingId: 'REC-SUB',
-            sourceSystemKind: {
-              ...TEST_PERMIT_1.permitTracking![0].sourceSystemKind,
-              sourceSystem: PeachIntegratedSystem.VFCBC,
-              integrated: true
-            }
-          }
-        ]
-      };
-
+      const permit = { ...TEST_PERMIT_1, stage: PermitStage.PRE_SUBMISSION, state: PermitState.NONE };
       const peachSummary = {
         ...TEST_PEACH_SUMMARY,
         stage: PermitStage.APPLICATION_SUBMISSION,
@@ -306,64 +317,20 @@ describe('peach domain', () => {
         decisionDate: null,
         statusLastChanged: null
       };
-
-      vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPiesRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
-      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({
-        [PeachIntegratedSystem.VFCBC + 'REC-SUB']: peachSummary
-      } as never);
-
       const updatedPermit = { ...permit, stage: PermitStage.APPLICATION_SUBMISSION };
       mockRepos.permit.upsert.mockResolvedValue(updatedPermit as never);
 
-      const result = await syncPeachRecords(mockRepos);
+      const result = await applyPeachUpdates(mockRepos, [trackingRecordFor(permit as never)], {
+        [key]: peachSummary
+      } as never);
 
       expect(mockRepos.permit.upsert).toHaveBeenCalled();
-      expect(result.length).toBeGreaterThanOrEqual(0);
-    });
-
-    it('should handle PEACH fetch errors gracefully', async () => {
-      const permit = {
-        ...TEST_PERMIT_2,
-        permitTracking: [
-          {
-            ...TEST_PERMIT_2.permitTracking![0],
-            trackingId: 'REC-SUB',
-            sourceSystemKind: {
-              ...TEST_PERMIT_2.permitTracking![0].sourceSystemKind,
-              sourceSystem: PeachIntegratedSystem.VFCBC,
-              integrated: true
-            }
-          }
-        ]
-      };
-
-      vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPiesRecord').mockRejectedValue(new Error('PEACH fetch failed'));
-      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({});
-
-      const result = await syncPeachRecords(mockRepos);
-
-      expect(result).toBeDefined();
+      expect(result).toHaveLength(1);
+      expect(result[0].permit).toBe(updatedPermit);
     });
 
     it('should return updated permit when applicant requests hold', async () => {
-      const permit = {
-        ...TEST_PERMIT_2,
-        onHoldCode: null,
-        permitTracking: [
-          {
-            ...TEST_PERMIT_2.permitTracking![0],
-            trackingId: 'REC-SUB',
-            sourceSystemKind: {
-              ...TEST_PERMIT_2.permitTracking![0].sourceSystemKind,
-              sourceSystem: PeachIntegratedSystem.VFCBC,
-              integrated: true
-            }
-          }
-        ]
-      };
-
+      const permit = { ...TEST_PERMIT_2, onHoldCode: null };
       const peachSummary = {
         ...TEST_PEACH_SUMMARY,
         onHoldCode: PiesOnHold.APPLICANT_REQUEST,
@@ -373,43 +340,18 @@ describe('peach domain', () => {
         stage: permit.stage,
         state: permit.state
       };
+      mockRepos.permit.upsert.mockResolvedValue({ ...permit, onHoldCode: PiesOnHold.APPLICANT_REQUEST } as never);
 
-      vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPiesRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
-      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({
-        [PeachIntegratedSystem.VFCBC + 'REC-SUB']: peachSummary
+      const result = await applyPeachUpdates(mockRepos, [trackingRecordFor(permit as never)], {
+        [key]: peachSummary
       } as never);
 
-      const updatedPermit = {
-        ...permit,
-        onHoldCode: PiesOnHold.APPLICANT_REQUEST
-      };
-
-      mockRepos.permit.upsert.mockResolvedValue(updatedPermit as never);
-
-      const result = await syncPeachRecords(mockRepos);
-
-      expect(result.length).toBeGreaterThan(0);
-      const updatedResult = result.find((r) => r.permit.permitId === permit.permitId);
-      expect(updatedResult?.note).toMatch(/This application has been placed on hold at the applicant.*request/);
+      expect(result).toHaveLength(1);
+      expect(result[0].note).toMatch(/This application has been placed on hold at the applicant.*request/);
     });
 
     it('should only return permits with status changes', async () => {
-      const permit = {
-        ...TEST_PERMIT_2,
-        permitTracking: [
-          {
-            ...TEST_PERMIT_2.permitTracking![0],
-            trackingId: 'REC-SUB',
-            sourceSystemKind: {
-              ...TEST_PERMIT_2.permitTracking![0].sourceSystemKind,
-              sourceSystem: PeachIntegratedSystem.VFCBC,
-              integrated: true
-            }
-          }
-        ]
-      };
-
+      const permit = { ...TEST_PERMIT_2 };
       const peachSummary = {
         ...TEST_PEACH_SUMMARY,
         stage: permit.stage,
@@ -420,65 +362,12 @@ describe('peach domain', () => {
         statusLastChanged: permit.statusLastChanged
       };
 
-      vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPiesRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
-      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({
-        [PeachIntegratedSystem.VFCBC + 'REC-SUB']: peachSummary
+      const result = await applyPeachUpdates(mockRepos, [trackingRecordFor(permit as never)], {
+        [key]: peachSummary
       } as never);
 
-      const result = await syncPeachRecords(mockRepos);
-
+      expect(mockRepos.permit.upsert).not.toHaveBeenCalled();
       expect(result).toEqual([]);
-    });
-
-    it('should handle multiple permits with mixed results', async () => {
-      const permit1 = {
-        ...TEST_PERMIT_1,
-        permitTracking: [
-          {
-            ...TEST_PERMIT_1.permitTracking![0],
-            trackingId: 'REC-1',
-            sourceSystemKind: {
-              ...TEST_PERMIT_1.permitTracking![0].sourceSystemKind,
-              sourceSystem: PeachIntegratedSystem.VFCBC,
-              integrated: true
-            }
-          }
-        ]
-      };
-
-      const permit2 = {
-        ...TEST_PERMIT_2,
-        permitTracking: [
-          {
-            ...TEST_PERMIT_2.permitTracking![0],
-            trackingId: 'REC-2',
-            sourceSystemKind: {
-              ...TEST_PERMIT_2.permitTracking![0].sourceSystemKind,
-              sourceSystem: PeachIntegratedSystem.WMA,
-              integrated: true
-            }
-          }
-        ]
-      };
-
-      vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit1, permit2] as never);
-
-      const getPiesRecordSpy = vi.spyOn(peachExternal, 'getPiesRecord');
-      getPiesRecordSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1 as never);
-      getPiesRecordSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_2 as never);
-
-      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({
-        [PeachIntegratedSystem.VFCBC + 'REC-1']: { ...TEST_PEACH_SUMMARY, stage: PermitStage.APPLICATION_SUBMISSION },
-        [PeachIntegratedSystem.WMA + 'REC-2']: TEST_PEACH_SUMMARY
-      } as never);
-
-      mockRepos.permit.upsert.mockResolvedValue(permit1 as never);
-
-      const result = await syncPeachRecords(mockRepos);
-
-      expect(peachExternal.getPiesRecord).toHaveBeenCalledTimes(2);
-      expect(result).toBeDefined();
     });
   });
 });

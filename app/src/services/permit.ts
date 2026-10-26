@@ -4,8 +4,9 @@ import { PermitStage, PermitState } from '#src/db/codes/enums';
 import { unitOfWork } from '#src/db/unitOfWork';
 import { activityContactScope } from '#src/db/utils/utils';
 import { findPriorityPermitTracking } from '#src/domains/peach';
-import { buildNewPermitRecord, sendPermitUpdateNotifications } from '#src/domains/permit';
+import { buildNewPermitRecord, prepareNotificationEmails } from '#src/domains/permit';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
+import { email } from '#src/external/ches';
 import { getPiesRecord } from '#src/external/peach';
 import { summarizePiesRecord } from '#src/parsers/peach';
 import { getScopeUserId } from '#src/parsers/responseFiltering';
@@ -16,6 +17,7 @@ import { differential, isEmptyObject } from '#src/utils/utils';
 import type {
   CurrentAuthorization,
   CurrentContext,
+  Email,
   IntakePermitInput,
   ListPermitsInput,
   Permit,
@@ -218,7 +220,29 @@ export const upsertPermitService = async (
   permitTrackingData: UpsertPermitBodyInput['permitTracking'],
   permitTypeData: UpsertPermitBodyInput['permitType']
 ): Promise<Permit> => {
-  return await unitOfWork.execute(
+  const peachIntegratedTracking = findPriorityPermitTracking(permitTrackingData as PermitTracking[] | undefined);
+
+  // Check if this permit type is PEACH integrated, only matters with a PEACH tracking record
+  const isPeachIntegratedAuth =
+    !!peachIntegratedTracking &&
+    (await unitOfWork.execute(async ({ sourceSystemKind }) => {
+      const sourceSystemKinds = await sourceSystemKind.list();
+      return checkIfPeachIntegratedAuthType(permitTypeData?.sourceSystem ?? '', sourceSystemKinds);
+    }));
+  let isValidPeachPermit = false;
+
+  // Validate the PEACH record
+  if (isPeachIntegratedAuth) {
+    const peachRecord = await getPiesRecord(
+      peachIntegratedTracking.trackingId!,
+      peachIntegratedTracking.sourceSystemKind!.sourceSystem
+    );
+    const peachSummary = summarizePiesRecord(peachRecord);
+    isValidPeachPermit = !!peachSummary;
+    if (!isValidPeachPermit) throw new Problem(400, { detail: 'Invalid Peach record summary' });
+  }
+
+  const { data, emails } = await unitOfWork.execute(
     async ({
       electrificationProject,
       generalProject,
@@ -227,7 +251,6 @@ export const upsertPermitService = async (
       permitNote,
       permitTracking,
       permitType,
-      sourceSystemKind,
       user
     }) => {
       // Add permit ID and stamp data if necessary
@@ -235,24 +258,6 @@ export const upsertPermitService = async (
         ...permitData,
         permitId: permitData.permitId || randomUUID()
       };
-
-      const sourceSystemKinds = await sourceSystemKind.list();
-      const isPeachIntegratedAuth = checkIfPeachIntegratedAuthType(
-        permitTypeData?.sourceSystem ?? '',
-        sourceSystemKinds
-      );
-      const peachIntegratedTracking = findPriorityPermitTracking(permitTrackingData as PermitTracking[] | undefined);
-      let isValidPeachPermit = false;
-
-      if (isPeachIntegratedAuth && !!peachIntegratedTracking) {
-        const peachRecord = await getPiesRecord(
-          peachIntegratedTracking.trackingId!,
-          peachIntegratedTracking.sourceSystemKind!.sourceSystem
-        );
-        const peachSummary = summarizePiesRecord(peachRecord);
-        isValidPeachPermit = !!peachSummary;
-        if (!isValidPeachPermit) throw new Problem(400, { detail: 'Invalid Peach record summary' });
-      }
 
       // Add data to tracking IDs if necessary
       permitTrackingData?.forEach((x) => {
@@ -312,13 +317,14 @@ export const upsertPermitService = async (
       const permitNoteText = (permitNoteData?.[0]?.note ?? '').trim();
       const isEmptyPermitNote = permitNoteText.length === 0;
 
-      // Prevent creating notes and sending an update email if the above call fails
+      // Prevent creating notes and preparing an update email if the above call fails
+      let emails: Email[] = [];
       if (data?.permitId) {
         if (!isEmptyPermitNote || (isValidPeachPermit && statusChanged)) {
           const note = isEmptyPermitNote
             ? `This application is ${data.state.toLocaleLowerCase()} in the ${data.stage.toLocaleLowerCase()}.`
             : permitNoteText;
-          await sendPermitUpdateNotifications(
+          emails = await prepareNotificationEmails(
             { electrificationProject, generalProject, housingProject, permitNote, permitType, user },
             data,
             false,
@@ -327,7 +333,12 @@ export const upsertPermitService = async (
         }
       }
 
-      return data;
+      return { data, emails };
     }
   );
+
+  // Send the notification emails
+  await Promise.all(emails.map((emailData) => email(emailData)));
+
+  return data;
 };

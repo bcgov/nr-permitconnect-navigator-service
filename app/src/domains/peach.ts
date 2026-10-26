@@ -11,7 +11,14 @@ import { getLogger } from '#src/utils/log';
 
 import type { PermitStage, PermitState } from '#src/db/codes/enums';
 import type { Repositories } from '#src/db/unitOfWork';
-import type { PeachSummaryResponse, PermitTracking, PiesRecord, UpdatedPermitWithNote } from '#types';
+import type {
+  PeachSummaryResponse,
+  PeachSystemRecordPermit,
+  Permit,
+  PermitTracking,
+  PiesRecord,
+  UpdatedPermitWithNote
+} from '#types';
 
 const log = getLogger(import.meta.filename);
 const limit = pLimit(5);
@@ -56,18 +63,18 @@ export const findPriorityPermitTracking = (
 };
 
 /**
- * Syncs PEACH data for permit tracking to PCNS, returns a list of permits used for sending update notifications
+ * Finds PCNS permits that are PEACH integrated and their highest priority tracking record, db read only
  * @param repositories - The required repositories
- * @returns Array of updated permits
+ * @returns Array of permits with their PEACH tracking record id/system
  */
-export const syncPeachRecords = async (
+export const getPeachTrackingRecords = async (
   repositories: Pick<Repositories, 'permit'>
-): Promise<UpdatedPermitWithNote[]> => {
+): Promise<PeachSystemRecordPermit[]> => {
   // Only fetch permits that have a peach integrated system permit type
   const peachIntegratedPermits = await listPeachIntegratedTrackings({ permit: repositories.permit });
 
   // Find the highest priority system record for each permit.
-  const systemRecordPermits = peachIntegratedPermits.flatMap((permit) => {
+  return peachIntegratedPermits.flatMap((permit) => {
     const permitTracking = findPriorityPermitTracking(permit.permitTracking);
 
     const recordId = permitTracking?.trackingId;
@@ -75,7 +82,16 @@ export const syncPeachRecords = async (
 
     return recordId && systemId ? [{ recordId, systemId, permit }] : [];
   });
+};
 
+/**
+ * Fetches and parses PEACH records for the given tracking records, external calls only
+ * @param systemRecordPermits - Permits and their PEACH tracking record id/system
+ * @returns Parsed PEACH summaries keyed by systemId + recordId
+ */
+export const fetchPeachRecords = async (
+  systemRecordPermits: PeachSystemRecordPermit[]
+): Promise<Record<string, PeachSummaryResponse>> => {
   // Uses rate limiting with p-limit to avoid overwhelming PEACH with requests, limit is set to 5.
   const results = await Promise.allSettled(
     systemRecordPermits.map((srp) => limit(() => getPiesRecord(srp.recordId, srp.systemId)))
@@ -101,13 +117,24 @@ export const syncPeachRecords = async (
     }
   }
 
-  const parsedRecords: Record<string, PeachSummaryResponse> = parsePiesRecords(records);
+  return parsePiesRecords(records);
+};
 
+/**
+ * Applies fetched PEACH data to PCNS permits, returns a list of permits used for sending update notifications, db
+ * write only
+ * @param repositories - The required repositories
+ * @param systemRecordPermits - Permits and their PEACH tracking record id/system
+ * @param parsedRecords - Parsed PEACH summaries keyed by systemId + recordId
+ * @returns Array of updated permits
+ */
+export const applyPeachUpdates = async (
+  repositories: Pick<Repositories, 'permit'>,
+  systemRecordPermits: PeachSystemRecordPermit[],
+  parsedRecords: Record<string, PeachSummaryResponse>
+): Promise<UpdatedPermitWithNote[]> => {
   const pendingUpdates: {
-    cleanedPermit: Omit<
-      (typeof systemRecordPermits)[number]['permit'],
-      'activity' | 'permitNote' | 'permitTracking' | 'permitType'
-    >;
+    cleanedPermit: Omit<Permit, 'activity' | 'permitNote' | 'permitTracking' | 'permitType'>;
     note?: string;
     notify: boolean;
   }[] = [];

@@ -1,22 +1,11 @@
 import config from 'config';
 import { mockReset } from 'vitest-mock-extended';
 
-import {
-  TEST_EMAIL_RESPONSE,
-  TEST_IDIR_USER_1,
-  TEST_PERMIT_1,
-  TEST_PERMIT_2,
-  TEST_PERMIT_NOTE_1
-} from '#tests/unit/data/index';
+import { TEST_IDIR_USER_1, TEST_PERMIT_1, TEST_PERMIT_2, TEST_PERMIT_NOTE_1 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
-import {
-  listPeachIntegratedTrackings,
-  sendPermitUpdateEmail,
-  sendPermitUpdateNotifications
-} from '#src/domains/permit';
+import { buildPermitUpdateEmail, listPeachIntegratedTrackings, prepareNotificationEmails } from '#src/domains/permit';
 import * as projectDomain from '#src/domains/project';
-import * as chesExternal from '#src/external/ches';
 import { Initiative } from '#src/utils/enums/application';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
@@ -87,10 +76,8 @@ describe('permit domain', () => {
     });
   });
 
-  describe('sendPermitUpdateEmail', () => {
-    it('should send email with correct template and subject for test environment', async () => {
-      const emailSpy = vi.spyOn(chesExternal, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE as never);
-
+  describe('buildPermitUpdateEmail', () => {
+    it('should build email with correct template and subject for test environment', async () => {
       const permit = {
         ...TEST_PERMIT_1,
         permitType: { name: 'Water Permit' }
@@ -105,9 +92,9 @@ describe('permit domain', () => {
         emailTemplate: vi.fn().mockReturnValue('<html>Email body</html>')
       };
 
-      await sendPermitUpdateEmail(mockRepos, params);
+      const emailData = await buildPermitUpdateEmail(mockRepos, params);
 
-      expect(emailSpy).toHaveBeenCalledWith({
+      expect(emailData).toEqual({
         to: ['recipient@example.com'],
         from: 'noreply@example.com',
         cc: ['noreply@example.com'],
@@ -135,8 +122,6 @@ describe('permit domain', () => {
         return undefined;
       });
 
-      const emailSpy = vi.spyOn(chesExternal, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE as never);
-
       const permit = { ...TEST_PERMIT_1, permitType: { name: 'Permit' } };
       const params: PermitUpdateEmailParams = {
         permit: permit as never,
@@ -147,18 +132,15 @@ describe('permit domain', () => {
         emailTemplate: vi.fn().mockReturnValue('body')
       };
 
-      await sendPermitUpdateEmail(mockRepos, params);
+      const emailData = await buildPermitUpdateEmail(mockRepos, params);
 
-      const emailCall = emailSpy.mock.calls[0]?.[0];
-      expect(emailCall?.subject).toBe('Updates for Housing project ACTI1234, Permit');
-      expect(emailCall?.subject).not.toContain('TEST');
+      expect(emailData.subject).toBe('Updates for Housing project ACTI1234, Permit');
+      expect(emailData.subject).not.toContain('TEST');
     });
   });
 
-  describe('sendPermitUpdateNotifications', () => {
-    it('should create permit note and send proponent email', async () => {
-      vi.spyOn(chesExternal, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE as never);
-
+  describe('prepareNotificationEmails', () => {
+    it('should create permit note and build proponent email', async () => {
       vi.spyOn(projectDomain, 'getProjectByActivityId').mockResolvedValue({
         projectId: 'proj-123',
         activityId: 'ACTI1234',
@@ -187,14 +169,15 @@ describe('permit domain', () => {
         permitNote: []
       };
 
-      await sendPermitUpdateNotifications(mockRepos, permit as never, false);
+      const emails = await prepareNotificationEmails(mockRepos, permit as never, false);
 
       expect(mockRepos.permitNote.create).toHaveBeenCalled();
       const createCall = mockRepos.permitNote.create.mock.calls[0]?.[0];
       expect(createCall?.permitId).toBe(permit.permitId);
+      expect(emails.length).toBe(1);
     });
 
-    it('should not send proponent email when no primary contact email', async () => {
+    it('should not build proponent email when no primary contact email', async () => {
       vi.spyOn(projectDomain, 'getProjectByActivityId').mockResolvedValue({
         projectId: 'proj-123',
         activityId: 'ACTI1234',
@@ -222,14 +205,13 @@ describe('permit domain', () => {
         permitNote: []
       };
 
-      await sendPermitUpdateNotifications(mockRepos, permit as never, false);
+      const emails = await prepareNotificationEmails(mockRepos, permit as never, false);
 
       expect(mockRepos.permitNote.create).toHaveBeenCalled();
+      expect(emails.length).toBe(0);
     });
 
-    it('should send navigator email when fromPeachSync is true', async () => {
-      const emailSpy = vi.spyOn(chesExternal, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE as never);
-
+    it('should build navigator email when fromPeachSync is true', async () => {
       vi.spyOn(projectDomain, 'getProjectByActivityId').mockResolvedValue({
         projectId: 'proj-123',
         activityId: 'ACTI1234',
@@ -263,10 +245,10 @@ describe('permit domain', () => {
         permitNote: []
       };
 
-      await sendPermitUpdateNotifications(mockRepos, permit as never, true);
+      const emails = await prepareNotificationEmails(mockRepos, permit as never, true);
 
       expect(mockRepos.user.findById).toHaveBeenCalledWith('user-123');
-      expect(emailSpy).toHaveBeenCalled();
+      expect(emails.length).toBeGreaterThan(0);
     });
 
     it('should throw error when permit state/stage are invalid', async () => {
@@ -283,7 +265,7 @@ describe('permit domain', () => {
         stage: 'INVALID_STAGE'
       };
 
-      await expect(sendPermitUpdateNotifications(mockRepos, permit as never, false)).rejects.toThrow(
+      await expect(prepareNotificationEmails(mockRepos, permit as never, false)).rejects.toThrow(
         'Invalid permit.state'
       );
     });
@@ -314,13 +296,13 @@ describe('permit domain', () => {
 
       const customNote = 'Custom note text';
 
-      await sendPermitUpdateNotifications(mockRepos, permit as never, false, customNote);
+      await prepareNotificationEmails(mockRepos, permit as never, false, customNote);
 
       const createCall = mockRepos.permitNote.create.mock.calls[0]?.[0];
       expect(createCall?.note).toBe(customNote);
     });
 
-    it('should not send email when permit needed is NO and stage is PRE_SUBMISSION', async () => {
+    it('should not build email when permit needed is NO and stage is PRE_SUBMISSION', async () => {
       vi.spyOn(projectDomain, 'getProjectByActivityId').mockResolvedValue({
         projectId: 'proj-123',
         activityId: 'ACTI1234',
@@ -345,9 +327,10 @@ describe('permit domain', () => {
         permitNote: []
       };
 
-      await sendPermitUpdateNotifications(mockRepos, permit as never, false);
+      const emails = await prepareNotificationEmails(mockRepos, permit as never, false);
 
       expect(mockRepos.permitNote.create).toHaveBeenCalled();
+      expect(emails.length).toBe(0);
     });
   });
 });

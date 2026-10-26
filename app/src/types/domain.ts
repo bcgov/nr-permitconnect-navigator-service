@@ -64,6 +64,12 @@ export type SearchPermitsInput = SearchPermitsRequest;
 export type UpsertPermitBodyInput = UpsertPermitBodyRequest;
 export type UpsertPermitInput = UpsertPermitRequest;
 
+export interface PeachSystemRecordPermit {
+  recordId: string;
+  systemId: string;
+  permit: Permit;
+}
+
 export interface PermitUpdateEmailParams {
   permit: Permit;
   initiative: Initiative;
