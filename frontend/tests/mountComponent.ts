@@ -74,6 +74,15 @@ export interface MountResult {
   pinia?: Pinia;
 }
 
+// Unmounted after each test so components' own cleanup (e.g. PrimeVue Tabs cancelling its
+// internal ink-bar timer) runs -- otherwise leaked timers can fire after happy-dom tears down
+// the test's globals, throwing `ReferenceError: HTMLElement is not defined` in an unrelated test.
+const activeWrappers: ReturnType<typeof mount>[] = [];
+
+afterEach(() => {
+  activeWrappers.splice(0).forEach((wrapper) => wrapper.unmount());
+});
+
 export interface MountResultWithForm extends MountResult {
   form: ReturnType<typeof useForm>;
 }
@@ -126,6 +135,7 @@ export function mountComponent(
         directives: resolvedDirectives
       }
     });
+    activeWrappers.push(wrapper);
 
     return { wrapper, pinia };
   }
@@ -153,6 +163,7 @@ export function mountComponent(
   const wrapper = mount(Harness, {
     global: { plugins: resolvedPlugins, stubs: { ...defaultStubs, ...stubs }, provide, directives: resolvedDirectives }
   });
+  activeWrappers.push(wrapper);
 
   return { wrapper, pinia, form };
 }
