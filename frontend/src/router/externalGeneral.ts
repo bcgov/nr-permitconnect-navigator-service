@@ -9,7 +9,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: 'general',
     meta: { access: [NavigationPermission.EXT_GENERAL], breadcrumb: 'General', requiresAuth: true },
-    beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.GENERAL)],
+    beforeEnter: [() => useAppStore().setInitiative(Initiative.GENERAL), entryRedirect],
     children: [
       {
         path: '',
