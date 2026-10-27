@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 
 import HeaderMenu from '@/components/common/HeaderMenu.vue';
 import { AppDrawer } from '@/components/layout';
+import { RouteName } from '@/utils/enums/application';
 
 // Actions
 const { t } = useI18n();
@@ -29,7 +30,14 @@ const route = useRoute();
         </div>
         <div class="mx-2 bcds-header-line bg-[#d8d8d8] w-[1px] h-[32px]" />
         <div class="flex grow ml-2">
-          <h2 class="m-0 font-bold app-primary-color">{{ t('common.header.name') }}</h2>
+          <h2 class="m-0 font-bold app-primary-color">
+            <router-link
+              :to="{ name: RouteName.HOME }"
+              class="no-underline text-inherit"
+            >
+              {{ t('common.header.name') }}
+            </router-link>
+          </h2>
         </div>
         <div class="flex justify-end lg:mr-12">
           <HeaderMenu />
