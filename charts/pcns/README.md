@@ -1,6 +1,6 @@
 # nr-permitconnect-navigator-service
 
-![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.11.0](https://img.shields.io/badge/AppVersion-0.11.0-informational?style=flat-square)
+![Version: 0.1.7](https://img.shields.io/badge/Version-0.1.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.11.0](https://img.shields.io/badge/AppVersion-0.11.0-informational?style=flat-square)
 
 PermitConnect Navigator Service
 
@@ -36,7 +36,7 @@ Kubernetes: `>= 1.13.0`
 | config.configMap | object | `{"FRONTEND_APIPATH":"api/v1","FRONTEND_CHES_ROADMAP_BCC":null,"FRONTEND_COMS_APIPATH":null,"FRONTEND_COMS_BUCKETID":null,"FRONTEND_GEOCODER_APIPATH":null,"FRONTEND_OIDC_AUTHORITY":null,"FRONTEND_OIDC_CLIENTID":null,"FRONTEND_OPENSTREETMAP_APIPATH":null,"FRONTEND_ORGBOOK_APIPATH":null,"SERVER_APIPATH":"/v1","SERVER_ATS_APIPATH":null,"SERVER_ATS_TOKENURL":null,"SERVER_BODYLIMIT":"30mb","SERVER_CHEFS_APIPATH":null,"SERVER_CHES_APIPATH":null,"SERVER_CHES_SUBMISSION_CC":null,"SERVER_CHES_TOKENURL":null,"SERVER_DB_POOL_MAX":"10","SERVER_DB_POOL_MIN":"2","SERVER_DB_PORT":"5432","SERVER_ENV":null,"SERVER_LOGLEVEL":"http","SERVER_OBJECTSTORAGE_BUCKET":null,"SERVER_OBJECTSTORAGE_ENDPOINT":null,"SERVER_OBJECTSTORAGE_KEY":null,"SERVER_OIDC_AUDIENCE":null,"SERVER_OIDC_AUTHORITY":null,"SERVER_OPENMAPS_APIPATH":null,"SERVER_PCBCURL":null,"SERVER_PCNS_APPURL":null,"SERVER_PCNS_NAVEMAIL":null,"SERVER_PEACH_APIPATH":null,"SERVER_PEACH_TOKENURL":null,"SERVER_PORT":"8080","SERVER_SSO_APIPATH":null,"SERVER_SSO_INTEGRATION":null,"SERVER_SSO_TOKENURL":null}` | These values will be wholesale added to the configmap as is; refer to the pcns documentation for what each of these values mean and whether you need them defined. Ensure that all values are represented explicitly as strings, as non-string values will not translate over as expected into container environment variables. For configuration keys named `*_ENABLED`, either leave them commented/undefined, or set them to string value "true". |
 | config.enabled | bool | `false` | Set to true if you want to let Helm manage and overwrite your configmaps. |
 | config.releaseScoped | bool | `false` | This should be set to true if and only if you require configmaps and secrets to be release scoped. In the event you want all instances in the same namespace to share a similar configuration, this should be set to false |
-| database.bootstrapImage | string | `"artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres:ubi9-18.1-2547"` | CrunchyDB image containing psql and pg_isready for the permissions Job |
+| database.bootstrapImage | string | `"artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres:ubi9-18.1-20260910"` | CrunchyDB image containing psql and pg_isready for the permissions Job |
 | database.clusterName | string | `"crunchy"` | CrunchyDB PostgresCluster name |
 | database.host | string | `"crunchy-pgbouncer"` | Service used by application runtime connections |
 | database.name | string | `nil` | Overrides the database name from the secret; used for per-PR databases |

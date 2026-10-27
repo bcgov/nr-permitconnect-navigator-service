@@ -4,7 +4,7 @@ crunchy-postgres:
   fullnameOverride: crunchy
 
   # -- CrunchyDB image used for PostgreSQL instance pods.
-  crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres:ubi9-18.1-2547
+  crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres:ubi9-18.1-20260910
   # -- PostgreSQL major version.
   postgresVersion: 18
   # -- Image pull policy for database containers.
