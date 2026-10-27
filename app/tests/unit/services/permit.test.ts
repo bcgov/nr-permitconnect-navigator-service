@@ -430,6 +430,27 @@ describe('permit service', () => {
       expect(sentInTransaction).toBe(false);
     });
 
+    it('returns the saved permit when sending a notification email fails', async () => {
+      const preparedEmails = [{ to: ['one@example.com'] }, { to: ['two@example.com'] }];
+
+      mockRepos.permit.findFirst.mockResolvedValueOnce(TEST_PERMIT_1 as never);
+      mockRepos.permit.upsert.mockResolvedValueOnce(TEST_PERMIT_1 as never);
+      mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(TEST_PERMIT_1 as never);
+      mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({ count: 0 } as never);
+      prepareNotificationEmailsSpy.mockResolvedValueOnce(preparedEmails as never);
+      emailSpy.mockRejectedValueOnce(new Error('Unable to start a transaction in the given time'));
+
+      const response = await permitService.upsertPermitService(
+        TEST_PERMIT_1 as never,
+        [{ permitId: TEST_PERMIT_1.permitId, note: 'A note' } as never],
+        [],
+        TEST_PERMIT_TYPE_1
+      );
+
+      expect(response).toStrictEqual(TEST_PERMIT_1);
+      expect(emailSpy).toHaveBeenCalledTimes(2);
+    });
+
     it('does not call prepareNotificationEmails when note is empty and status unchanged', async () => {
       mockRepos.permit.findFirst.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permit.upsert.mockResolvedValueOnce(TEST_PERMIT_1 as never);

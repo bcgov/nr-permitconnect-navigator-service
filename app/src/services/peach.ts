@@ -12,8 +12,11 @@ import { email } from '#src/external/ches';
 import { getPiesRecord } from '#src/external/peach';
 import { summarizePiesRecord } from '#src/parsers/peach';
 import { Problem } from '#src/utils/index';
+import { getLogger } from '#src/utils/log';
 
 import type { Email, PermitTracking } from '#types';
+
+const log = getLogger(import.meta.filename);
 
 // Each email fetches a CHES token and opens its own db transaction to log it
 const emailLimit = pLimit(5);
@@ -61,5 +64,11 @@ export const syncPeachRecordsService = async (): Promise<Email[]> => {
  * @param emails - The emails to send
  */
 export const sendPeachNotificationsService = async (emails: Email[]) => {
-  await Promise.all(emails.map((emailData) => emailLimit(() => email(emailData))));
+  // One failed send must not stop the rest, and every failure is logged rather than just the first
+  const results = await Promise.allSettled(emails.map((emailData) => emailLimit(() => email(emailData))));
+  results.forEach((result, i) => {
+    if (result.status === 'rejected') {
+      log.warn(`PEACH sync failed to send notification "${emails[i].subject}"`, result.reason);
+    }
+  });
 };

@@ -206,5 +206,17 @@ describe('peach service', () => {
       expect(emailSpy).toHaveBeenCalledTimes(12);
       expect(maxActive).toBe(5);
     });
+
+    it('still sends every remaining email when one fails', async () => {
+      // More than the limit of 5, so later sends only start once earlier ones have settled
+      const emails = Array.from({ length: 7 }, (_, i) => ({ to: [`${i}@example.com`], subject: `Update ${i}` }));
+
+      emailSpy.mockRejectedValueOnce(new Error('Unable to start a transaction in the given time'));
+      emailSpy.mockResolvedValue({} as never);
+
+      await expect(peachService.sendPeachNotificationsService(emails as never)).resolves.toBeUndefined();
+
+      expect(emailSpy).toHaveBeenCalledTimes(7);
+    });
   });
 });

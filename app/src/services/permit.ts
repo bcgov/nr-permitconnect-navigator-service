@@ -11,6 +11,7 @@ import { getPiesRecord } from '#src/external/peach';
 import { summarizePiesRecord } from '#src/parsers/peach';
 import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { PermitNeeded } from '#src/utils/enums/permit';
+import { getLogger } from '#src/utils/log';
 import Problem from '#src/utils/problem';
 import { differential, isEmptyObject } from '#src/utils/utils';
 
@@ -30,6 +31,8 @@ import type {
   UpsertPermitInput
 } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
+
+const log = getLogger(import.meta.filename);
 
 function checkIfPeachIntegratedAuthType(sourceSystem: string, sourceSystemKinds: SourceSystemKind[]): boolean {
   const hasIntegratedSourceSystemKind = sourceSystemKinds.some(
@@ -337,8 +340,13 @@ export const upsertPermitService = async (
     }
   );
 
-  // Send the notification emails
-  await Promise.all(emails.map((emailData) => email(emailData)));
+  // The permit and note are already committed, so a failed send must not report the save as failed
+  const results = await Promise.allSettled(emails.map((emailData) => email(emailData)));
+  results.forEach((result) => {
+    if (result.status === 'rejected') {
+      log.warn(`Failed to send permit update notification for permit ${data.permitId}`, result.reason);
+    }
+  });
 
   return data;
 };
