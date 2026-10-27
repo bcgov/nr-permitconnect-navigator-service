@@ -74,28 +74,32 @@ export function createProps(route: { query: LocationQuery; params: RouteParamsGe
 export function entryRedirect(to: RouteLocationNormalizedGeneric) {
   const authzStore = useAuthZStore();
 
+  // Without access to either zone, bouncing between them would redirect forever
+  const otherZone = (name: RouteName, permission: NavigationPermission) =>
+    authzStore.canNavigate(permission) ? { name } : { name: RouteName.NOT_FOUND };
+
   // Electrification
   if (to.name === RouteName.INT_ELECTRIFICATION && !authzStore.canNavigate(NavigationPermission.INT_ELECTRIFICATION)) {
-    return { name: RouteName.EXT_ELECTRIFICATION };
+    return otherZone(RouteName.EXT_ELECTRIFICATION, NavigationPermission.EXT_ELECTRIFICATION);
   }
   if (to.name === RouteName.EXT_ELECTRIFICATION && !authzStore.canNavigate(NavigationPermission.EXT_ELECTRIFICATION)) {
-    return { name: RouteName.INT_ELECTRIFICATION };
+    return otherZone(RouteName.INT_ELECTRIFICATION, NavigationPermission.INT_ELECTRIFICATION);
   }
 
   // General
   if (to.name === RouteName.INT_GENERAL && !authzStore.canNavigate(NavigationPermission.INT_GENERAL)) {
-    return { name: RouteName.EXT_GENERAL };
+    return otherZone(RouteName.EXT_GENERAL, NavigationPermission.EXT_GENERAL);
   }
   if (to.name === RouteName.EXT_GENERAL && !authzStore.canNavigate(NavigationPermission.EXT_GENERAL)) {
-    return { name: RouteName.INT_GENERAL };
+    return otherZone(RouteName.INT_GENERAL, NavigationPermission.INT_GENERAL);
   }
 
   // Housing
   if (to.name === RouteName.INT_HOUSING && !authzStore.canNavigate(NavigationPermission.INT_HOUSING)) {
-    return { name: RouteName.EXT_HOUSING };
+    return otherZone(RouteName.EXT_HOUSING, NavigationPermission.EXT_HOUSING);
   }
   if (to.name === RouteName.EXT_HOUSING && !authzStore.canNavigate(NavigationPermission.EXT_HOUSING)) {
-    return { name: RouteName.INT_HOUSING };
+    return otherZone(RouteName.INT_HOUSING, NavigationPermission.INT_HOUSING);
   }
 }
 
@@ -189,14 +193,20 @@ export default function getRouter() {
           top: convertRemToPixels(5)
         }));
       }
-      // Query or hash changes on the same page keep the scroll position
-      if (to.path === from.path) return false;
+      // Staying on the same route keeps the scroll position, e.g. a draft autosave adding its draftId param
+      if (to.name === from.name) return false;
       return { top: 0 };
     }
   });
 
+  // Redirects re-run beforeEach and duplicates run only afterEach, so track the navigation instead of pairing hooks
+  let navigating = false;
+
   router.beforeEach(async (to, from) => {
-    appStore.beginDeterminateLoading();
+    if (!navigating) {
+      navigating = true;
+      appStore.beginDeterminateLoading();
+    }
 
     // Authentication guard
     if (to.meta.requiresAuth) {
@@ -219,7 +229,25 @@ export default function getRouter() {
   });
 
   router.afterEach(() => {
+    globalThis.sessionStorage.removeItem(StorageKey.CHUNK_RELOAD);
+    if (!navigating) return;
+    navigating = false;
     appStore.endDeterminateLoading();
+  });
+
+  // Errors skip afterEach, so loading has to end here too
+  router.onError((error, to) => {
+    if (navigating) {
+      navigating = false;
+      appStore.endDeterminateLoading();
+    }
+
+    // A deploy removes the old chunks an open tab still references, so reload once per path to fetch the new ones
+    const isChunkError = /dynamically imported module|Importing a module script failed/i.test(error?.message);
+    if (isChunkError && globalThis.sessionStorage.getItem(StorageKey.CHUNK_RELOAD) !== to.fullPath) {
+      globalThis.sessionStorage.setItem(StorageKey.CHUNK_RELOAD, to.fullPath);
+      globalThis.location.assign(to.fullPath);
+    }
   });
 
   return router;

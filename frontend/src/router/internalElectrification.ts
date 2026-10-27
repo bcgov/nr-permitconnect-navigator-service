@@ -8,7 +8,7 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: 'electrification',
-    beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.ELECTRIFICATION)],
+    beforeEnter: [() => useAppStore().setInitiative(Initiative.ELECTRIFICATION), entryRedirect],
     meta: { access: [NavigationPermission.INT_ELECTRIFICATION], requiresAuth: true },
     children: [
       {

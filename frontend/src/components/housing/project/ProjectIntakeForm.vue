@@ -35,10 +35,9 @@ import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
-import { PermitStage } from '@/utils/enums/codeEnums';
-import { PermitNeeded } from '@/utils/enums/permit';
 import { NumResidentialUnits } from '@/utils/enums/housing';
 import { ActivityContactRole, FormState, FormType, ProjectLocation } from '@/utils/enums/projectCommon';
+import { draftToPermitsFormValues, projectToPermitsFormValues, toPermitsPayload } from '@/utils/permit';
 import { generalErrorHandler, toOneOf } from '@/utils/utils';
 import { toTypedSchema } from '@/utils/zodSchema';
 import { toContactFormValues } from '@/validators/contact';
@@ -46,7 +45,7 @@ import { toContactFormValues } from '@/validators/contact';
 import type { GeoJSON } from 'geojson';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { DeepPartial, Draft, HousingProject, RequestBody, OrgBookOption, Permit } from '@/types';
+import type { DeepPartial, Draft, HousingProject, RequestBody, OrgBookOption } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 // Props
@@ -177,15 +176,7 @@ async function onSubmit(data: FormSchemaType) {
         streetAddress: data.location.streetAddress,
         geoJson: data.location.geoJson as GeoJSON | undefined
       },
-      permits: {
-        appliedPermits: data.permits.appliedPermits?.map((x) => ({
-          submittedDate: x.submittedDate?.toISOString(),
-          permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId }],
-          permitTypeId: x.permitTypeId
-        })),
-        hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
-        investigatePermits: data.permits.investigatePermits
-      }
+      permits: toPermitsPayload(data.permits)
     };
 
     const response = await housingProjectService.submitDraft(payload);
@@ -213,19 +204,7 @@ onBeforeMount(() => {
     if (draft.value) {
       initialFormValues.value = {
         ...draft.value.data,
-        permits: {
-          ...draft.value.data.permits,
-          appliedPermits:
-            draft.value.data.permits.appliedPermits?.map((x) => ({
-              permitTypeId: x.permitTypeId,
-              permitTracking: [
-                {
-                  trackingId: x.permitTracking?.[0]?.trackingId
-                }
-              ],
-              submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
-            })) ?? []
-        }
+        permits: draftToPermitsFormValues(draft.value.data.permits)
       };
 
       // Load org book option if company name is already filled
@@ -284,18 +263,7 @@ onBeforeMount(() => {
           projectLocationDescription: project?.projectLocationDescription,
           geoJson: project.geoJson
         },
-        permits: {
-          appliedPermits: useProjectStore()
-            .getPermits.filter((x: Permit) => x.stage === PermitStage.APPLICATION_SUBMISSION)
-            .map((x: Permit) => ({
-              ...x,
-              submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
-            })),
-          hasAppliedProvincialPermits: toOneOf(YES_NO_UNSURE_LIST, project.hasAppliedProvincialPermits),
-          investigatePermits: useProjectStore().getPermits.filter(
-            (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
-          )
-        }
+        permits: projectToPermitsFormValues(project.hasAppliedProvincialPermits, useProjectStore().getPermits)
       };
     } else {
       const userContact = useContactStore().getContact;

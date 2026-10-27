@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import type { schema as accessRequestSchema } from '#src/schemas/request/accessRequest';
 import type { schema as activityContactSchema } from '#src/schemas/request/activityContact';
+import type { intakePermits } from '#src/schemas/request/appliedPermit';
 import type { schema as atsSchema } from '#src/schemas/request/ats';
 import type { schema as contactSchema } from '#src/schemas/request/contact';
 import type { schema as documentSchema } from '#src/schemas/request/document';
@@ -125,6 +126,8 @@ export type UpsertPermitBodyRequest = z.infer<typeof permitSchema.upsertPermit.b
 // to Prisma's unchecked write input, which needs relation scalars/nested-writes, not the validated read shape.
 export type UpsertPermitRequest = Omit<UpsertPermitBodyRequest, 'permitType' | 'permitNote' | 'permitTracking'>;
 export type IntakePermitRequest = z.infer<typeof permitSchema.intakePermit.body>[number];
+// Permits section shared by the housing, general, and electrification draft submissions
+export type DraftPermitsRequest = z.infer<typeof intakePermits>;
 export type ListPermitsRequest = z.infer<typeof permitSchema.listPermits.query>;
 export type SearchPermitsRequest = z.infer<typeof permitSchema.searchPermits.query>;
 

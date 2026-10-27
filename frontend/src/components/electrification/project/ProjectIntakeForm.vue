@@ -7,9 +7,12 @@ import { useRouter } from 'vue-router';
 
 import { FormAutosave, FormNavigationGuard } from '@/components/form';
 import {
+  AppliedPermitsIntakeCard,
   BcHydroNumberCard,
   CollectionDisclaimer,
   ContactCardIntakeForm,
+  InvestigatePermitsCard,
+  PermitLearnCard,
   ProjectDescriptionCard,
   ProjectNameCard,
   ProjectTypeCard,
@@ -19,9 +22,10 @@ import {
 import { createProjectIntakeSchema } from '@/validators/electrification/projectIntakeFormSchema';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { electrificationProjectService } from '@/services';
-import { useCodeStore, useContactStore, useFormStore } from '@/store';
+import { useCodeStore, useContactStore, useFormStore, useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
+import { draftToPermitsFormValues, projectToPermitsFormValues, toPermitsPayload } from '@/utils/permit';
 import { generalErrorHandler } from '@/utils/utils';
 import { toTypedSchema } from '@/utils/zodSchema';
 import { toContactFormValues } from '@/validators/contact';
@@ -124,7 +128,8 @@ async function onSubmit(data: FormSchemaType) {
       project: {
         bcHydroNumber: data.project.bcHydroNumber,
         projectType: data.project.projectType
-      }
+      },
+      permits: toPermitsPayload(data.permits)
     };
 
     const response = await electrificationProjectService.submitDraft(payload);
@@ -151,7 +156,8 @@ onBeforeMount(async () => {
 
     if (draft.value) {
       initialFormValues.value = {
-        ...draft.value.data
+        ...draft.value.data,
+        permits: draftToPermitsFormValues(draft.value.data.permits)
       };
 
       // Load org book option if company name is already filled
@@ -176,7 +182,8 @@ onBeforeMount(async () => {
         project: {
           bcHydroNumber: project.bcHydroNumber,
           projectType: project.projectType ?? undefined
-        }
+        },
+        permits: projectToPermitsFormValues(project.hasAppliedProvincialPermits, useProjectStore().getPermits)
       };
     } else {
       const userContact = useContactStore().getContact;
@@ -222,7 +229,9 @@ onBeforeMount(async () => {
     <ProjectTypeCard />
     <BcHydroNumberCard />
     <ProjectDescriptionCard :activity-id="draft?.activityId ?? project?.activityId" />
-
+    <AppliedPermitsIntakeCard />
+    <PermitLearnCard />
+    <InvestigatePermitsCard />
     <div class="flex items-center justify-center mt-6">
       <Button
         :label="t('ui.actions.submit')"

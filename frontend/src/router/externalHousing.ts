@@ -9,7 +9,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: 'housing',
     meta: { access: [NavigationPermission.EXT_HOUSING], breadcrumb: 'Housing', requiresAuth: true },
-    beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.HOUSING)],
+    beforeEnter: [() => useAppStore().setInitiative(Initiative.HOUSING), entryRedirect],
     children: [
       {
         path: '',

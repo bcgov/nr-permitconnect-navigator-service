@@ -8,7 +8,7 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: 'housing',
-    beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.HOUSING)],
+    beforeEnter: [() => useAppStore().setInitiative(Initiative.HOUSING), entryRedirect],
     meta: { access: [NavigationPermission.INT_HOUSING], requiresAuth: true },
     children: [
       {

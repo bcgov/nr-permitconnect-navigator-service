@@ -11,6 +11,8 @@ import {
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import {
+  buildIntakePermits,
+  createIntakePermits,
   listPeachIntegratedTrackings,
   sendPermitUpdateEmail,
   sendPermitUpdateNotifications
@@ -46,6 +48,107 @@ describe('permit domain', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockReset(mockRepos);
+  });
+
+  describe('buildIntakePermits', () => {
+    it('builds applied permits with their trackers and investigate permits', () => {
+      const result = buildIntakePermits('ACTI1234', {
+        hasAppliedProvincialPermits: 'Yes',
+        appliedPermits: [
+          { permitTypeId: 1, submittedDate: new Date('2024-01-01'), permitTracking: [{ trackingId: 'TRK-1' }] }
+        ],
+        investigatePermits: [{ permitTypeId: 2 }]
+      });
+
+      expect(result.appliedPermits).toHaveLength(1);
+      expect(result.appliedPermits[0]).toMatchObject({
+        permitTypeId: 1,
+        activityId: 'ACTI1234',
+        stage: PermitStage.APPLICATION_SUBMISSION,
+        needed: PermitNeeded.YES,
+        state: PermitState.IN_PROGRESS,
+        submittedDate: new Date('2024-01-01')
+      });
+      expect(result.appliedPermitTrackers).toEqual([
+        expect.objectContaining({ trackingId: 'TRK-1', permitId: result.appliedPermits[0].permitId })
+      ]);
+      expect(result.investigatePermits).toHaveLength(1);
+      expect(result.investigatePermits[0]).toMatchObject({
+        permitTypeId: 2,
+        activityId: 'ACTI1234',
+        stage: PermitStage.PRE_SUBMISSION,
+        needed: PermitNeeded.UNDER_INVESTIGATION,
+        state: PermitState.NONE
+      });
+    });
+
+    it('skips trackers without a trackingId', () => {
+      const result = buildIntakePermits('ACTI1234', {
+        hasAppliedProvincialPermits: 'Yes',
+        appliedPermits: [{ permitTypeId: 1, permitTracking: [{ trackingId: undefined }, { trackingId: null }] }]
+      });
+
+      expect(result.appliedPermits).toHaveLength(1);
+      expect(result.appliedPermitTrackers).toEqual([]);
+    });
+
+    it('ignores client-supplied tracker IDs, stamps, and relations', () => {
+      const result = buildIntakePermits('ACTI1234', {
+        hasAppliedProvincialPermits: 'Yes',
+        appliedPermits: [
+          {
+            permitTypeId: 1,
+            permitTracking: [
+              {
+                trackingId: 'TRK-1',
+                sourceSystemKindId: 3,
+                shownToProponent: true,
+                permitTrackingId: 123,
+                permitId: 'someone-elses-permit',
+                createdBy: 'spoofed',
+                deletedAt: new Date(),
+                sourceSystemKind: { sourceSystemKindId: 3, description: 'x', sourceSystem: 'y' }
+              }
+            ]
+          }
+        ]
+      });
+
+      expect(result.appliedPermitTrackers).toEqual([
+        {
+          permitId: result.appliedPermits[0].permitId,
+          trackingId: 'TRK-1',
+          sourceSystemKindId: 3,
+          shownToProponent: true
+        }
+      ]);
+    });
+
+    it('returns empty arrays when no permits are given', () => {
+      expect(buildIntakePermits('ACTI1234', { hasAppliedProvincialPermits: 'No' })).toEqual({
+        appliedPermits: [],
+        investigatePermits: [],
+        appliedPermitTrackers: []
+      });
+    });
+  });
+
+  describe('createIntakePermits', () => {
+    it('saves every permit before creating the trackers', async () => {
+      const calls: string[] = [];
+      mockRepos.permit.upsert.mockImplementation((async () => calls.push('permit')) as never);
+      mockRepos.permitTracking.create.mockImplementation((async () => calls.push('tracker')) as never);
+      const intakePermits = buildIntakePermits('ACTI1234', {
+        hasAppliedProvincialPermits: 'Yes',
+        appliedPermits: [{ permitTypeId: 1, permitTracking: [{ trackingId: 'TRK-1' }] }],
+        investigatePermits: [{ permitTypeId: 2 }]
+      });
+
+      await createIntakePermits(mockRepos, intakePermits);
+
+      expect(calls).toEqual(['permit', 'permit', 'tracker']);
+      expect(mockRepos.permitTracking.create).toHaveBeenCalledWith(intakePermits.appliedPermitTrackers[0]);
+    });
   });
 
   describe('listPeachIntegratedTrackings', () => {

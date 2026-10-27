@@ -52,7 +52,7 @@ describe('generalProject domain', () => {
         Initiative.GENERAL,
         TEST_CURRENT_CONTEXT
       );
-      expect(result.generalProject.activityId).toBe(TEST_ACTIVITY_GENERAL.activityId);
+      expect(result.activityId).toBe(TEST_ACTIVITY_GENERAL.activityId);
     });
 
     it('should throw error when activity creation fails', async () => {
@@ -65,19 +65,16 @@ describe('generalProject domain', () => {
       );
     });
 
-    it('should return a blank project shell with defaults and no permits', async () => {
+    it('should return a blank project shell with defaults', async () => {
       vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
         TEST_ACTIVITY_GENERAL.activityId
       );
 
       const result = await createGeneralProjectData(mockRepos, TEST_CURRENT_CONTEXT);
 
-      expect(result.generalProject.applicationStatus).toBe(ApplicationStatus.NEW);
-      expect(result.generalProject.submissionType).toBe(SubmissionType.GUIDANCE);
-      expect(result.generalProject.generalProjectId).toBeDefined();
-      expect(result.appliedPermits).toEqual([]);
-      expect(result.investigatePermits).toEqual([]);
-      expect(result.appliedPermitTrackers).toEqual([]);
+      expect(result.applicationStatus).toBe(ApplicationStatus.NEW);
+      expect(result.submissionType).toBe(SubmissionType.GUIDANCE);
+      expect(result.generalProjectId).toBeDefined();
     });
   });
 

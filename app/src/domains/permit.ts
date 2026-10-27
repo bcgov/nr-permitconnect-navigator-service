@@ -1,6 +1,7 @@
 import config from 'config';
 import { randomUUID } from 'node:crypto';
 
+import { upsertPermitTracking } from './permitTracking.ts';
 import { getProjectByActivityId } from './project.ts';
 import { codeTable } from '#src/db/codes/cache';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
@@ -16,7 +17,14 @@ import {
 import { state } from '../../state.ts';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type { Permit, PermitCreateInput, PermitUpdateEmailParams, ProjectRepositoryKeys } from '#types';
+import type {
+  DraftPermitsInput,
+  Permit,
+  PermitCreateInput,
+  PermitTrackingCreateInput,
+  PermitUpdateEmailParams,
+  ProjectRepositoryKeys
+} from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 /**
@@ -58,6 +66,90 @@ export const buildNewPermitRecord = (params: {
   targetDateDescription: null,
   technicalReviewer: null
 });
+
+/**
+ * Builds applied permit records, plus trackers for their tracking IDs
+ * @param permits - The applied permits, each tied to an activity
+ * @returns Applied permit records and their trackers
+ */
+export const buildAppliedPermits = (
+  permits: (NonNullable<DraftPermitsInput['appliedPermits']>[number] & { activityId: string })[]
+) => {
+  const appliedPermitTrackers: PermitTrackingCreateInput[] = [];
+
+  const appliedPermits = permits.map((x) => {
+    const permitId = randomUUID();
+
+    // Add each tracker for this permit with the proper permitId
+    x.permitTracking
+      ?.filter((pt) => pt.trackingId)
+      .forEach((pt) =>
+        // Pick fields explicitly, a client-sent permitTrackingId would overwrite another project's tracker
+        appliedPermitTrackers.push({
+          permitId,
+          trackingId: pt.trackingId,
+          sourceSystemKindId: pt.sourceSystemKindId,
+          shownToProponent: pt.shownToProponent ?? undefined
+        } satisfies PermitTrackingCreateInput)
+      );
+
+    return buildNewPermitRecord({
+      permitId,
+      permitTypeId: x.permitTypeId,
+      activityId: x.activityId,
+      stage: PermitStage.APPLICATION_SUBMISSION,
+      needed: PermitNeeded.YES,
+      state: PermitState.IN_PROGRESS,
+      submittedDate: x.submittedDate
+    });
+  });
+
+  return { appliedPermits, appliedPermitTrackers };
+};
+
+/**
+ * Builds the permit and tracker records for the permits section of a project intake
+ * @param activityId - The activity the permits belong to
+ * @param permits - The permits section of the intake submission
+ * @returns Applied and investigate permit records, plus the trackers for the applied permits
+ */
+export const buildIntakePermits = (activityId: string, permits: DraftPermitsInput) => ({
+  ...buildAppliedPermits((permits.appliedPermits ?? []).map((x) => ({ ...x, activityId }))),
+  investigatePermits: (permits.investigatePermits ?? []).map((x) =>
+    buildNewPermitRecord({
+      permitId: randomUUID(),
+      permitTypeId: x.permitTypeId,
+      activityId,
+      stage: PermitStage.PRE_SUBMISSION,
+      needed: PermitNeeded.UNDER_INVESTIGATION,
+      state: PermitState.NONE
+    })
+  )
+});
+
+/**
+ * Saves the permits and trackers built for an intake
+ * @param repositories - The required repositories
+ * @param intakePermits - The permit and tracker records to save
+ */
+export const createIntakePermits = async (
+  repositories: Pick<Repositories, 'permit' | 'permitTracking'>,
+  intakePermits: {
+    appliedPermits: PermitCreateInput[];
+    investigatePermits?: PermitCreateInput[];
+    appliedPermitTrackers: PermitTrackingCreateInput[];
+  }
+) => {
+  const { appliedPermits, investigatePermits = [], appliedPermitTrackers } = intakePermits;
+
+  await Promise.all(
+    [...appliedPermits, ...investigatePermits].map((p) => repositories.permit.upsert({ permitId: p.permitId }, p, p))
+  );
+  // Trackers reference their permit, so they can only be saved once the permits exist
+  await Promise.all(
+    appliedPermitTrackers.map((pt) => upsertPermitTracking({ permitTracking: repositories.permitTracking }, pt))
+  );
+};
 
 /**
  * Retrieve permits and trackings that are PEACH integrated
