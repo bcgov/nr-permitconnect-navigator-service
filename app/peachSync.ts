@@ -1,53 +1,39 @@
-import { syncPeachRecords } from './src/domains/peach.ts';
-import { sendPermitUpdateNotifications } from './src/domains/permit.ts';
 import { refreshCodeCaches } from './src/db/codes/cache.ts';
-import { unitOfWork } from './src/db/unitOfWork.ts';
+import { sendPeachNotificationsService, syncPeachRecordsService } from './src/services/peach.ts';
 import { getLogger } from './src/utils/log.ts';
 import { state } from './state.ts';
 
-import type { UpdatedPermitWithNote } from '#types';
+import type { Email } from '#types';
 
 const log = getLogger(import.meta.filename);
 
-async function syncPeachToPcns() {
+export async function syncPeachToPcns() {
   if (!state.features.peach) return;
 
-  await unitOfWork.execute(
-    async ({ electrificationProject, generalProject, housingProject, permit, permitNote, permitType, user }) => {
-      const started = Date.now();
-      let updatedPermitsWithNotes: UpdatedPermitWithNote[];
+  const started = Date.now();
+  log.info('PEACH sync job started');
 
-      log.info('PEACH sync job started');
-      try {
-        updatedPermitsWithNotes = await syncPeachRecords({ permit });
+  let emails: Email[];
+  try {
+    emails = await syncPeachRecordsService();
 
-        log.info('PEACH sync completed', {
-          durationMs: Date.now() - started,
-          updatedCount: updatedPermitsWithNotes.length
-        });
-      } catch (error) {
-        log.error('PEACH sync FAILED during data sync', error);
-        process.exitCode = 1;
-        return;
-      }
+    log.info('PEACH sync completed', {
+      durationMs: Date.now() - started,
+      emailCount: emails.length
+    });
+  } catch (error) {
+    log.error('PEACH sync FAILED during data sync', error);
+    process.exitCode = 1;
+    return;
+  }
 
-      if (updatedPermitsWithNotes.length === 0) return;
+  if (emails.length === 0) return;
 
-      try {
-        for (const permitWithNote of updatedPermitsWithNotes) {
-          const { permit, note } = permitWithNote;
-          await sendPermitUpdateNotifications(
-            { electrificationProject, generalProject, housingProject, permitNote, permitType, user },
-            permit,
-            true,
-            note
-          );
-        }
-      } catch (error) {
-        log.warn('PEACH sync completed but sending notifications failed', error);
-      }
-    }
-  );
+  try {
+    await sendPeachNotificationsService(emails);
+  } catch (error) {
+    log.warn('PEACH sync completed but sending notifications failed', error);
+  }
 }
 
 async function main() {
@@ -60,7 +46,10 @@ async function main() {
   await syncPeachToPcns();
 }
 
-void main().catch((error) => {
-  log.error('Fatal error in PEACH sync', error);
-  process.exit(1);
-});
+// Guards the auto-run so importing this module (e.g. from a test) doesn't trigger it
+if (import.meta.main) {
+  void main().catch((error) => {
+    log.error('Fatal error in PEACH sync', error);
+    process.exit(1);
+  });
+}
