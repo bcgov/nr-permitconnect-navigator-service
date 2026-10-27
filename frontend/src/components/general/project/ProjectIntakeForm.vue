@@ -38,7 +38,7 @@ import { toContactFormValues } from '@/validators/contact';
 import type { GeoJSON } from 'geojson';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { DeepPartial, Draft, GeneralProject, RequestBody, OrgBookOption } from '@/types';
+import type { DeepPartial, Draft, GeneralProject, OrgBookOption, RequestBody } from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectIntakeFormSchema';
 
 // Props
