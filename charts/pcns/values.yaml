@@ -215,7 +215,7 @@ database:
   # -- Overrides the database name from the secret; used for per-PR databases
   name: ~
   # -- CrunchyDB image containing psql and pg_isready for the permissions Job
-  bootstrapImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres:ubi9-18.1-2547
+  bootstrapImage: artifacts.developer.gov.bc.ca:8080/bcgov-docker-local/crunchy-postgres:ubi9-18.1-20260910
   # -- CrunchyDB PostgresCluster name
   clusterName: crunchy
   # -- Service used by application runtime connections

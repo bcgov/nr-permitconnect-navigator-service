@@ -1,6 +1,6 @@
 # crunchydb
 
-![Version: 0.0.4](https://img.shields.io/badge/Version-0.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18](https://img.shields.io/badge/AppVersion-18-informational?style=flat-square)
+![Version: 0.0.5](https://img.shields.io/badge/Version-0.0.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18](https://img.shields.io/badge/AppVersion-18-informational?style=flat-square)
 
 Standalone Crunchy PostgreSQL cluster for PCNS (wraps bcgov/crunchy-postgres)
 
@@ -23,7 +23,7 @@ Standalone Crunchy PostgreSQL cluster for PCNS (wraps bcgov/crunchy-postgres)
 | crunchy-postgres-tools.networking.podNetworkPolicy.enabled | bool | `false` | Keep disabled: subchart renders an unconstrained permit-all policy. |
 | crunchy-postgres-tools.networking.route.enabled | bool | `false` | PCNS chart owns its OpenShift route. |
 | crunchy-postgres-tools.provisioner.serviceAccount.enabled | bool | `false` | Service accounts are namespace/CI infra you don't manage from this release. |
-| crunchy-postgres.crunchyImage | string | `"artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres:ubi9-18.1-2547"` | CrunchyDB image used for PostgreSQL instance pods. |
+| crunchy-postgres.crunchyImage | string | `"artifacts.developer.gov.bc.ca:8080/bcgov-docker-local/crunchy-postgres:ubi9-18.1-20260910"` | CrunchyDB image used for PostgreSQL instance pods. |
 | crunchy-postgres.dataSource.enabled | bool | `false` | Restore-from-backup source; enable only for a DR/prod cutover. |
 | crunchy-postgres.fullnameOverride | string | `"crunchy"` | Sets the cluster name; charts/pcns hardcodes crunchy-primary/-pgbouncer/-pguser-crunchy to match. |
 | crunchy-postgres.imagePullPolicy | string | `"IfNotPresent"` | Image pull policy for database containers. |
