@@ -3,6 +3,32 @@ entries:
   nr-permitconnect-navigator-service:
   - apiVersion: v2
     appVersion: 0.11.0
+    created: "2026-10-28T21:23:01.544409349Z"
+    description: PermitConnect Navigator Service
+    digest: 53cfe7ee39aee82dcd441aea067623d6317d1b9da89e2b14a012599684fd1e93
+    home: https://bcgov.github.io/nr-permitconnect-navigator-service
+    keywords:
+    - nodejs
+    - typescript
+    - docker
+    - microservice
+    - access-control
+    - object-storage
+    - vue
+    kubeVersion: '>= 1.13.0'
+    maintainers:
+    - email: NRM.PermittingAndData@gov.bc.ca
+      name: NRM Permitting and Data Solutions
+      url: https://github.com/bcgov/nr-permitconnect-navigator-service
+    name: nr-permitconnect-navigator-service
+    sources:
+    - https://github.com/bcgov/nr-permitconnect-navigator-service
+    type: application
+    urls:
+    - https://github.com/bcgov/nr-permitconnect-navigator-service/releases/download/nr-permitconnect-navigator-service-0.1.7/nr-permitconnect-navigator-service-0.1.7.tgz
+    version: 0.1.7
+  - apiVersion: v2
+    appVersion: 0.11.0
     created: "2026-10-19T18:15:48.999362671Z"
     description: PermitConnect Navigator Service
     digest: c9a19e905da17b74cc56c0de98846514fa1dc6c4737dc830ee296d0c844347c9
@@ -1323,4 +1349,4 @@ entries:
     urls:
     - https://github.com/bcgov/nr-permitconnect-navigator-service/releases/download/nr-permitconnect-navigator-service-0.0.1/nr-permitconnect-navigator-service-0.0.1.tgz
     version: 0.0.1
-generated: "2026-10-19T18:15:48.999830254Z"
+generated: "2026-10-28T21:23:01.544624118Z"
