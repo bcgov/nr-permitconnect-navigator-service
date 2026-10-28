@@ -29,8 +29,8 @@ crunchy-postgres:
       # Secret is created elsewhere so helm upgrade/uninstall can't blank or delete the credentials.
       createS3Secret: false
       s3Secret: s3-pgbackrest
-      s3Path: /padprd
-      bucket: pcnspr
+      s3Path: /crunchy
+      bucket: padprd
       endpoint: https://nrs.objectstore.gov.bc.ca
       region: ca-central-1
       fullSchedule: "0 9 * * *"
