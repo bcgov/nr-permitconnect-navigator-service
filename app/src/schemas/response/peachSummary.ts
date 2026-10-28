@@ -14,7 +14,11 @@ export const peachSummarySchema = z
     submittedTime: z.string().nullable(),
     decisionDate: z.string().nullable(),
     decisionTime: z.string().nullable(),
-    statusLastChanged: z.string(),
-    statusLastChangedTime: z.string().nullable()
+    statusLastChanged: z.string().nullable(),
+    statusLastChangedTime: z.string().nullable(),
+    consultationStartDate: z.string().nullable(),
+    consultationStartTime: z.string().nullable(),
+    consultationEndDate: z.string().nullable(),
+    consultationEndTime: z.string().nullable()
   })
   .openapi('PeachSummary');
