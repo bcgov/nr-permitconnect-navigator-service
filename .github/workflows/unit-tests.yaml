@@ -65,7 +65,7 @@ jobs:
       fail-fast: true
       matrix:
         node-version:
-          - "24.x"
+          - "26.x"
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -104,14 +104,14 @@ jobs:
         env:
           CI: true
       - name: Save Coverage Results
-        if: matrix.node-version == '24.x'
+        if: matrix.node-version == '26.x'
         uses: actions/upload-artifact@v7
         with:
           name: coverage-app
           path: ${{ github.workspace }}/app/coverage
           retention-days: 1
       - name: Monitor Coverage
-        if: "matrix.node-version == '24.x' &&  github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork"
+        if: "matrix.node-version == '26.x' &&  github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork"
         uses: slavcodev/coverage-monitor-action@a7fb808726aa317c2df392b585bb7b7700587df5 # 1.11.0
         with:
           comment_mode: update
@@ -144,7 +144,7 @@ jobs:
       fail-fast: true
       matrix:
         node-version:
-          - "24.x"
+          - "26.x"
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -176,14 +176,14 @@ jobs:
         env:
           CI: true
       - name: Save Coverage Results
-        if: matrix.node-version == '24.x'
+        if: matrix.node-version == '26.x'
         uses: actions/upload-artifact@v7
         with:
           name: coverage-frontend
           path: ${{ github.workspace }}/frontend/coverage
           retention-days: 1
       - name: Monitor Coverage
-        if: "matrix.node-version == '24.x' &&  github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork"
+        if: "matrix.node-version == '26.x' &&  github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork"
         uses: slavcodev/coverage-monitor-action@a7fb808726aa317c2df392b585bb7b7700587df5 # 1.11.0
         with:
           comment_mode: update

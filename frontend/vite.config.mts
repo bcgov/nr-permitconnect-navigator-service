@@ -31,6 +31,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
+    // Node 25+ native sessionStorage shadows happy-dom's and can't be spied on
+    execArgv: ['--no-webstorage'],
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx,vue}'],
     exclude: [...configDefaults.exclude, 'packages/template/*'],
     coverage: {

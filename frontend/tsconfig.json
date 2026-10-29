@@ -1,6 +1,6 @@
 {
   "extends": [
-    "@tsconfig/node24/tsconfig.json",
+    "@tsconfig/node26/tsconfig.json",
     "@vue/tsconfig/tsconfig.dom.json"
   ],
   "compilerOptions": {
@@ -13,12 +13,10 @@
       // sourced from @vue/tsconfig/tsconfig.dom.json
       "DOM",
       "DOM.Iterable",
-      // sourced from @tsconfig/node24/tsconfig.json
-      "es2024",
-      "ESNext.Array",
+      // sourced from @tsconfig/node26/tsconfig.json
+      "es2025",
       "ESNext.Collection",
-      "ESNext.Iterator",
-      "ESNext.Promise"
+      "ESNext.Temporal"
     ],
     "paths": {
       "@/*": [

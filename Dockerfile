@@ -11,7 +11,7 @@ ARG PRISMA_DUMMY_DATABASE_URL="postgresql://user:password@localhost:5432/db"
 #
 # Stage 1: Build the frontend
 #
-FROM docker.io/node:24.22.1-alpine AS frontend-build
+FROM docker.io/node:26.13.0-alpine AS frontend-build
 
 ARG APP_ROOT
 ENV NPM_CONFIG_FUND=false NPM_CONFIG_UPDATE_NOTIFIER=false
@@ -23,7 +23,7 @@ RUN npm ci && npm run build
 #
 # Stage 2: Production Dependencies & Minimal Identity
 #
-FROM docker.io/node:24.22.1-alpine AS prod-deps
+FROM docker.io/node:26.13.0-alpine AS prod-deps
 
 ARG APP_ROOT APP_UID
 ARG PRISMA_DUMMY_DATABASE_URL
@@ -68,6 +68,7 @@ COPY --from=prod-deps /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # Copy required Alpine musl shared libraries and Node.js binary
 COPY --from=prod-deps /lib/ld-musl-*.so.1 /lib/
+COPY --from=prod-deps /usr/lib/libatomic.so.* /usr/lib/
 COPY --from=prod-deps /usr/lib/libgcc_s.so.* /usr/lib/
 COPY --from=prod-deps /usr/lib/libstdc++.so.* /usr/lib/
 COPY --from=prod-deps /usr/local/bin/node /usr/local/bin/node
