@@ -8,7 +8,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <Card>
+  <Card class="pt-4">
     <template #content>
       <span class="flex font-bold">
         <i18n-t

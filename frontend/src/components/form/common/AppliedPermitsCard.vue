@@ -39,7 +39,10 @@ onMounted(() => {
 
 <template>
   <div ref="appliedPermitsContainer">
-    <Card class="no-shadow">
+    <Card
+      class="no-shadow"
+      :class="{ 'pt-4': !header }"
+    >
       <template
         v-if="header"
         #title
@@ -94,7 +97,7 @@ onMounted(() => {
               <div class="flex items-center ml-2 mb-4">
                 <Button
                   v-if="getEditable"
-                  class="p-button-lg p-button-text p-button-danger p-0"
+                  class="p-button-lg p-button-text p-button-danger"
                   :aria-label="t('ui.actions.delete')"
                   @click="remove(idx)"
                 >
@@ -105,7 +108,7 @@ onMounted(() => {
           </div>
           <Button
             v-if="getEditable"
-            class="w-full flex justify-center font-bold h-10"
+            class="w-full justify-center font-bold h-10"
             outlined
             @click="
               push({

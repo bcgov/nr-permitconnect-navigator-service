@@ -43,7 +43,11 @@ function initializeApp(): void {
       options: {
         prefix: 'p',
         darkModeSelector: 'dark',
-        cssLayer: false
+        // PrimeVue prepends this to <head>, so it must hold the full order or primeui lands below Tailwind base
+        cssLayer: {
+          name: 'primeui',
+          order: 'properties, theme, base, components, primeui, primeui-overrides, utilities, keyframes'
+        }
       }
     }
   });

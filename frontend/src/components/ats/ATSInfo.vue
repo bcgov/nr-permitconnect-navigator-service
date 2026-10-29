@@ -224,7 +224,7 @@ function onNewATSEnquiry() {
 </template>
 
 <style scoped lang="scss">
-.ats-button {
+.ats-button:not(:enabled:hover) {
   background-color: white;
 }
 </style>

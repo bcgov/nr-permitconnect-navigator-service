@@ -120,7 +120,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
           </fieldset>
           <InputText
             v-if="values.housing?.financiallySupportedIndigenous === BasicResponse.YES"
-            class="w-1/2 pl-0"
+            class="w-1/2"
             name="housing.indigenousDescription"
             :disabled="!getEditable"
             :placeholder="t('projectIntakeForm.financiallySupportedCard.indigenousHousingProviderName')"
@@ -148,7 +148,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
           </fieldset>
           <InputText
             v-if="values.housing?.financiallySupportedNonProfit === BasicResponse.YES"
-            class="w-1/2 pl-0"
+            class="w-1/2"
             name="housing.nonProfitDescription"
             :disabled="!getEditable"
             :placeholder="t('projectIntakeForm.financiallySupportedCard.nonProfitHousingSocietyName')"
@@ -176,7 +176,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
           </fieldset>
           <InputText
             v-if="values.housing?.financiallySupportedHousingCoop === BasicResponse.YES"
-            class="w-1/2 pl-0"
+            class="w-1/2"
             name="housing.housingCoopDescription"
             :disabled="!getEditable"
             :placeholder="t('projectIntakeForm.financiallySupportedCard.housingCoopName')"

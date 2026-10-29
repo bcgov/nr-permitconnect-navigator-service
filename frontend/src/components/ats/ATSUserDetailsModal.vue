@@ -116,11 +116,11 @@ watch(visible, () => {
       <Column
         field="action"
         :header="t('i.ats.atsUserDetailsModal.action')"
-        class="text-center header-center"
+        class="header-center"
       >
         <template #body="{ data }">
           <Button
-            class="p-button-lg p-button-text p-button-danger p-0"
+            class="p-button-lg p-button-text p-button-danger"
             :aria-label="t('i.ats.atsUserDetailsModal.deleteUser')"
             :disabled="disabled || isRelatedEnquiry"
             @click="users = users.filter((atsUser) => atsUser.clientId !== data.clientId)"

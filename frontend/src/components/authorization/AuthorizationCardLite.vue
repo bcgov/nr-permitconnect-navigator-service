@@ -29,9 +29,7 @@ const isTerminalState = computed(() => {
 
 <template>
   <!-- eslint-disable max-len -->
-  <Card
-    class="px-0 py-4 border-[var(--p-greyscale-100)] shadow-[0.25rem_0.25rem_0.25rem_0rem_var(--p-greyscale-50)] hover:bg-[var(--p-bcblue-50)]"
-  >
+  <Card class="px-0 py-4 border-[var(--p-greyscale-100)]">
     <!-- eslint-enable max-len -->
     <template #content>
       <div class="flex justify-between items-center">
