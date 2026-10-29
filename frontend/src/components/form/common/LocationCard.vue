@@ -203,7 +203,7 @@ watchEffect(() => {
           v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
           class="col-span-12"
         >
-          <Card class="no-shadow">
+          <Card class="no-shadow pt-4">
             <template #content>
               <div class="grid grid-cols-12 gap-4 nested-grid">
                 <EditableSelect
@@ -271,7 +271,7 @@ watchEffect(() => {
           v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
           class="col-span-12"
         >
-          <Card class="no-shadow">
+          <Card class="no-shadow pt-4">
             <template #content>
               <div class="grid grid-cols-12 gap-4 nested-grid">
                 <InputNumber
@@ -333,7 +333,7 @@ watchEffect(() => {
           @map:polygon-updated="onPolygonUpdate"
           @map:pin-updated="onPinUpdate"
         />
-        <Card class="no-shadow">
+        <Card class="no-shadow pt-4">
           <template #content>
             <div class="grid grid-cols-12 gap-4 nested-grid">
               <InputText

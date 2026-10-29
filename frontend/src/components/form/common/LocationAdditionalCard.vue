@@ -55,7 +55,7 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
         <AccordionPanel value="0">
           <AccordionHeader>{{ t('locationAdditionalCard.accordion.headers.parcel') }}</AccordionHeader>
           <AccordionContent>
-            <Card class="no-shadow">
+            <Card class="no-shadow pt-4">
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
                   <InputText
@@ -82,7 +82,7 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
         <AccordionPanel value="0">
           <AccordionHeader>{{ t('locationAdditionalCard.accordion.headers.geomark') }}</AccordionHeader>
           <AccordionContent>
-            <Card class="no-shadow">
+            <Card class="no-shadow pt-4">
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
                   <InputText

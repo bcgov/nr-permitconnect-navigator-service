@@ -53,7 +53,7 @@ const toggle = (event: Event) => {
       id="menu-toggle"
       type="button"
       text
-      class="font-bold text-lg"
+      class="font-bold"
       aria-haspopup="true"
       aria-controls="overlay-menu"
       @click="toggle"

@@ -372,7 +372,7 @@ onBeforeMount(async () => {
 
     <div class="grid grid-cols-[4fr_1fr] gap-x-9 mt-4">
       <div class="flex flex-col gap-y-9">
-        <div class="p-panel flex justify-between items-start px-6 py-4">
+        <div class="p-panel px-6 py-4">
           <h2 class="section-header my-0">{{ values.contact.firstName }} {{ values.contact.lastName }}</h2>
           <div class="flex flex-col">
             <span>{{ t('enquiryForm.submissionDate') }}</span>

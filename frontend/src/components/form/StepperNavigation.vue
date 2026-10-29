@@ -52,7 +52,6 @@ function handlePrevClick() {
     <Button
       :aria-label="t('stepperNavigation.previous')"
       :class="prevDisabled ? 'button-hidden' : 'button-visible'"
-      class="px-6 py-1"
       outlined
       icon="pi pi-arrow-left"
       icon-class="text-xl"
@@ -63,7 +62,6 @@ function handlePrevClick() {
     <Button
       :aria-label="t('stepperNavigation.next')"
       :class="nextDisabled ? 'button-hidden' : 'button-visible'"
-      class="px-6 py-1"
       outlined
       icon="pi pi-arrow-right"
       icon-class="text-xl"

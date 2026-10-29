@@ -68,7 +68,7 @@ watchEffect(() => {
         >
           <DocumentCard
             :document="document"
-            class="cursor-pointer hover:shadow-[0_0_11px_rgba(33,33,33,0.2)]"
+            class="cursor-pointer"
             :delete-button="false"
             :selectable="true"
             :selected="selectedFiles.includes(document)"

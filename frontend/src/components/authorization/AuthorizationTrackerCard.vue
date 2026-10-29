@@ -206,7 +206,6 @@ const timelineDescription = computed(() => (iconClass: string) => {
       <div class="application-progress-block">
         <div class="status-timeline">
           <Timeline
-            class="pl-4"
             :value="getTimelineStage(permit.state, permit.stage)"
             layout="horizontal"
           >

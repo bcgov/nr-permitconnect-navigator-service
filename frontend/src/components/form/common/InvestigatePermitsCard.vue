@@ -57,7 +57,7 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
         v-slot="{ fields, push, remove }"
         name="permits.investigatePermits"
       >
-        <Card class="no-shadow">
+        <Card class="no-shadow pt-4">
           <template #content>
             <div ref="investigatePermitsContainer">
               <div
@@ -81,7 +81,7 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
                     <div class="flex items-center ml-2 mb-6">
                       <Button
                         v-if="getEditable"
-                        class="p-button-lg p-button-text p-button-danger p-0"
+                        class="p-button-lg p-button-text p-button-danger"
                         :aria-label="t('ui.actions.delete')"
                         @click="remove(idx)"
                       >
@@ -93,7 +93,7 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
               </div>
               <Button
                 v-if="getEditable"
-                class="w-full flex justify-center font-bold h-10"
+                class="w-full justify-center font-bold h-10"
                 outlined
                 @click="
                   push({ permitTypeId: undefined });

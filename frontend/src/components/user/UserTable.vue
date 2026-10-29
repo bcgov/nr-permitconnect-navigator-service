@@ -95,7 +95,7 @@ function getStatusClass(data: UserAccessRequest) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-0"
+          class="p-button-lg p-button-text"
           aria-label="Manage user"
           :disabled="data.accessRequest?.status === AccessRequestStatus.PENDING"
           @click="
@@ -119,7 +119,7 @@ function getStatusClass(data: UserAccessRequest) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0"
+          class="p-button-lg p-button-text p-button-danger"
           aria-label="Revoke user"
           :disabled="data.accessRequest?.status === AccessRequestStatus.PENDING"
           @click="
@@ -143,7 +143,7 @@ function getStatusClass(data: UserAccessRequest) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-0"
+          class="p-button-lg p-button-text"
           aria-label="Approve request"
           @click="
             () => {
@@ -166,7 +166,7 @@ function getStatusClass(data: UserAccessRequest) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0"
+          class="p-button-lg p-button-text p-button-danger"
           aria-label="Deny request"
           @click="
             () => {

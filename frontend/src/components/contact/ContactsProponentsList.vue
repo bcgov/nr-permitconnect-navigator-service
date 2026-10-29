@@ -221,7 +221,7 @@ onBeforeMount(() => {
       <template #body="{ data }">
         <Button
           aria-label="View contact"
-          class="p-button-lg p-button-text p-0"
+          class="p-button-lg p-button-text"
           @click="
             () => {
               router.push({
@@ -239,7 +239,7 @@ onBeforeMount(() => {
         >
           <Button
             aria-label="Edit contact"
-            class="p-button-lg p-button-text p-0"
+            class="p-button-lg p-button-text"
             :disabled="data.userId"
             @click="
               () => {
@@ -254,7 +254,7 @@ onBeforeMount(() => {
         <span v-else>
           <Button
             aria-label="Edit contact"
-            class="p-button-lg p-button-text p-0"
+            class="p-button-lg p-button-text"
             :disabled="data.userId"
             @click="
               () => {
@@ -268,7 +268,7 @@ onBeforeMount(() => {
         </span>
         <Button
           aria-label="Delete contact"
-          class="p-button-lg p-button-text p-button-danger p-0"
+          class="p-button-lg p-button-text p-button-danger"
           :disabled="data.userId || historyMap[data.contactId]"
           @click="onDelete(data)"
         >
