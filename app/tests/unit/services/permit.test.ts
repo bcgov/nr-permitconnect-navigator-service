@@ -1,6 +1,7 @@
 import { mockReset } from 'vitest-mock-extended';
 
 import {
+  TEST_CONTACT_1,
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
   TEST_PERMIT_1,
@@ -27,6 +28,7 @@ import type { CurrentAuthorization, IntakePermitRequest } from '#types';
 vi.mock('config');
 
 const prepareNotificationEmailsSpy = vi.spyOn(permitDomain, 'prepareNotificationEmails');
+const prepareIntakeNotificationEmails = vi.spyOn(permitDomain, 'prepareIntakeNotificationEmails');
 const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
 const findPriorityPermitTrackingSpy = vi.spyOn(peachDomain, 'findPriorityPermitTracking');
 const getPiesRecordSpy = vi.spyOn(externalPeach, 'getPiesRecord');
@@ -72,6 +74,10 @@ describe('permit service', () => {
   });
 
   describe('intakePermitService', () => {
+    beforeEach(() => {
+      mockRepos.contact.findFirst.mockResolvedValue(TEST_CONTACT_1 as never);
+    });
+
     it('creates a permit for each applied permit and tracking only for those with a trackingId', async () => {
       const intakeData: IntakePermitRequest[] = [
         {
@@ -88,6 +94,7 @@ describe('permit service', () => {
 
       mockRepos.permit.upsert.mockResolvedValue({} as never);
       upsertPermitTrackingSpy.mockResolvedValueOnce({} as never);
+      prepareIntakeNotificationEmails.mockResolvedValueOnce([]);
       mockRepos.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1] as never);
 
       const response = await permitService.intakePermitService(
@@ -129,6 +136,7 @@ describe('permit service', () => {
 
       mockRepos.permit.upsert.mockResolvedValueOnce({} as never);
       mockRepos.permit.findMany.mockResolvedValueOnce([] as never);
+      prepareIntakeNotificationEmails.mockResolvedValueOnce([]);
 
       await permitService.intakePermitService(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, intakeData);
 
@@ -174,6 +182,7 @@ describe('permit service', () => {
         mockRepos.activityContact.findMany.mockResolvedValueOnce([{ activityId: TEST_PERMIT_1.activityId }] as never);
         mockRepos.permit.upsert.mockResolvedValueOnce({} as never);
         mockRepos.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1] as never);
+        prepareIntakeNotificationEmails.mockResolvedValueOnce([]);
 
         await permitService.intakePermitService(proponentAuthContext, TEST_CURRENT_CONTEXT, intakeData);
 
