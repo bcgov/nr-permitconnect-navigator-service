@@ -4,7 +4,7 @@ import { PermitStage, PermitState } from '#src/db/codes/enums';
 import { unitOfWork } from '#src/db/unitOfWork';
 import { activityContactScope } from '#src/db/utils/utils';
 import { findPriorityPermitTracking } from '#src/domains/peach';
-import { buildNewPermitRecord, prepareNotificationEmails } from '#src/domains/permit';
+import { buildNewPermitRecord, prepareNotificationEmails, prepareIntakeNotificationEmails } from '#src/domains/permit';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { email } from '#src/external/ches';
 import { getPiesRecord } from '#src/external/peach';
@@ -95,54 +95,86 @@ export const intakePermitService = async (
   currentContext: CurrentContext,
   data: IntakePermitInput[]
 ): Promise<Permit[]> => {
-  return await unitOfWork.execute(async ({ activityContact, permit, permitTracking }) => {
-    // Validate the calling user is a delegate for every activity in the permit request list
-    // if the calling user has `scope:self`
-    if (currentAuthorization?.attributes.includes('scope:self')) {
-      const userActivities = (
-        await activityContact.findMany({
-          where: {
-            contact: { user: { userId: currentContext.userId! } }
-          },
-          select: { activityId: true }
-        })
-      ).map((x) => x.activityId);
+  const { permits, emails } = await unitOfWork.execute(
+    async ({
+      activityContact,
+      contact,
+      permit,
+      permitTracking,
+      electrificationProject,
+      generalProject,
+      housingProject,
+      permitType,
+      user
+    }) => {
+      // Validate the calling user is a delegate for every activity in the permit request list
+      // if the calling user has `scope:self`
+      if (currentAuthorization?.attributes.includes('scope:self')) {
+        const userActivities = (
+          await activityContact.findMany({
+            where: {
+              contact: { user: { userId: currentContext.userId! } }
+            },
+            select: { activityId: true }
+          })
+        ).map((x) => x.activityId);
 
-      const permitActivities = data.map((x: IntakePermitInput) => x.activityId);
+        const permitActivities = data.map((x: IntakePermitInput) => x.activityId);
 
-      if (!permitActivities.every((activityId) => userActivities.includes(activityId))) {
-        throw new Problem(403, {
-          detail: 'User is not a delegate for one or more activities in the permit request list'
-        });
+        if (!permitActivities.every((activityId) => userActivities.includes(activityId))) {
+          throw new Problem(403, {
+            detail: 'User is not a delegate for one or more activities in the permit request list'
+          });
+        }
       }
-    }
 
-    // Build new permit and tracking ID arrays
-    const appliedPermitTrackers: PermitTrackingUpsertInput[] = [];
+      // Build new permit and tracking ID arrays
+      const appliedPermitTrackers: PermitTrackingUpsertInput[] = [];
 
-    const appliedPermits = data.map((x: IntakePermitInput) => {
-      const permitId = randomUUID();
+      const appliedPermits = data.map((x: IntakePermitInput) => {
+        const permitId = randomUUID();
 
-      // Add each tracker for this permit with the proper permitId
-      if (x.trackingId) appliedPermitTrackers.push({ trackingId: x.trackingId, permitId } as PermitTrackingUpsertInput);
+        // Add each tracker for this permit with the proper permitId
+        if (x.trackingId)
+          appliedPermitTrackers.push({ trackingId: x.trackingId, permitId } as PermitTrackingUpsertInput);
 
-      return buildNewPermitRecord({
-        permitId,
-        permitTypeId: x.permitTypeId,
-        activityId: x.activityId,
-        stage: PermitStage.APPLICATION_SUBMISSION,
-        needed: PermitNeeded.YES,
-        state: PermitState.IN_PROGRESS,
-        submittedDate: x.submittedDate
+        return buildNewPermitRecord({
+          permitId,
+          permitTypeId: x.permitTypeId,
+          activityId: x.activityId,
+          stage: PermitStage.APPLICATION_SUBMISSION,
+          needed: PermitNeeded.YES,
+          state: PermitState.IN_PROGRESS,
+          submittedDate: x.submittedDate
+        });
       });
-    });
 
-    // Create each permit and tracking IDs
-    await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
-    await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
+      // Create each permit and tracking IDs
+      const addedPermits = await Promise.all(
+        appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p))
+      );
+      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
 
-    return permit.findMany({ where: { permitId: { in: appliedPermits.map((x) => x.permitId) } } });
+      const emails = await prepareIntakeNotificationEmails(
+        { contact, electrificationProject, generalProject, housingProject, permitType, user },
+        currentContext,
+        addedPermits
+      );
+
+      const permits = await permit.findMany({ where: { permitId: { in: appliedPermits.map((x) => x.permitId) } } });
+
+      return { permits, emails };
+    }
+  );
+
+  const emailResults = await Promise.allSettled(emails.map((emailData) => email(emailData)));
+  emailResults.forEach((emailResult) => {
+    if (emailResult.status === 'rejected') {
+      log.warn('Failed to send permit intake notification ', emailResult.reason);
+    }
   });
+
+  return permits;
 };
 
 /**
