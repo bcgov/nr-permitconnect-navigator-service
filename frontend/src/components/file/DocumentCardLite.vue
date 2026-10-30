@@ -39,7 +39,7 @@ function onClick() {
 
 <template>
   <Card
-    class="pb-1 text-center rounded-xl"
+    class="pb-1 text-center"
     :class="{ 'shadow-[0_0_11px_var(--p-primary-950)]': isSelected }"
     @click="onClick"
   >

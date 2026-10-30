@@ -45,7 +45,7 @@ const { t } = useI18n();
 </template>
 
 <style scoped lang="scss">
-.p-button-outlined {
+.p-button-outlined:not(:enabled:hover) {
   background-color: white;
 }
 :deep(.p-message-text) {

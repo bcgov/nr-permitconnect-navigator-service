@@ -196,7 +196,7 @@ watch(
           <div class="flex items-center">
             <div>
               <Button
-                class="p-button-sm p-button-outlined p-button-danger p-1 mr-1"
+                class="p-button-sm p-button-outlined p-button-danger mr-1"
                 @click="onFileRemove(document)"
               >
                 <font-awesome-icon icon="fa-solid fa-times" />

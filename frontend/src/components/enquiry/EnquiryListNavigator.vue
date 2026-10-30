@@ -338,12 +338,12 @@ function updateQueryParams() {
     <Column
       field="action"
       header="Action"
-      class="text-center header-center"
+      class="header-center"
       style="min-width: 150px"
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0"
+          class="p-button-lg p-button-text p-button-danger"
           aria-label="Delete enquiry"
           :disabled="!useAuthZStore().can(appStore.getInitiative, Resource.ENQUIRY, Action.DELETE)"
           @click="

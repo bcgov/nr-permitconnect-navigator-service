@@ -111,7 +111,7 @@ useFormErrorWatcher(formRef, 'RegisteredBusinessCard', tab);
           </div>
           <InputText
             v-else-if="values.basic.isDevelopedInBc === BasicResponse.NO"
-            class="col-span-6 pl-0"
+            class="col-span-6"
             name="basic.registeredName"
             :placeholder="t('registeredBusinessCard.placeholders.notInBcRegisteredName')"
             :bold="false"

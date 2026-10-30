@@ -23,9 +23,7 @@ const { codeDisplay } = useCodeStore();
 
 <template>
   <!-- eslint-disable max-len -->
-  <Card
-    class="border-[var(--p-greyscale-100)] shadow-[0.25rem_0.25rem_0.25rem_0rem_var(--p-greyscale-50)] hover:bg-[var(--p-bcblue-50)] mb-4"
-  >
+  <Card class="border-[var(--p-greyscale-100)] mb-4">
     <!-- eslint-enable max-len -->
     <template #content>
       <div class="flex justify-between">

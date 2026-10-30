@@ -116,7 +116,7 @@ function isManageable(activityContact: ActivityContact, action: TeamAction) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-0"
+          class="p-button-lg p-button-text"
           :aria-label="t('projectTeamTable.headerManage')"
           :disabled="!isManageable(data, TeamAction.MANAGE)"
           @click="emit('projectTeamTable:manageUser', data)"
@@ -134,7 +134,7 @@ function isManageable(activityContact: ActivityContact, action: TeamAction) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0"
+          class="p-button-lg p-button-text p-button-danger"
           :aria-label="t('projectTeamTable.headerRevoke')"
           :disabled="!isManageable(data, TeamAction.REVOKE)"
           @click="emit('projectTeamTable:revokeUser', data)"
