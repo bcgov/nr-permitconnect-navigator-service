@@ -17,7 +17,7 @@ product_external_dependencies:
     - Common-Hosted-Email-Service
 product_information:
   api_specifications:
-    - https://pcns-prod-master.apps.silver.devops.gov.bc.ca/api/v1/docs
+    - https://pcns-prod-main.apps.silver.devops.gov.bc.ca/api/v1/docs
   business_capabilities_custom: Case Management
   business_capabilities_standard:
     - Manage Object Storage Objects
@@ -30,7 +30,7 @@ product_information:
   product_name: PermitConnect Navigator Service
   product_status: maturing
   product_urls:
-    - https://pcns-prod-master.apps.silver.devops.gov.bc.ca/
+    - https://pcns-prod-main.apps.silver.devops.gov.bc.ca/
   program_area: Permitting Solutions Branch
 product_technology_information:
   backend_frameworks:

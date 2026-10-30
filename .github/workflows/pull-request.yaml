@@ -3,7 +3,7 @@ name: Pull Request
 on:
   pull_request:
     branches:
-      - master
+      - main
       - "feature/**"
       - "release/**"
     types:
@@ -172,7 +172,7 @@ jobs:
           set -euo pipefail
 
           POD=$(oc get pod -n "$NS" -o name --no-headers \
-            -l postgres-operator.crunchydata.com/cluster=crunchy,postgres-operator.crunchydata.com/role=master | head -1)
+            -l postgres-operator.crunchydata.com/cluster=crunchy,postgres-operator.crunchydata.com/role=main | head -1)
 
           if [ -z "$POD" ]; then
             echo "::warning::No crunchy primary found in $NS; leaving database $DB in place."

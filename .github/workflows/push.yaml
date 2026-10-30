@@ -3,7 +3,7 @@ name: Push
 on:
   push:
     branches:
-      - master
+      - main
     tags:
       - v*.*.*
 
@@ -35,7 +35,7 @@ jobs:
   deploy-dev:
     name: Deploy to Dev
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deployer.yaml
     permissions:
       # Deployer checks out the repository
@@ -45,7 +45,7 @@ jobs:
       acronym: ${{ vars.ACRONYM }}
       environment: dev
       image_tag: ${{ needs.build.outputs.image_tag }}
-      job_name: master
+      job_name: main
       namespace_prefix: ${{ vars.NAMESPACE_PREFIX }}
       namespace_environment: dev
     secrets:
@@ -66,7 +66,7 @@ jobs:
       acronym: ${{ vars.ACRONYM }}
       environment: test
       image_tag: ${{ needs.build.outputs.image_tag }}
-      job_name: master
+      job_name: main
       namespace_prefix: ${{ vars.NAMESPACE_PREFIX }}
       namespace_environment: test
     secrets:
@@ -88,7 +88,7 @@ jobs:
       acronym: ${{ vars.ACRONYM }}
       environment: prod
       image_tag: ${{ needs.build.outputs.image_tag }}
-      job_name: master
+      job_name: main
       namespace_prefix: ${{ vars.NAMESPACE_PREFIX }}
       namespace_environment: prod
     secrets:
