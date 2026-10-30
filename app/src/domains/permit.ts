@@ -7,15 +7,25 @@ import { PermitStage, PermitState } from '#src/db/codes/enums';
 import { formatDateOnly, toTitleCase } from '#src/utils/index';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
+import Problem from '#src/utils/problem';
 import {
   initialPeachPermitUpdateTemplate,
+  intakePermitNotificationTemplate,
   navPermitStatusUpdateTemplate,
   permitNoteUpdateTemplate
 } from '#src/utils/templates';
 import { state } from '../../state.ts';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type { Email, Permit, PermitCreateInput, PermitUpdateEmailParams, ProjectRepositoryKeys } from '#types';
+import type {
+  Contact,
+  CurrentContext,
+  Email,
+  Permit,
+  PermitCreateInput,
+  PermitUpdateEmailParams,
+  ProjectRepositoryKeys
+} from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 /**
@@ -221,4 +231,136 @@ export const prepareNotificationEmails = async (
   return await Promise.all(
     permitUpdateEmails.map((emailJob) => buildPermitUpdateEmail({ permitType: repositories.permitType }, emailJob))
   );
+};
+
+/**
+ * Builds the email content for an intake notification listing newly submitted permits, does not send it
+ * @param repositories - The required repositories
+ * @param permits The submitted permits to list, all belonging to the same activity
+ * @param contact Contact record of the proponent who submitted the permits
+ * @returns The email ready to be sent
+ */
+async function buildIntakeNotificationEmail(
+  repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitType' | 'user'>,
+  permits: Permit[],
+  contact: Contact
+): Promise<Email> {
+  const firstPermit = permits[0];
+  if (!firstPermit) {
+    throw new Error('Cannot send intake permit notification without permits');
+  }
+  if (!firstPermit.createdAt) {
+    throw new Error(`Permit ${firstPermit.permitId} is missing its creation date`);
+  }
+
+  const project = await getProjectByActivityId(
+    {
+      electrificationProject: repositories.electrificationProject,
+      generalProject: repositories.generalProject,
+      housingProject: repositories.housingProject
+    },
+    firstPermit.activityId
+  );
+
+  const initiative = (project.activity!.initiative!.code as Initiative).toLowerCase();
+
+  const navigatorId = project.assignedUserId;
+
+  // Add navigator update email to email jobs
+  let dearName = 'Navigator team';
+  const pcnsEmail: string = config.get('server.pcns.navEmail');
+  let navigatorEmail: string | undefined;
+  if (navigatorId) {
+    const navigator = await repositories.user.findById(navigatorId);
+    if (navigator) {
+      dearName = `${navigator.firstName} ${navigator.lastName}`;
+      navigatorEmail = navigator.email!;
+    }
+  }
+
+  const appUrl = config.get<string>('server.pcns.appUrl');
+  const permitTypeIds = Array.from(new Set(permits.map((permit) => permit.permitTypeId)));
+  const permitTypes = await repositories.permitType.findMany({
+    where: { permitTypeId: { in: permitTypeIds } }
+  });
+  const permitTypeById = new Map(permitTypes.map((permitType) => [permitType.permitTypeId, permitType]));
+
+  const permitLinks = permits.map((permit) => {
+    const permitType = permitTypeById.get(permit.permitTypeId);
+    if (!permitType) {
+      throw new Error(`Permit type ${permit.permitTypeId} not found`);
+    }
+
+    const href = `${appUrl}/i/${initiative}/project/${project.projectId}/authorization/${permit.permitId}`;
+    const label = `${permitType.businessDomain}: ${permitType.name}`;
+    return { href, label };
+  });
+
+  const submittedPermits = permitLinks.map(({ href, label }) => `<a href="${href}">${label}</a>`).join(', ');
+
+  const emailBody = intakePermitNotificationTemplate({
+    dearName,
+    projectName: project.projectName,
+    activityId: project.activityId,
+    proponentName: contact.firstName,
+    relationshipToProject: contact.contactApplicantRelationship,
+    newPermitsCount: permits.length.toString(),
+    projectId: project.projectId,
+    submittedPermits: submittedPermits,
+    submittedDate: formatDateOnly(firstPermit.createdAt.toLocaleDateString('en-CA', { timeZone: 'America/Vancouver' }))
+  });
+
+  const appEnv = config.get('server.env');
+  let subject = `New ${toTitleCase(initiative)} permits have been submitted`;
+  if (appEnv === 'dev' || appEnv === 'test') subject = `TEST -- ${subject} -- TEST`;
+
+  const emailData = {
+    to: [navigatorEmail ?? pcnsEmail],
+    from: pcnsEmail,
+    subject: subject,
+    bodyType: 'html',
+    body: emailBody
+  };
+
+  return emailData;
+}
+
+/**
+ * Builds one intake notification email per activity for the submitted permits, does not send them
+ * @param repositories - The required repositories
+ * @param currentContext The context of the proponent submitting the permits
+ * @param permits The submitted permits, grouped into one email per activity
+ * @returns The emails ready to be sent
+ * @throws {Problem} 403 if the current user does not have an associated contact record
+ */
+export const prepareIntakeNotificationEmails = async (
+  repositories: Pick<Repositories, ProjectRepositoryKeys | 'contact' | 'permitType' | 'user'>,
+  currentContext: CurrentContext,
+  permits: Permit[]
+): Promise<Email[]> => {
+  const contactRecord = await repositories.contact.findFirst({
+    where: {
+      userId: currentContext.userId!
+    }
+  });
+
+  if (!contactRecord)
+    throw new Problem(403, {
+      detail: 'User does not have an associated contact record'
+    });
+  const permitsByProject: Record<string, Permit[]> = {};
+  for (const permit of permits) {
+    if (!permitsByProject[permit.activityId]) {
+      permitsByProject[permit.activityId] = [];
+    }
+    permitsByProject[permit.activityId].push(permit);
+  }
+
+  const emailDataArray = await Promise.all(
+    Object.values(permitsByProject).map((projectPermits) =>
+      buildIntakeNotificationEmail(repositories, projectPermits, contactRecord)
+    )
+  );
+
+  return emailDataArray;
 };

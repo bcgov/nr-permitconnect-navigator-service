@@ -1,16 +1,27 @@
 import config from 'config';
 import { mockReset } from 'vitest-mock-extended';
 
-import { TEST_IDIR_USER_1, TEST_PERMIT_1, TEST_PERMIT_2, TEST_PERMIT_NOTE_1 } from '#tests/unit/data/index';
+import {
+  TEST_IDIR_USER_1,
+  TEST_PERMIT_1,
+  TEST_PERMIT_2,
+  TEST_PERMIT_NOTE_1,
+  TEST_PERMIT_TYPE_1
+} from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
-import { buildPermitUpdateEmail, listPeachIntegratedTrackings, prepareNotificationEmails } from '#src/domains/permit';
+import {
+  buildPermitUpdateEmail,
+  listPeachIntegratedTrackings,
+  prepareNotificationEmails,
+  prepareIntakeNotificationEmails
+} from '#src/domains/permit';
 import * as projectDomain from '#src/domains/project';
 import { Initiative } from '#src/utils/enums/application';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
-import type { PermitUpdateEmailParams } from '#types';
+import type { CurrentContext, PermitUpdateEmailParams } from '#types';
 
 vi.mock('config', async () => {
   const actual = await vi.importActual<{ get: (k: string) => unknown; has: (k: string) => boolean }>('config');
@@ -331,6 +342,51 @@ describe('permit domain', () => {
 
       expect(mockRepos.permitNote.create).toHaveBeenCalled();
       expect(emails.length).toBe(0);
+    });
+  });
+
+  describe('prepareIntakeNotificationEmails', () => {
+    it('should include a comma-separated link for each submitted permit', async () => {
+      const secondPermitType = { ...TEST_PERMIT_TYPE_1, permitTypeId: 2, name: 'PERMIT2' };
+      vi.mocked(config.get).mockImplementation((key: string) => {
+        if (key === 'server.pcns.appUrl') return 'www.example.com';
+        if (key === 'server.pcns.navEmail') return 'nav@example.com';
+        return undefined;
+      });
+
+      vi.spyOn(projectDomain, 'getProjectByActivityId').mockResolvedValue({
+        projectId: 'proj-123',
+        projectName: 'Project',
+        activity: {
+          activityId: 'ACTI1234',
+          initiative: { code: Initiative.HOUSING },
+          activityContact: [
+            {
+              role: ActivityContactRole.PRIMARY,
+              contact: {
+                firstName: 'John',
+                contactApplicantRelationship: 'Applicant'
+              }
+            }
+          ]
+        },
+        assignedUserId: null
+      } as never);
+
+      mockRepos.contact.findFirst.mockResolvedValue({ firstName: 'John' } as never);
+      mockRepos.permitType.findMany.mockResolvedValue([TEST_PERMIT_TYPE_1, secondPermitType] as never);
+
+      const emails = await prepareIntakeNotificationEmails(mockRepos, { userId: 'user-123' } as CurrentContext, [
+        { ...TEST_PERMIT_1, createdAt: new Date('2024-01-04T00:00:00.000Z') },
+        { ...TEST_PERMIT_2, permitTypeId: 2, createdAt: new Date('2024-01-05T00:00:00.000Z') }
+      ]);
+
+      expect(emails).toHaveLength(1);
+      const authorizationPath = 'www.example.com/i/housing/project/proj-123/authorization';
+      const firstLink = `<a href="${authorizationPath}/${TEST_PERMIT_1.permitId}">DOMAIN: PERMIT1</a>`;
+      const secondLink = `<a href="${authorizationPath}/${TEST_PERMIT_2.permitId}">DOMAIN: PERMIT2</a>`;
+      expect(emails[0].body).toContain(`${firstLink}, ${secondLink}`);
+      expect(mockRepos.permitType.findMany).toHaveBeenCalledTimes(1);
     });
   });
 });
