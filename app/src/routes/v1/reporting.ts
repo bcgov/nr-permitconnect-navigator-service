@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { openapiRoute } from './openapiRoute.ts';
 import {
+  getDashboardController,
   getElectrificationProjectPermitDataController,
   getGeneralProjectPermitDataController,
   getHousingProjectPermitDataController
@@ -14,12 +15,31 @@ import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
 import { UNAUTHORIZED_RESPONSE, FORBIDDEN_RESPONSE } from '#src/schemas/response/problem';
 import { housingReportingPermitDataSchema, reportingPermitDataSchema } from '#src/schemas/response/reportingPermitData';
+import { reportingDashboardSchema } from '#src/schemas/response/reportingDashboard';
 
 const basePath = '/reporting';
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(hasIdentity(IdentityProviderKind.AZUREIDIR));
 router.use(requireSomeGroup);
+
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/dashboard',
+  operationId: 'getReportingDashboard',
+  summary: 'Get a signed Metabase dashboard embed URL',
+  tags: ['Reporting'],
+  responses: {
+    200: {
+      description: 'Signed dashboard embed URL, or null when Metabase is not configured',
+      schema: reportingDashboardSchema
+    },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.REPORTING, Action.READ)],
+  handler: getDashboardController
+});
 
 openapiRoute(basePath, router, {
   method: 'get',

@@ -1,4 +1,7 @@
+import config from 'config';
+
 import {
+  getDashboardController,
   getElectrificationProjectPermitDataController,
   getGeneralProjectPermitDataController,
   getHousingProjectPermitDataController
@@ -8,7 +11,10 @@ import * as reportingService from '#src/services/reporting';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 
-vi.mock('config');
+vi.mock('config', async () => {
+  const actual = await vi.importActual<{ get: (k: string) => unknown }>('config');
+  return { default: { ...actual, get: vi.fn((key: string) => actual.get(key)), has: vi.fn() } };
+});
 
 const mockResponse = () => {
   const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
@@ -67,6 +73,34 @@ const mockData = [
     source_system_acronym: 'TS'
   }
 ];
+
+describe('getDashboardController', () => {
+  it('should respond with a null url when Metabase is not configured', () => {
+    vi.mocked(config.has).mockReturnValue(false);
+
+    getDashboardController({} as Request, res as unknown as Response);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ url: null });
+  });
+
+  it('should respond with a signed embed url when Metabase is configured', () => {
+    const settings: Record<string, string> = {
+      'server.metabase.dashboardId': '5',
+      'server.metabase.secretKey': 'secret',
+      'server.metabase.siteUrl': 'https://metabase.example.com'
+    };
+    vi.mocked(config.has).mockReturnValue(true);
+    vi.mocked(config.get).mockImplementation((key: string) => settings[key]);
+
+    getDashboardController({} as Request, res as unknown as Response);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      url: expect.stringMatching(/^https:\/\/metabase\.example\.com\/embed\/dashboard\/[\w-]+\.[\w-]+\.[\w-]+#/)
+    });
+  });
+});
 
 describe('getElectrificationProjectPermitDataController', () => {
   it('should call service and respond with 200 and result', async () => {

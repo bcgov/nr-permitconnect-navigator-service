@@ -58,6 +58,12 @@ app.use(
           new URL(config.get('frontend.geocoder.apiPath')).origin,
           new URL(config.get('frontend.orgbook.apiPath')).origin
         ],
+        'frame-src': [
+          "'self'",
+          ...(config.has('server.metabase.siteUrl')
+            ? [new URL(config.get<string>('server.metabase.siteUrl')).origin]
+            : [])
+        ],
         'img-src': ["'self'", 'data:', new URL(config.get('frontend.openStreetMap.apiPath')).origin], // eslint-disable-line
         'media-src': ["'self'", 'data:', (_req, res: any) => `'nonce-${res.locals.cspNonce}'`], // eslint-disable-line
         'script-src': ["'self'", (_req, res: any) => `'nonce-${res.locals.cspNonce}'`] // eslint-disable-line

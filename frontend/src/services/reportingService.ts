@@ -11,10 +11,15 @@ import type { ResponseBody } from '@/types';
 const reportingRoute = createRouteBuilder('reporting');
 
 const reportingRoutes = {
+  dashboard: () => reportingRoute('dashboard'),
   electrificationProjectPermit: () => reportingRoute('electrification-project', 'permit'),
   generalProjectPermit: () => reportingRoute('general-project', 'permit'),
   housingProjectPermit: () => reportingRoute('housing-project', 'permit')
 } as const;
+
+export function getDashboard(): Promise<ResponseBody<'getReportingDashboard'>> {
+  return api.get<ResponseBody<'getReportingDashboard'>>(reportingRoutes.dashboard());
+}
 
 /**
  * Retrieves permit data for electrification projects.
