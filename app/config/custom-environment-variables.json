@@ -68,6 +68,11 @@
     "env": "SERVER_ENV",
     "logFile": "SERVER_LOGFILE",
     "logLevel": "SERVER_LOGLEVEL",
+    "metabase": {
+      "dashboardId": "SERVER_METABASE_DASHBOARDID",
+      "secretKey": "SERVER_METABASE_SECRETKEY",
+      "siteUrl": "SERVER_METABASE_SITEURL"
+    },
     "objectStorage": {
       "accessKeyId": "SERVER_OBJECTSTORAGE_ACCESSKEYID",
       "bucket": "SERVER_OBJECTSTORAGE_BUCKET",

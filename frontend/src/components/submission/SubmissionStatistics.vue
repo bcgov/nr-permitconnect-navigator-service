@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import iframeResize from 'iframe-resizer/js/iframeResizer';
 import { version as uuidVersion, validate as uuidValidate } from 'uuid';
-import { inject, ref, watch } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue';
 
 import { Button, DatePicker, Select, useToast } from '@/lib/primevue';
 import { reportingService, userService } from '@/services';
+import { getDashboard } from '@/services/reportingService';
 import { useAppStore, useAuthZStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import { Action, GroupName, Initiative, Regex, Resource } from '@/utils/enums/application';
@@ -12,7 +14,7 @@ import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { ProjectService } from '@/types/services';
-import type { InputEvent, ProjectStatistics, User } from '@/types';
+import type { InputEvent, ProjectStatistics, Schema, User } from '@/types';
 
 // Injections
 const projectService = inject<Ref<ProjectService<unknown>>>(projectServiceKey);
@@ -26,10 +28,38 @@ const NAV_GROUPS = [
   GroupName.SUPERVISOR
 ];
 
+// Housing has every statistic, the other initiatives a subset; rows missing from the response are hidden
+type StatisticKey = keyof Schema<'HousingProjectStatistics'>;
+const ROWS: { label: string; value?: string; key: StatisticKey; filter?: 'range' | 'month' | 'assignee' }[] = [
+  { label: 'Total Submissions and Enquiries', key: 'total_submissions' },
+  { label: 'Multi-authorization projects', key: 'multi_permits_needed' },
+  { label: 'Submissions by range', key: 'total_submissions_between', filter: 'range' },
+  { label: 'Submissions by month', key: 'total_submissions_monthyear', filter: 'month' },
+  { label: 'Submissions by assigned navigator', key: 'total_submissions_assignedto', filter: 'assignee' },
+  { label: 'Submissions by activity state:', value: 'New', key: 'state_new' },
+  { label: 'Submissions by activity state:', value: 'In Progress', key: 'state_inprogress' },
+  { label: 'Submissions by activity state:', value: 'Delayed', key: 'state_delayed' },
+  { label: 'Submissions by activity state:', value: 'Completed', key: 'state_completed' },
+  { label: 'Submissions by financially supported:', value: 'BC Housing', key: 'supported_bc' },
+  { label: 'Submissions by financially supported:', value: 'Indigenous', key: 'supported_indigenous' },
+  { label: 'Submissions by financially supported:', value: 'Non-profit', key: 'supported_non_profit' },
+  { label: 'Submissions by financially supported:', value: 'Co-operative', key: 'supported_housing_coop' },
+  { label: 'Submissions at', value: 'priority: 1', key: 'queue_1' },
+  { label: 'Submissions at', value: 'priority: 2', key: 'queue_2' },
+  { label: 'Submissions at', value: 'priority: 3', key: 'queue_3' },
+  { label: 'Type:', value: 'Guidance', key: 'guidance' },
+  { label: 'Type:', value: 'General Enquiry', key: 'general_enquiry' },
+  { label: 'Type:', value: 'Status Request', key: 'status_request' },
+  { label: 'Type:', value: 'Escalation', key: 'escalation' },
+  { label: 'Type:', value: 'Inapplicable', key: 'inapplicable' }
+];
+
 // State
 const assigneeOptions: Ref<User[]> = ref([]);
 const statistics = defineModel<ProjectStatistics | undefined>('statistics');
 const statisticFilters: Ref<{ dateFrom?: Date; dateTo?: Date; monthYear?: Date; userId?: string }> = ref({});
+const url = ref<string>();
+const frame = useTemplateRef<HTMLIFrameElement & { iFrameResizer?: { removeListeners: () => void } }>('frame');
 
 // Actions
 const getAssigneeOptionLabel = (e: User) => `${e.fullName} [${e.email}]`;
@@ -39,6 +69,9 @@ const getPercentage = (input: number) =>
   statistics.value && statistics.value.total_submissions > 0
     ? Math.round((input / statistics.value.total_submissions) * 100)
     : 0;
+
+const getStatistic = (key: StatisticKey) =>
+  (statistics.value as Partial<Schema<'HousingProjectStatistics'>> | undefined)?.[key] ?? 0;
 
 const assigneeIsEmpty = (value: unknown) =>
   value === null || value === undefined || (typeof value === 'string' && value.trim().length === 0);
@@ -116,6 +149,17 @@ async function onDownloadProjectPermitData() {
   a.remove();
 }
 
+// Metabase only sizes the embed to its content once an iframe-resizer parent connects
+// checkOrigin off since siteUrl may be http while Metabase answers from https
+// The embed only reports growth, so the iframe stays at the tallest tab viewed
+const onFrameLoad = () => frame.value && iframeResize({ checkOrigin: false }, frame.value);
+
+onBeforeMount(async () => {
+  url.value = (await getDashboard()).url ?? undefined;
+});
+
+onBeforeUnmount(() => frame.value?.iFrameResizer?.removeListeners());
+
 watch(
   statisticFilters,
   async () => {
@@ -158,220 +202,77 @@ watch(
         Download Production Data
       </Button>
     </div>
-    <table class="w-full text-left border-collapse mx-auto">
+    <table class="w-full text-left border-collapse">
       <thead class="bg-[var(--p-greyscale-400)]">
         <tr>
-          <th class="col-span-9"><div class="p-2">Statistics</div></th>
-          <th class="col-span-1 text-right"><div class="py-2">Number</div></th>
-          <th class="col-span-2 text-right"><div class="p-2">Percentage of total</div></th>
+          <th class="p-2">Statistics</th>
+          <th class="py-2 text-right">Number</th>
+          <th class="p-2 text-right">Percentage of total</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td class="col-span-9">Total Submissions and Enquiries</td>
-          <td class="col-span-1 text-right">{{ statistics.total_submissions }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.total_submissions) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">Multi-authorization projects</td>
-          <td class="col-span-1 text-right">{{ statistics.multi_permits_needed }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.multi_permits_needed) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions by range
-            <DatePicker
-              v-model="statisticFilters.dateFrom"
-              show-icon
-              icon-display="input"
-            />
-            to
-            <DatePicker
-              v-model="statisticFilters.dateTo"
-              show-icon
-              icon-display="input"
-            />
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.total_submissions_between }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.total_submissions_between) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions by month
-            <DatePicker
-              v-model="statisticFilters.monthYear"
-              view="month"
-              show-icon
-              icon-display="input"
-            />
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.total_submissions_monthyear }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.total_submissions_monthyear) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions by assigned navigator
-            <Select
-              v-model="statisticFilters.userId"
-              class="w-7/12"
-              editable
-              :options="assigneeOptions"
-              :option-label="getAssigneeOptionLabel"
-              option-value="userId"
-              @input="(e: InputEvent) => onAssigneeInput(e)"
-            />
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.total_submissions_assignedto }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.total_submissions_assignedto) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions by activity state:
-            <span class="font-bold">New</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.state_new }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.state_new) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions by activity state:
-            <span class="font-bold">In Progress</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.state_inprogress }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.state_inprogress) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions by activity state:
-            <span class="font-bold">Delayed</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.state_delayed }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.state_delayed) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions by activity state:
-            <span class="font-bold">Completed</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.state_completed }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.state_completed) }}%</td>
-        </tr>
-        <tr v-if="'supported_bc' in statistics">
-          <td class="col-span-9">
-            Submissions by financially supported:
-            <span class="font-bold">BC Housing</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.supported_bc }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_bc) }}%</td>
-        </tr>
-        <tr v-if="'supported_indigenous' in statistics">
-          <td class="col-span-9">
-            Submissions by financially supported:
-            <span class="font-bold">Indigenous</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.supported_indigenous }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_indigenous) }}%</td>
-        </tr>
-        <tr v-if="'supported_non_profit' in statistics">
-          <td class="col-span-9">
-            Submissions by financially supported:
-            <span class="font-bold">Non-profit</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.supported_non_profit }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_non_profit) }}%</td>
-        </tr>
-        <tr v-if="'supported_housing_coop' in statistics">
-          <td class="col-span-9">
-            Submissions by financially supported:
-            <span class="font-bold">Co-operative</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.supported_housing_coop }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_housing_coop) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions at
-            <span class="font-bold">priority: 1</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.queue_1 }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.queue_1) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions at
-            <span class="font-bold">priority: 2</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.queue_2 }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.queue_2) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions at
-            <span class="font-bold">priority: 3</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.queue_3 }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.queue_3) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Type:
-            <span class="font-bold">Guidance</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.guidance }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.guidance) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Type:
-            <span class="font-bold">General Enquiry</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.general_enquiry }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.general_enquiry) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Type:
-            <span class="font-bold">Status Request</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.status_request }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.status_request) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Type:
-            <span class="font-bold">Escalation</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.escalation }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.escalation) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Type:
-            <span class="font-bold">Inapplicable</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.inapplicable }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.inapplicable) }}%</td>
-        </tr>
+        <template
+          v-for="row in ROWS"
+          :key="row.key"
+        >
+          <tr
+            v-if="row.key in statistics"
+            class="even:bg-[#f2f2f2]"
+          >
+            <td class="py-2 pl-2">
+              {{ row.label }}
+              <span
+                v-if="row.value"
+                class="font-bold"
+              >
+                {{ row.value }}
+              </span>
+              <template v-if="row.filter === 'range'">
+                <DatePicker
+                  v-model="statisticFilters.dateFrom"
+                  show-icon
+                  icon-display="input"
+                />
+                to
+                <DatePicker
+                  v-model="statisticFilters.dateTo"
+                  show-icon
+                  icon-display="input"
+                />
+              </template>
+              <DatePicker
+                v-else-if="row.filter === 'month'"
+                v-model="statisticFilters.monthYear"
+                view="month"
+                show-icon
+                icon-display="input"
+              />
+              <Select
+                v-else-if="row.filter === 'assignee'"
+                v-model="statisticFilters.userId"
+                class="w-7/12"
+                editable
+                :options="assigneeOptions"
+                :option-label="getAssigneeOptionLabel"
+                option-value="userId"
+                @input="(e: InputEvent) => onAssigneeInput(e)"
+              />
+            </td>
+            <td class="py-2 text-right">{{ getStatistic(row.key) }}</td>
+            <td class="py-2 pr-2 text-right">{{ getPercentage(getStatistic(row.key)) }}%</td>
+          </tr>
+        </template>
       </tbody>
     </table>
   </div>
+  <template v-if="url">
+    <h1>Dashboard</h1>
+    <iframe
+      ref="frame"
+      :src="url"
+      title="Permit and project dashboard"
+      class="w-full h-[100vh] border-0 overflow-hidden"
+      @load="onFrameLoad"
+    />
+  </template>
 </template>
-
-<style scoped lang="scss">
-td {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-td:nth-child(3n + 1) {
-  padding-left: 0.5rem;
-}
-
-td:nth-child(3n + 3) {
-  padding-right: 0.5rem;
-}
-
-tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-</style>
