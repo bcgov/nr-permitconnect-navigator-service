@@ -52,7 +52,7 @@ export function getDocHTML(version = 'v1'): string {
     </head>
     <body>
       <redoc spec-url='/api/${version}/docs/api-spec.yaml' />
-      <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+      <script type="module" src="https://cdn.redoc.ly/redoc/v3.0.1/bundles/redoc.standalone.js"></script>
     </body>
   </html>`;
 }
