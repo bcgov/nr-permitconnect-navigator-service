@@ -112,7 +112,7 @@ const filteredDocuments = computed(() => {
     >
       <ProgressBar
         mode="indeterminate"
-        class="self-center h-[0.3rem]"
+        class="self-center"
       />
     </div>
     <div
@@ -166,7 +166,7 @@ const filteredDocuments = computed(() => {
       <DocumentCardLite
         :document="document"
         :delete-button="!disabled"
-        class="cursor-pointer hover:shadow-[0_0_11px_rgba(33,33,33,0.2)] mb-2"
+        class="cursor-pointer mb-2"
         @click="documentService.downloadDocument({ documentId: document.documentId, filename: document.filename })"
       />
     </div>

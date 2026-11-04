@@ -1,13 +1,17 @@
-@layer properties, theme, base, main, components, primevue-overrides, utilities, keyframes;
-
+/* Layer order is declared in main.ts cssLayer.order */
 @import "tailwindcss";
 @import "tailwindcss-primeui";
 
-@layer main {
-/* -------- text and fonts -------- */
+@layer theme {
+:root {
+  --app-label-color: #38598a;
+}
+}
+
+/* Must come after the tailwindcss import to beat preflight */
+@layer base {
 :root {
   font-size: 16px;
-  --app-label-color: #38598a;
 }
 
 html {
@@ -97,7 +101,9 @@ label {
   display: inline-block;
   margin-bottom: 0.5rem;
 }
+}
 
+@layer components {
 .wrap-block {
   display: inline-block;
   overflow-wrap: break-word;
@@ -107,35 +113,6 @@ label {
   }
 }
 
-
-/* -------- layout ----------*/
-
-.app-primary-color {
-  color: var(--p-primary-color) !important;
-}
-
-.app-error-background {
-  background-color: var(--p-red-950) !important;
-}
-
-.app-error-border {
-  border-color: var(--p-red-950)!important;
-}
-
-.app-error-color {
-  color: var(--p-error-color) !important;
-}
-
-.app-error-message {
-  color: var(--p-error-color);
-  font-size: 0.8rem;
-}
-
-.app-label-color {
-  color: var(--app-label-color);
-}
-
-/* common */
 .disclaimer-block {
   outline: solid 0.063rem var(--p-greyscale-200);
   border-radius: 0.5rem;
@@ -145,12 +122,10 @@ label {
 }
 /* ---------- primevue overrides ------------ */
 
-@layer primevue-overrides {
+@layer primeui-overrides {
 
 .p-dialog-title {
   flex-grow: 1;
-  font-size: 1.25rem !important;
-  font-weight: bold;
 }
 
 .app-info-dialog {
@@ -163,18 +138,15 @@ label {
 }
 
 .p-accordionheader {
-  justify-content: flex-start !important;
+  justify-content: flex-start;
   .p-accordionheader-toggle-icon {
     order: -1;
     margin-right: 1rem;
   }
 }
 
-/* buttons */
 .p-button {
-  border-width: 2px !important;
-  padding-top: 0.5rem !important;
-  padding-bottom: 0.5rem !important;
+  border-width: 2px;
 
   .p-button-label:hover {
     text-decoration: underline;
@@ -191,11 +163,6 @@ label {
   border-width: 1px;
   margin-bottom: 1rem;
 
-  .p-divider {
-    margin-bottom: 0;
-
-  }
-
   .section-header {
     color: var(--p-card-color);
     font-weight: bold;
@@ -209,24 +176,14 @@ label {
 
   }
 
-  .p-card-body {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-  }
-
  .p-card-content {
     padding: 0 1rem 1rem 1rem;
   }
 }
 
-/* datatable */
 .p-datatable {
   .p-datatable-loading-icon {
     color: var(--p-bcblue-800);
-  }
-
-  .p-paginator {
-    justify-content: right;
   }
 }
 
@@ -234,38 +191,46 @@ label {
   justify-content: right;
 }
 
-/* modal */
 .p-dialog-footer {
   display: flex;
   flex-direction: row-reverse;
-  justify-content: right !important;
+  justify-content: right;
 }
 
-/* tabs */
 .p-tab {
   text-decoration: underline;
   font-size: var(--p-font-size);
 }
+}
 
-/* tooltip */
-.p-tooltip {
-  &.p-tooltip-top .p-tooltip-arrow {
-      border-top-color: var(--p-surface-800);
-    }
-  &.p-tooltip-right .p-tooltip-arrow {
-    border-right-color: var(--p-surface-800);
-  }
-  &.p-tooltip-bottom .p-tooltip-arrow {
-    border-bottom-color: var(--p-surface-800);
-  }
-  &.p-tooltip-left .p-tooltip-arrow {
-    border-left-color: var(--p-surface-800);
-  }
+/* ---------- app utilities ------------ */
 
-  .p-tooltip-text {
-    background-color: var(--p-surface-800);
-    color: var(--p-surface-0);
-  }
+/* Must come after the tailwindcss import to beat same-specificity utilities */
+@layer utilities {
+
+.app-primary-color {
+  color: var(--p-primary-color);
+}
+
+.app-error-background {
+  background-color: var(--p-red-950);
+}
+
+.app-error-border {
+  border-color: var(--p-red-950);
+}
+
+.app-error-color {
+  color: var(--p-error-color);
+}
+
+.app-error-message {
+  color: var(--p-error-color);
+  font-size: 0.8rem;
+}
+
+.app-label-color {
+  color: var(--app-label-color);
 }
 }
 

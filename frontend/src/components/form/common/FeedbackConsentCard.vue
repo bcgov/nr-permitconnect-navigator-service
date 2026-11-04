@@ -30,11 +30,14 @@ useFormErrorWatcher(formRef, 'FeedbackConsentCard', tab);
 </script>
 
 <template>
-  <Card ref="formRef">
+  <Card
+    ref="formRef"
+    class="pt-4"
+  >
     <template #content>
       <div class="mb-2 flex items-center">
         <Checkbox
-          class="m-0 inline-block"
+          class="m-0"
           name="basic.consentToFeedback"
           :bold="false"
           :disabled="!getEditable"

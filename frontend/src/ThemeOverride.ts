@@ -200,6 +200,21 @@ export const ThemeOverride = definePreset(Material, {
       }
     },
     button: {
+      root: {
+        padding: {
+          y: '0.5rem'
+        },
+        sm: {
+          padding: {
+            y: '0.5rem'
+          }
+        },
+        lg: {
+          padding: {
+            y: '0.5rem'
+          }
+        }
+      },
       colorScheme: {
         light: {
           root: {
@@ -236,7 +251,7 @@ export const ThemeOverride = definePreset(Material, {
     dialog: {
       title: {
         font: {
-          size: '1.8rem'
+          size: '1.25rem'
         }
       }
     },
