@@ -3,10 +3,10 @@ name: Lint Charts
 on:
   pull_request:
     paths:
-      - '.github/environments/values*.yaml'
-      - '.github/workflows/charts-lint.yaml'
-      - 'charts/**'
-      - 'infra/**'
+      - ".github/environments/values*.yaml"
+      - ".github/workflows/charts-lint.yaml"
+      - "charts/**"
+      - "infra/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -62,10 +62,10 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::4. Check chart version bump"
-          if git diff --quiet origin/master -- charts/pcns; then
+          if git diff --quiet origin/main -- charts/pcns; then
             echo "No pcns chart changes detected."
           else
-            old=$(git show origin/master:charts/pcns/Chart.yaml | grep -oP '^version:\s*\K\S+')
+            old=$(git show origin/main:charts/pcns/Chart.yaml | grep -oP '^version:\s*\K\S+')
             new=$(grep -oP '^version:\s*\K\S+' charts/pcns/Chart.yaml)
 
             if [ "$old" = "$new" ]; then

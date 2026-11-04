@@ -3,7 +3,7 @@ name: Push
 on:
   push:
     branches:
-      - master
+      - main
     tags:
       - v*.*.*
 
@@ -35,7 +35,7 @@ jobs:
   deploy-dev:
     name: Deploy to Dev
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deployer.yaml
     permissions:
       # Deployer checks out the repository
