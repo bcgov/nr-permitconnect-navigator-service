@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { ensureActivityWithPrimaryContact } from './activity.ts';
-import { buildIntakePermits } from './permit.ts';
+import { buildProjectIntakePermits } from './permit.ts';
 import { Initiative } from '#src/utils/enums/application';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
@@ -69,7 +69,7 @@ export const generateElectrificationProjectData = async (
       addedToAts: false,
       queuePriority: null
     } satisfies ElectrificationProjectCreateInput,
-    ...buildIntakePermits(activityId, data.permits)
+    ...buildProjectIntakePermits(activityId, data.permits)
   };
 
   return electrificationProjectData;
