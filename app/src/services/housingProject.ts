@@ -2,7 +2,7 @@ import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
 import { activityContactScope } from '#src/db/utils/utils';
 import { createHousingProjectData, generateHousingProjectData } from '#src/domains/housingProject';
-import { createIntakePermits } from '#src/domains/permit';
+import { saveIntakePermits } from '#src/domains/permit';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
@@ -173,7 +173,7 @@ export const submitHousingProjectDraftService = async (
       const response = await housingProject.create(project);
 
       // Create each permit and tracking IDs
-      await createIntakePermits({ permit, permitTracking }, intakePermits);
+      await saveIntakePermits({ permit, permitTracking }, intakePermits);
 
       // Delete old draft
       if (draftId) await draft.delete({ draftId });

@@ -3,7 +3,13 @@ import { randomUUID } from 'node:crypto';
 import { unitOfWork } from '#src/db/unitOfWork';
 import { activityContactScope } from '#src/db/utils/utils';
 import { findPriorityPermitTracking } from '#src/domains/peach';
-import { buildAppliedPermits, createIntakePermits, prepareNotificationEmails, prepareIntakeNotificationEmails } from '#src/domains/permit';
+import {
+  buildAppliedPermits,
+  createPermitUpdateNote,
+  saveIntakePermits,
+  preparePermitUpdateEmails,
+  prepareIntakePermitEmails
+} from '#src/domains/permit';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { email } from '#src/external/ches';
 import { getPiesRecord } from '#src/external/peach';
@@ -144,13 +150,13 @@ export const intakePermitService = async (
       );
 
       // Create each permit and tracking IDs
-      await createIntakePermits({ permit, permitTracking }, intakePermits);
+      await saveIntakePermits({ permit, permitTracking }, intakePermits);
 
       const permits = await permit.findMany({
         where: { permitId: { in: intakePermits.appliedPermits.map((x) => x.permitId) } }
       });
 
-      const emails = await prepareIntakeNotificationEmails(
+      const emails = await prepareIntakePermitEmails(
         { contact, electrificationProject, generalProject, housingProject, permitType, user },
         currentContext,
         permits
@@ -349,14 +355,12 @@ export const upsertPermitService = async (
       let emails: Email[] = [];
       if (data?.permitId) {
         if (!isEmptyPermitNote || (isValidPeachPermit && statusChanged)) {
-          const note = isEmptyPermitNote
-            ? `This application is ${data.state.toLocaleLowerCase()} in the ${data.stage.toLocaleLowerCase()}.`
-            : permitNoteText;
-          emails = await prepareNotificationEmails(
-            { electrificationProject, generalProject, housingProject, permitNote, permitType, user },
+          const createdNote = await createPermitUpdateNote({ permitNote }, data, permitNoteText || undefined);
+          emails = await preparePermitUpdateEmails(
+            { electrificationProject, generalProject, housingProject, permitType, user },
             data,
             false,
-            note
+            createdNote.note
           );
         }
       }

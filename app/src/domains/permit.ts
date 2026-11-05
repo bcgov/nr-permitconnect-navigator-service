@@ -117,7 +117,7 @@ export const buildAppliedPermits = (
  * @param permits - The permits section of the intake submission
  * @returns Applied and investigate permit records, plus the trackers for the applied permits
  */
-export const buildIntakePermits = (activityId: string, permits: DraftPermitsInput) => ({
+export const buildProjectIntakePermits = (activityId: string, permits: DraftPermitsInput) => ({
   ...buildAppliedPermits((permits.appliedPermits ?? []).map((x) => ({ ...x, activityId }))),
   investigatePermits: (permits.investigatePermits ?? []).map((x) =>
     buildNewPermitRecord({
@@ -136,7 +136,7 @@ export const buildIntakePermits = (activityId: string, permits: DraftPermitsInpu
  * @param repositories - The required repositories
  * @param intakePermits - The permit and tracker records to save
  */
-export const createIntakePermits = async (
+export const saveIntakePermits = async (
   repositories: Pick<Repositories, 'permit' | 'permitTracking'>,
   intakePermits: {
     appliedPermits: PermitCreateInput[];
@@ -160,7 +160,7 @@ export const createIntakePermits = async (
  * @param repositories - The required repositories
  * @returns A Promise that resolves to a list of permits matching the search params
  */
-export const listPeachIntegratedTrackings = async (repositories: Pick<Repositories, 'permit'>): Promise<Permit[]> => {
+export const listPeachIntegratedPermits = async (repositories: Pick<Repositories, 'permit'>): Promise<Permit[]> => {
   return await repositories.permit.findMany({
     where: {
       AND: [{ permitTracking: { some: { sourceSystemKind: { integrated: true } } } }]
@@ -225,18 +225,44 @@ export const buildPermitUpdateEmail = async (
 };
 
 /**
- * Creates the update note and builds email notifications for an updated permit, does not send them
+ * Creates the update note for a permit, defaulting to a summary of its state and stage
+ * @param repositories - The required repositories
+ * @param permit - The permit the note belongs to
+ * @param note - The note text, if given
+ * @returns The created note
+ */
+export const createPermitUpdateNote = async (
+  repositories: Pick<Repositories, 'permitNote'>,
+  permit: Permit,
+  note?: string
+) => {
+  const stateDisplay = codeTable.PermitState.displays[permit.state];
+  const stageDisplay = codeTable.PermitStage.displays[permit.stage];
+
+  if (!stateDisplay || !stageDisplay) {
+    throw new Error(`Invalid permit.state: ${permit.state} or permit.stage: ${permit.stage}`);
+  }
+
+  return await repositories.permitNote.create({
+    permitNoteId: randomUUID(),
+    permitId: permit.permitId,
+    note: note ?? `This application is ${stateDisplay.toLocaleLowerCase()} in the ${stageDisplay.toLocaleLowerCase()}.`
+  });
+};
+
+/**
+ * Builds email notifications for an updated permit, does not send them
  * @param repositories - The required repositories
  * @param permit Permit to prepare notifications for
  * @param fromPeachSync Indicates if the update is coming from a PEACH sync
- * @param note A permit note to be used in permit note creation, if given
+ * @param note Text of the update note created for this change
  * @returns The emails ready to be sent
  */
-export const prepareNotificationEmails = async (
-  repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitNote' | 'permitType' | 'user'>,
+export const preparePermitUpdateEmails = async (
+  repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitType' | 'user'>,
   permit: Permit,
   fromPeachSync: boolean,
-  note?: string
+  note: string
 ): Promise<Email[]> => {
   const permitUpdateEmails: PermitUpdateEmailParams[] = [];
 
@@ -272,20 +298,6 @@ export const prepareNotificationEmails = async (
       });
   }
 
-  const stateDisplay = codeTable.PermitState.displays[permit.state];
-  const stageDisplay = codeTable.PermitStage.displays[permit.stage];
-
-  if (!stateDisplay || !stageDisplay) {
-    throw new Error(`Invalid permit.state: ${permit.state} or permit.stage: ${permit.stage}`);
-  }
-
-  // Create update note for status change
-  const permitNoteRes = await repositories.permitNote.create({
-    permitNoteId: randomUUID(),
-    permitId: permit.permitId,
-    note: note ?? `This application is ${stateDisplay.toLocaleLowerCase()} in the ${stageDisplay.toLocaleLowerCase()}.`
-  });
-
   // Add proponent update email to email jobs
   const primaryContact = project?.activity?.activityContact?.find(
     (ac) => ac.role === ActivityContactRole.PRIMARY
@@ -294,7 +306,7 @@ export const prepareNotificationEmails = async (
   const peachUpdateNotePlaceholder =
     'You can now track your application progress here. You will receive an email if the status or stage changes, ' +
     'or when your Navigator posts an update.';
-  const isOnlyTemplate = permitNoteRes.note.trim() === peachUpdateNotePlaceholder;
+  const isOnlyTemplate = note.trim() === peachUpdateNotePlaceholder;
   const isFirstNote = !permit?.permitNote?.length;
 
   const useInitialPeachTemplate = isOnlyTemplate && isFirstNote && state.features.peach;
@@ -327,7 +339,7 @@ export const prepareNotificationEmails = async (
  * @param contact Contact record of the proponent who submitted the permits
  * @returns The email ready to be sent
  */
-async function buildIntakeNotificationEmail(
+async function buildIntakePermitEmail(
   repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitType' | 'user'>,
   permits: Permit[],
   contact: Contact
@@ -423,7 +435,7 @@ async function buildIntakeNotificationEmail(
  * @returns The emails ready to be sent
  * @throws {Problem} 403 if the current user does not have an associated contact record
  */
-export const prepareIntakeNotificationEmails = async (
+export const prepareIntakePermitEmails = async (
   repositories: Pick<Repositories, ProjectRepositoryKeys | 'contact' | 'permitType' | 'user'>,
   currentContext: CurrentContext,
   permits: Permit[]
@@ -448,7 +460,7 @@ export const prepareIntakeNotificationEmails = async (
 
   const emailDataArray = await Promise.all(
     Object.values(permitsByProject).map((projectPermits) =>
-      buildIntakeNotificationEmail(repositories, projectPermits, contactRecord)
+      buildIntakePermitEmail(repositories, projectPermits, contactRecord)
     )
   );
 

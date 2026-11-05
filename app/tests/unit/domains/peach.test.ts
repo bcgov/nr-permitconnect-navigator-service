@@ -219,28 +219,28 @@ describe('peach domain', () => {
 
   describe('getPeachTrackingRecords', () => {
     it('should return empty array when no PEACH integrated permits found', async () => {
-      vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([]);
+      vi.spyOn(permitDomain, 'listPeachIntegratedPermits').mockResolvedValue([]);
 
       expect(await getPeachTrackingRecords(mockRepos)).toEqual([]);
     });
 
     it('should skip permits without permit tracking', async () => {
       const permit = { ...TEST_PERMIT_1, permitTracking: undefined };
-      vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
+      vi.spyOn(permitDomain, 'listPeachIntegratedPermits').mockResolvedValue([permit] as never);
 
       expect(await getPeachTrackingRecords(mockRepos)).toEqual([]);
     });
 
     it('should skip permits without priority tracking', async () => {
       const permit = { ...TEST_PERMIT_1, permitTracking: [] };
-      vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
+      vi.spyOn(permitDomain, 'listPeachIntegratedPermits').mockResolvedValue([permit] as never);
 
       expect(await getPeachTrackingRecords(mockRepos)).toEqual([]);
     });
 
     it('should return the priority tracking record id and system for each permit', async () => {
       const permit = withTracking(TEST_PERMIT_1, 'REC-1', PeachIntegratedSystem.VFCBC);
-      vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
+      vi.spyOn(permitDomain, 'listPeachIntegratedPermits').mockResolvedValue([permit] as never);
 
       expect(await getPeachTrackingRecords(mockRepos)).toEqual([
         { recordId: 'REC-1', systemId: PeachIntegratedSystem.VFCBC, permit }

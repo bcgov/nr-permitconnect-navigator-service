@@ -5,7 +5,7 @@ import {
   createElectrificationProjectData,
   generateElectrificationProjectData
 } from '#src/domains/electrificationProject';
-import { createIntakePermits } from '#src/domains/permit';
+import { saveIntakePermits } from '#src/domains/permit';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
@@ -193,7 +193,7 @@ export const submitElectrificationProjectDraftService = async (
       const response = await electrificationProject.create(project);
 
       // Create each permit and tracking IDs
-      await createIntakePermits({ permit, permitTracking }, intakePermits);
+      await saveIntakePermits({ permit, permitTracking }, intakePermits);
 
       // Delete old draft
       if (draftId) await draft.delete({ draftId });

@@ -11,12 +11,13 @@ import {
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import {
-  buildIntakePermits,
+  buildProjectIntakePermits,
   buildPermitUpdateEmail,
-  createIntakePermits,
-  listPeachIntegratedTrackings,
-  prepareNotificationEmails,
-  prepareIntakeNotificationEmails
+  createPermitUpdateNote,
+  saveIntakePermits,
+  listPeachIntegratedPermits,
+  preparePermitUpdateEmails,
+  prepareIntakePermitEmails
 } from '#src/domains/permit';
 import * as projectDomain from '#src/domains/project';
 import { Initiative } from '#src/utils/enums/application';
@@ -50,9 +51,9 @@ describe('permit domain', () => {
     mockReset(mockRepos);
   });
 
-  describe('buildIntakePermits', () => {
+  describe('buildProjectIntakePermits', () => {
     it('builds applied permits with their trackers and investigate permits', () => {
-      const result = buildIntakePermits('ACTI1234', {
+      const result = buildProjectIntakePermits('ACTI1234', {
         hasAppliedProvincialPermits: 'Yes',
         appliedPermits: [
           { permitTypeId: 1, submittedDate: new Date('2024-01-01'), permitTracking: [{ trackingId: 'TRK-1' }] }
@@ -83,7 +84,7 @@ describe('permit domain', () => {
     });
 
     it('skips trackers without a trackingId', () => {
-      const result = buildIntakePermits('ACTI1234', {
+      const result = buildProjectIntakePermits('ACTI1234', {
         hasAppliedProvincialPermits: 'Yes',
         appliedPermits: [{ permitTypeId: 1, permitTracking: [{ trackingId: undefined }, { trackingId: null }] }]
       });
@@ -93,7 +94,7 @@ describe('permit domain', () => {
     });
 
     it('ignores client-supplied tracker IDs, stamps, and relations', () => {
-      const result = buildIntakePermits('ACTI1234', {
+      const result = buildProjectIntakePermits('ACTI1234', {
         hasAppliedProvincialPermits: 'Yes',
         appliedPermits: [
           {
@@ -125,7 +126,7 @@ describe('permit domain', () => {
     });
 
     it('returns empty arrays when no permits are given', () => {
-      expect(buildIntakePermits('ACTI1234', { hasAppliedProvincialPermits: 'No' })).toEqual({
+      expect(buildProjectIntakePermits('ACTI1234', { hasAppliedProvincialPermits: 'No' })).toEqual({
         appliedPermits: [],
         investigatePermits: [],
         appliedPermitTrackers: []
@@ -133,25 +134,25 @@ describe('permit domain', () => {
     });
   });
 
-  describe('createIntakePermits', () => {
+  describe('saveIntakePermits', () => {
     it('saves every permit before creating the trackers', async () => {
       const calls: string[] = [];
       mockRepos.permit.upsert.mockImplementation((async () => calls.push('permit')) as never);
       mockRepos.permitTracking.create.mockImplementation((async () => calls.push('tracker')) as never);
-      const intakePermits = buildIntakePermits('ACTI1234', {
+      const intakePermits = buildProjectIntakePermits('ACTI1234', {
         hasAppliedProvincialPermits: 'Yes',
         appliedPermits: [{ permitTypeId: 1, permitTracking: [{ trackingId: 'TRK-1' }] }],
         investigatePermits: [{ permitTypeId: 2 }]
       });
 
-      await createIntakePermits(mockRepos, intakePermits);
+      await saveIntakePermits(mockRepos, intakePermits);
 
       expect(calls).toEqual(['permit', 'permit', 'tracker']);
       expect(mockRepos.permitTracking.create).toHaveBeenCalledWith(intakePermits.appliedPermitTrackers[0]);
     });
   });
 
-  describe('listPeachIntegratedTrackings', () => {
+  describe('listPeachIntegratedPermits', () => {
     it('should find permits with PEACH integrated tracking', async () => {
       const permitWithTracking = {
         ...TEST_PERMIT_1,
@@ -165,7 +166,7 @@ describe('permit domain', () => {
 
       mockRepos.permit.findMany.mockResolvedValue([permitWithTracking] as never);
 
-      const result = await listPeachIntegratedTrackings(mockRepos);
+      const result = await listPeachIntegratedPermits(mockRepos);
 
       expect(mockRepos.permit.findMany).toHaveBeenCalledWith({
         where: {
@@ -184,7 +185,7 @@ describe('permit domain', () => {
     it('should return empty array when no PEACH integrated permits found', async () => {
       mockRepos.permit.findMany.mockResolvedValue([] as never);
 
-      const result = await listPeachIntegratedTrackings(mockRepos);
+      const result = await listPeachIntegratedPermits(mockRepos);
 
       expect(result).toEqual([]);
     });
@@ -253,8 +254,55 @@ describe('permit domain', () => {
     });
   });
 
-  describe('prepareNotificationEmails', () => {
-    it('should create permit note and build proponent email', async () => {
+  describe('createPermitUpdateNote', () => {
+    it('should create a status summary note when no note is given', async () => {
+      mockRepos.permitNote.create.mockResolvedValue(TEST_PERMIT_NOTE_1 as never);
+
+      const permit = {
+        ...TEST_PERMIT_2,
+        stage: PermitStage.APPLICATION_SUBMISSION,
+        state: PermitState.IN_PROGRESS
+      };
+
+      const result = await createPermitUpdateNote(mockRepos, permit as never);
+
+      const createCall = mockRepos.permitNote.create.mock.calls[0]?.[0];
+      expect(createCall?.permitId).toBe(permit.permitId);
+      expect(createCall?.note).toBe('This application is in progress in the application submission.');
+      expect(result).toBe(TEST_PERMIT_NOTE_1);
+    });
+
+    it('should use the given note when provided', async () => {
+      mockRepos.permitNote.create.mockResolvedValue(TEST_PERMIT_NOTE_1 as never);
+
+      const permit = {
+        ...TEST_PERMIT_1,
+        stage: PermitStage.APPLICATION_SUBMISSION,
+        state: PermitState.IN_PROGRESS
+      };
+
+      await createPermitUpdateNote(mockRepos, permit as never, 'Custom note text');
+
+      const createCall = mockRepos.permitNote.create.mock.calls[0]?.[0];
+      expect(createCall?.note).toBe('Custom note text');
+    });
+
+    it('should throw error when permit state/stage are invalid', async () => {
+      const permit = {
+        ...TEST_PERMIT_1,
+        state: 'INVALID_STATE',
+        stage: 'INVALID_STAGE'
+      };
+
+      await expect(createPermitUpdateNote(mockRepos, permit as never)).rejects.toThrow('Invalid permit.state');
+      expect(mockRepos.permitNote.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('preparePermitUpdateEmails', () => {
+    const note = 'This application is in progress in the application submission.';
+
+    it('should build proponent email', async () => {
       vi.spyOn(projectDomain, 'getProjectByActivityId').mockResolvedValue({
         projectId: 'proj-123',
         activityId: 'ACTI1234',
@@ -270,11 +318,6 @@ describe('permit domain', () => {
         assignedUserId: null
       } as never);
 
-      mockRepos.permitNote.create.mockResolvedValue({
-        ...TEST_PERMIT_NOTE_1,
-        note: 'This application is in progress in the application submission.'
-      } as never);
-
       const permit = {
         ...TEST_PERMIT_2,
         needed: PermitNeeded.YES,
@@ -283,11 +326,9 @@ describe('permit domain', () => {
         permitNote: []
       };
 
-      const emails = await prepareNotificationEmails(mockRepos, permit as never, false);
+      const emails = await preparePermitUpdateEmails(mockRepos, permit as never, false, note);
 
-      expect(mockRepos.permitNote.create).toHaveBeenCalled();
-      const createCall = mockRepos.permitNote.create.mock.calls[0]?.[0];
-      expect(createCall?.permitId).toBe(permit.permitId);
+      expect(mockRepos.permitNote.create).not.toHaveBeenCalled();
       expect(emails.length).toBe(1);
     });
 
@@ -307,11 +348,6 @@ describe('permit domain', () => {
         assignedUserId: null
       } as never);
 
-      mockRepos.permitNote.create.mockResolvedValue({
-        ...TEST_PERMIT_NOTE_1,
-        note: 'This application is in progress in the application submission.'
-      } as never);
-
       const permit = {
         ...TEST_PERMIT_2,
         needed: PermitNeeded.YES,
@@ -319,9 +355,8 @@ describe('permit domain', () => {
         permitNote: []
       };
 
-      const emails = await prepareNotificationEmails(mockRepos, permit as never, false);
+      const emails = await preparePermitUpdateEmails(mockRepos, permit as never, false, note);
 
-      expect(mockRepos.permitNote.create).toHaveBeenCalled();
       expect(emails.length).toBe(0);
     });
 
@@ -341,11 +376,6 @@ describe('permit domain', () => {
         }
       } as never);
 
-      mockRepos.permitNote.create.mockResolvedValue({
-        ...TEST_PERMIT_NOTE_1,
-        note: 'This application is in progress in the application submission.'
-      } as never);
-
       mockRepos.user.findById.mockResolvedValue({
         ...TEST_IDIR_USER_1,
         firstName: 'Jane',
@@ -359,61 +389,10 @@ describe('permit domain', () => {
         permitNote: []
       };
 
-      const emails = await prepareNotificationEmails(mockRepos, permit as never, true);
+      const emails = await preparePermitUpdateEmails(mockRepos, permit as never, true, note);
 
       expect(mockRepos.user.findById).toHaveBeenCalledWith('user-123');
       expect(emails.length).toBeGreaterThan(0);
-    });
-
-    it('should throw error when permit state/stage are invalid', async () => {
-      vi.spyOn(projectDomain, 'getProjectByActivityId').mockResolvedValue({
-        projectId: 'proj-123',
-        activityId: 'ACTI1234',
-        activity: { initiative: { code: Initiative.HOUSING } },
-        assignedUserId: null
-      } as never);
-
-      const permit = {
-        ...TEST_PERMIT_1,
-        state: 'INVALID_STATE',
-        stage: 'INVALID_STAGE'
-      };
-
-      await expect(prepareNotificationEmails(mockRepos, permit as never, false)).rejects.toThrow(
-        'Invalid permit.state'
-      );
-    });
-
-    it('should use permit-supplied note when provided', async () => {
-      vi.spyOn(projectDomain, 'getProjectByActivityId').mockResolvedValue({
-        projectId: 'proj-123',
-        activityId: 'ACTI1234',
-        activity: {
-          initiative: { code: Initiative.HOUSING },
-          activityContact: []
-        },
-        assignedUserId: null
-      } as never);
-
-      mockRepos.permitNote.create.mockResolvedValue({
-        ...TEST_PERMIT_NOTE_1,
-        note: 'Custom note'
-      } as never);
-
-      const permit = {
-        ...TEST_PERMIT_1,
-        stage: PermitStage.APPLICATION_SUBMISSION,
-        state: PermitState.IN_PROGRESS,
-        needed: PermitNeeded.YES,
-        permitNote: []
-      };
-
-      const customNote = 'Custom note text';
-
-      await prepareNotificationEmails(mockRepos, permit as never, false, customNote);
-
-      const createCall = mockRepos.permitNote.create.mock.calls[0]?.[0];
-      expect(createCall?.note).toBe(customNote);
     });
 
     it('should not build email when permit needed is NO and stage is PRE_SUBMISSION', async () => {
@@ -432,8 +411,6 @@ describe('permit domain', () => {
         assignedUserId: null
       } as never);
 
-      mockRepos.permitNote.create.mockResolvedValue(TEST_PERMIT_NOTE_1 as never);
-
       const permit = {
         ...TEST_PERMIT_1,
         needed: PermitNeeded.NO,
@@ -441,14 +418,13 @@ describe('permit domain', () => {
         permitNote: []
       };
 
-      const emails = await prepareNotificationEmails(mockRepos, permit as never, false);
+      const emails = await preparePermitUpdateEmails(mockRepos, permit as never, false, note);
 
-      expect(mockRepos.permitNote.create).toHaveBeenCalled();
       expect(emails.length).toBe(0);
     });
   });
 
-  describe('prepareIntakeNotificationEmails', () => {
+  describe('prepareIntakePermitEmails', () => {
     it('should include a comma-separated link for each submitted permit', async () => {
       const secondPermitType = { ...TEST_PERMIT_TYPE_1, permitTypeId: 2, name: 'PERMIT2' };
       vi.mocked(config.get).mockImplementation((key: string) => {
@@ -479,7 +455,7 @@ describe('permit domain', () => {
       mockRepos.contact.findFirst.mockResolvedValue({ firstName: 'John' } as never);
       mockRepos.permitType.findMany.mockResolvedValue([TEST_PERMIT_TYPE_1, secondPermitType] as never);
 
-      const emails = await prepareIntakeNotificationEmails(mockRepos, { userId: 'user-123' } as CurrentContext, [
+      const emails = await prepareIntakePermitEmails(mockRepos, { userId: 'user-123' } as CurrentContext, [
         { ...TEST_PERMIT_1, createdAt: new Date('2024-01-04T00:00:00.000Z') },
         { ...TEST_PERMIT_2, permitTypeId: 2, createdAt: new Date('2024-01-05T00:00:00.000Z') }
       ]);
@@ -510,7 +486,7 @@ describe('permit domain', () => {
       mockRepos.contact.findFirst.mockResolvedValue({ firstName: 'John' } as never);
       mockRepos.permitType.findMany.mockResolvedValue([TEST_PERMIT_TYPE_1] as never);
 
-      const emails = await prepareIntakeNotificationEmails(mockRepos, { userId: 'user-123' } as CurrentContext, [
+      const emails = await prepareIntakePermitEmails(mockRepos, { userId: 'user-123' } as CurrentContext, [
         { ...TEST_PERMIT_1, createdAt: new Date('2024-01-04T00:00:00.000Z') },
         {
           ...TEST_PERMIT_2,

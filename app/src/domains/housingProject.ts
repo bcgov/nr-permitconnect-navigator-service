@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { ensureActivityWithPrimaryContact } from './activity.ts';
-import { buildIntakePermits } from './permit.ts';
+import { buildProjectIntakePermits } from './permit.ts';
 import { jsonToPrismaInputJson } from '#src/db/utils/utils';
 import { getCurrentUsername } from '#src/utils/index';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
@@ -179,7 +179,7 @@ export const generateHousingProjectData = async (
         data.housing.financiallySupportedHousingCoop
       ].includes(BasicResponse.YES)
     } satisfies HousingProjectCreateInput,
-    ...buildIntakePermits(activityId, data.permits)
+    ...buildProjectIntakePermits(activityId, data.permits)
   };
 
   assignPriority(housingProjectData.housingProject);
