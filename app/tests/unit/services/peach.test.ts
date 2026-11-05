@@ -36,7 +36,10 @@ const summarizePiesRecordSpy = vi.spyOn(peachParser, 'summarizePiesRecord');
 const getPeachTrackingRecordsSpy = vi.spyOn(peachDomain, 'getPeachTrackingRecords');
 const fetchPeachRecordsSpy = vi.spyOn(peachDomain, 'fetchPeachRecords');
 const applyPeachUpdatesSpy = vi.spyOn(peachDomain, 'applyPeachUpdates');
-const prepareNotificationEmailsSpy = vi.spyOn(permitDomain, 'prepareNotificationEmails');
+const createPermitUpdateNoteSpy = vi
+  .spyOn(permitDomain, 'createPermitUpdateNote')
+  .mockImplementation(async (_repos, _permit, note) => ({ note }) as never);
+const preparePermitUpdateEmailsSpy = vi.spyOn(permitDomain, 'preparePermitUpdateEmails');
 const emailSpy = vi.spyOn(chesExternal, 'email');
 
 // Tracks whether a db transaction is open, external calls must only happen outside of one
@@ -140,7 +143,7 @@ describe('peach service', () => {
         return parsedRecords as never;
       });
       applyPeachUpdatesSpy.mockResolvedValueOnce(updated as never);
-      prepareNotificationEmailsSpy.mockResolvedValueOnce([email1] as never).mockResolvedValueOnce([email2] as never);
+      preparePermitUpdateEmailsSpy.mockResolvedValueOnce([email1] as never).mockResolvedValueOnce([email2] as never);
 
       const result = await peachService.syncPeachRecordsService();
 
@@ -149,8 +152,10 @@ describe('peach service', () => {
       expect(fetchPeachRecordsSpy).toHaveBeenCalledWith(trackingRecords);
       expect(fetchedInTransaction).toBe(false);
       expect(applyPeachUpdatesSpy).toHaveBeenCalledWith({ permit: mockRepos.permit }, trackingRecords, parsedRecords);
-      expect(prepareNotificationEmailsSpy).toHaveBeenNthCalledWith(1, mockRepos, TEST_PERMIT_1, true, 'Note 1');
-      expect(prepareNotificationEmailsSpy).toHaveBeenNthCalledWith(2, mockRepos, TEST_PERMIT_2, true, 'Note 2');
+      expect(createPermitUpdateNoteSpy).toHaveBeenNthCalledWith(1, mockRepos, TEST_PERMIT_1, 'Note 1');
+      expect(createPermitUpdateNoteSpy).toHaveBeenNthCalledWith(2, mockRepos, TEST_PERMIT_2, 'Note 2');
+      expect(preparePermitUpdateEmailsSpy).toHaveBeenNthCalledWith(1, mockRepos, TEST_PERMIT_1, true, 'Note 1');
+      expect(preparePermitUpdateEmailsSpy).toHaveBeenNthCalledWith(2, mockRepos, TEST_PERMIT_2, true, 'Note 2');
       expect(result).toEqual([email1, email2]);
     });
 
@@ -166,8 +171,9 @@ describe('peach service', () => {
       getPeachTrackingRecordsSpy.mockResolvedValueOnce(trackingRecords as never);
       fetchPeachRecordsSpy.mockResolvedValueOnce(parsedRecords as never);
       applyPeachUpdatesSpy.mockResolvedValueOnce(updated as never);
-      prepareNotificationEmailsSpy
-        .mockResolvedValueOnce([email1] as never)
+      preparePermitUpdateEmailsSpy.mockResolvedValueOnce([email1] as never);
+      createPermitUpdateNoteSpy
+        .mockResolvedValueOnce({ note: 'Note 1' } as never)
         .mockRejectedValueOnce(new Error('Invalid permit.state'));
 
       // Permit updates and their notes are prepared in the same transaction, so one failing rolls back the batch

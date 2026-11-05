@@ -1,6 +1,6 @@
 import pLimit from 'p-limit';
 
-import { listPeachIntegratedTrackings } from './permit.ts';
+import { listPeachIntegratedPermits } from './permit.ts';
 import { PiesOnHold } from '#src/db/codes/enums';
 import { generateUpdateStamps } from '#src/db/utils/utils';
 import { getPiesRecord } from '#src/external/peach';
@@ -71,7 +71,7 @@ export const getPeachTrackingRecords = async (
   repositories: Pick<Repositories, 'permit'>
 ): Promise<PeachSystemRecordPermit[]> => {
   // Only fetch permits that have a peach integrated system permit type
-  const peachIntegratedPermits = await listPeachIntegratedTrackings({ permit: repositories.permit });
+  const peachIntegratedPermits = await listPeachIntegratedPermits({ permit: repositories.permit });
 
   // Find the highest priority system record for each permit.
   return peachIntegratedPermits.flatMap((permit) => {

@@ -1,6 +1,7 @@
 import config from 'config';
 import { randomUUID } from 'node:crypto';
 
+import { upsertPermitTracking } from './permitTracking.ts';
 import { getProjectByActivityId } from './project.ts';
 import { codeTable } from '#src/db/codes/cache';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
@@ -20,9 +21,11 @@ import type { Repositories } from '#src/db/unitOfWork';
 import type {
   Contact,
   CurrentContext,
+  DraftPermitsInput,
   Email,
   Permit,
   PermitCreateInput,
+  PermitTrackingCreateInput,
   PermitUpdateEmailParams,
   ProjectRepositoryKeys
 } from '#types';
@@ -69,11 +72,95 @@ export const buildNewPermitRecord = (params: {
 });
 
 /**
+ * Builds applied permit records, plus trackers for their tracking IDs
+ * @param permits - The applied permits, each tied to an activity
+ * @returns Applied permit records and their trackers
+ */
+export const buildAppliedPermits = (
+  permits: (NonNullable<DraftPermitsInput['appliedPermits']>[number] & { activityId: string })[]
+) => {
+  const appliedPermitTrackers: PermitTrackingCreateInput[] = [];
+
+  const appliedPermits = permits.map((x) => {
+    const permitId = randomUUID();
+
+    // Add each tracker for this permit with the proper permitId
+    x.permitTracking
+      ?.filter((pt) => pt.trackingId)
+      .forEach((pt) =>
+        // Pick fields explicitly, a client-sent permitTrackingId would overwrite another project's tracker
+        appliedPermitTrackers.push({
+          permitId,
+          trackingId: pt.trackingId,
+          sourceSystemKindId: pt.sourceSystemKindId,
+          shownToProponent: pt.shownToProponent ?? undefined
+        } satisfies PermitTrackingCreateInput)
+      );
+
+    return buildNewPermitRecord({
+      permitId,
+      permitTypeId: x.permitTypeId,
+      activityId: x.activityId,
+      stage: PermitStage.APPLICATION_SUBMISSION,
+      needed: PermitNeeded.YES,
+      state: PermitState.IN_PROGRESS,
+      submittedDate: x.submittedDate
+    });
+  });
+
+  return { appliedPermits, appliedPermitTrackers };
+};
+
+/**
+ * Builds the permit and tracker records for the permits section of a project intake
+ * @param activityId - The activity the permits belong to
+ * @param permits - The permits section of the intake submission
+ * @returns Applied and investigate permit records, plus the trackers for the applied permits
+ */
+export const buildProjectIntakePermits = (activityId: string, permits: DraftPermitsInput) => ({
+  ...buildAppliedPermits((permits.appliedPermits ?? []).map((x) => ({ ...x, activityId }))),
+  investigatePermits: (permits.investigatePermits ?? []).map((x) =>
+    buildNewPermitRecord({
+      permitId: randomUUID(),
+      permitTypeId: x.permitTypeId,
+      activityId,
+      stage: PermitStage.PRE_SUBMISSION,
+      needed: PermitNeeded.UNDER_INVESTIGATION,
+      state: PermitState.NONE
+    })
+  )
+});
+
+/**
+ * Saves the permits and trackers built for an intake
+ * @param repositories - The required repositories
+ * @param intakePermits - The permit and tracker records to save
+ */
+export const saveIntakePermits = async (
+  repositories: Pick<Repositories, 'permit' | 'permitTracking'>,
+  intakePermits: {
+    appliedPermits: PermitCreateInput[];
+    investigatePermits?: PermitCreateInput[];
+    appliedPermitTrackers: PermitTrackingCreateInput[];
+  }
+) => {
+  const { appliedPermits, investigatePermits = [], appliedPermitTrackers } = intakePermits;
+
+  await Promise.all(
+    [...appliedPermits, ...investigatePermits].map((p) => repositories.permit.upsert({ permitId: p.permitId }, p, p))
+  );
+  // Trackers reference their permit, so they can only be saved once the permits exist
+  await Promise.all(
+    appliedPermitTrackers.map((pt) => upsertPermitTracking({ permitTracking: repositories.permitTracking }, pt))
+  );
+};
+
+/**
  * Retrieve permits and trackings that are PEACH integrated
  * @param repositories - The required repositories
  * @returns A Promise that resolves to a list of permits matching the search params
  */
-export const listPeachIntegratedTrackings = async (repositories: Pick<Repositories, 'permit'>): Promise<Permit[]> => {
+export const listPeachIntegratedPermits = async (repositories: Pick<Repositories, 'permit'>): Promise<Permit[]> => {
   return await repositories.permit.findMany({
     where: {
       AND: [{ permitTracking: { some: { sourceSystemKind: { integrated: true } } } }]
@@ -138,18 +225,44 @@ export const buildPermitUpdateEmail = async (
 };
 
 /**
- * Creates the update note and builds email notifications for an updated permit, does not send them
+ * Creates the update note for a permit, defaulting to a summary of its state and stage
+ * @param repositories - The required repositories
+ * @param permit - The permit the note belongs to
+ * @param note - The note text, if given
+ * @returns The created note
+ */
+export const createPermitUpdateNote = async (
+  repositories: Pick<Repositories, 'permitNote'>,
+  permit: Permit,
+  note?: string
+) => {
+  const stateDisplay = codeTable.PermitState.displays[permit.state];
+  const stageDisplay = codeTable.PermitStage.displays[permit.stage];
+
+  if (!stateDisplay || !stageDisplay) {
+    throw new Error(`Invalid permit.state: ${permit.state} or permit.stage: ${permit.stage}`);
+  }
+
+  return await repositories.permitNote.create({
+    permitNoteId: randomUUID(),
+    permitId: permit.permitId,
+    note: note ?? `This application is ${stateDisplay.toLocaleLowerCase()} in the ${stageDisplay.toLocaleLowerCase()}.`
+  });
+};
+
+/**
+ * Builds email notifications for an updated permit, does not send them
  * @param repositories - The required repositories
  * @param permit Permit to prepare notifications for
  * @param fromPeachSync Indicates if the update is coming from a PEACH sync
- * @param note A permit note to be used in permit note creation, if given
+ * @param note Text of the update note created for this change
  * @returns The emails ready to be sent
  */
-export const prepareNotificationEmails = async (
-  repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitNote' | 'permitType' | 'user'>,
+export const preparePermitUpdateEmails = async (
+  repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitType' | 'user'>,
   permit: Permit,
   fromPeachSync: boolean,
-  note?: string
+  note: string
 ): Promise<Email[]> => {
   const permitUpdateEmails: PermitUpdateEmailParams[] = [];
 
@@ -185,20 +298,6 @@ export const prepareNotificationEmails = async (
       });
   }
 
-  const stateDisplay = codeTable.PermitState.displays[permit.state];
-  const stageDisplay = codeTable.PermitStage.displays[permit.stage];
-
-  if (!stateDisplay || !stageDisplay) {
-    throw new Error(`Invalid permit.state: ${permit.state} or permit.stage: ${permit.stage}`);
-  }
-
-  // Create update note for status change
-  const permitNoteRes = await repositories.permitNote.create({
-    permitNoteId: randomUUID(),
-    permitId: permit.permitId,
-    note: note ?? `This application is ${stateDisplay.toLocaleLowerCase()} in the ${stageDisplay.toLocaleLowerCase()}.`
-  });
-
   // Add proponent update email to email jobs
   const primaryContact = project?.activity?.activityContact?.find(
     (ac) => ac.role === ActivityContactRole.PRIMARY
@@ -207,7 +306,7 @@ export const prepareNotificationEmails = async (
   const peachUpdateNotePlaceholder =
     'You can now track your application progress here. You will receive an email if the status or stage changes, ' +
     'or when your Navigator posts an update.';
-  const isOnlyTemplate = permitNoteRes.note.trim() === peachUpdateNotePlaceholder;
+  const isOnlyTemplate = note.trim() === peachUpdateNotePlaceholder;
   const isFirstNote = !permit?.permitNote?.length;
 
   const useInitialPeachTemplate = isOnlyTemplate && isFirstNote && state.features.peach;
@@ -240,7 +339,7 @@ export const prepareNotificationEmails = async (
  * @param contact Contact record of the proponent who submitted the permits
  * @returns The email ready to be sent
  */
-async function buildIntakeNotificationEmail(
+async function buildIntakePermitEmail(
   repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitType' | 'user'>,
   permits: Permit[],
   contact: Contact
@@ -336,7 +435,7 @@ async function buildIntakeNotificationEmail(
  * @returns The emails ready to be sent
  * @throws {Problem} 403 if the current user does not have an associated contact record
  */
-export const prepareIntakeNotificationEmails = async (
+export const prepareIntakePermitEmails = async (
   repositories: Pick<Repositories, ProjectRepositoryKeys | 'contact' | 'permitType' | 'user'>,
   currentContext: CurrentContext,
   permits: Permit[]
@@ -361,7 +460,7 @@ export const prepareIntakeNotificationEmails = async (
 
   const emailDataArray = await Promise.all(
     Object.values(permitsByProject).map((projectPermits) =>
-      buildIntakeNotificationEmail(repositories, projectPermits, contactRecord)
+      buildIntakePermitEmail(repositories, projectPermits, contactRecord)
     )
   );
 

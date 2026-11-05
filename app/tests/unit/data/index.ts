@@ -242,7 +242,12 @@ export const TEST_ELECTRIFICATION_INTAKE: SubmitElectrificationProjectDraftReque
     contactApplicantRelationship: ProjectRelationship.OWNER,
     contactPreference: ContactPreference.EMAIL
   },
-  draftId: null
+  draftId: null,
+  permits: {
+    appliedPermits: [],
+    hasAppliedProvincialPermits: BasicResponse.NO,
+    investigatePermits: []
+  }
 };
 
 export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProjectBase = {
@@ -260,6 +265,7 @@ export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProjectBase = {
   bcHydroNumber: '12345',
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'COMPANY',
+  hasAppliedProvincialPermits: null,
   hasEpa: null,
   locationDescription: null,
   megawatts: null,
@@ -294,6 +300,7 @@ export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
   addedToAts: false,
   projectCategory: null,
   locationDescription: null,
+  hasAppliedProvincialPermits: null,
   hasEpa: null,
   megawatts: null,
   bcEnvironmentAssessNeeded: null,
