@@ -30,8 +30,7 @@ const testForm = {
     region: Region.SKEENA,
     submissionType: SubmissionType.GUIDANCE
   },
-  atsInfo: { atsClientId: null, atsEnquiryId: null, businessArea: 'AGRICULTURE' },
-  projectAreasUpdated: { aaiUpdated: true }
+  atsInfo: { atsClientId: null, atsEnquiryId: null, businessArea: 'AGRICULTURE' }
 };
 
 // Mount
@@ -62,8 +61,7 @@ describe('general createProjectFormNavigatorSchema', () => {
       'submissionState.assignedUser': 'Assigned to must be empty or a selected user',
       'submissionState.queuePriority': 'Priority is a required field',
       'submissionState.region': 'Region is a required field',
-      'submissionState.submissionType': 'Submission type is a required field',
-      'projectAreasUpdated.aaiUpdated': 'Authorization and Approvals Insight (AAI) updated is a required field'
+      'submissionState.submissionType': 'Submission type is a required field'
     });
   });
 
