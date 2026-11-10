@@ -601,8 +601,6 @@ components:
         locationDescription:
           type: string
           nullable: true
-        aaiUpdated:
-          type: boolean
         atsClientId:
           type: integer
           nullable: true
@@ -878,7 +876,6 @@ components:
         - hasEpa
         - bcEnvironmentAssessNeeded
         - locationDescription
-        - aaiUpdated
         - atsClientId
         - astNotes
         - projectType
@@ -2530,8 +2527,6 @@ components:
           nullable: true
         naturalDisaster:
           type: boolean
-        aaiUpdated:
-          type: boolean
         applicationStatus:
           type: string
           nullable: true
@@ -2882,7 +2877,6 @@ components:
         - astNotes
         - atsClientId
         - naturalDisaster
-        - aaiUpdated
         - applicationStatus
         - projectNumber
         - projectDescription
@@ -3045,8 +3039,6 @@ components:
         financiallySupportedHousingCoop:
           type: string
           nullable: true
-        aaiUpdated:
-          type: boolean
         applicationStatus:
           type: string
           nullable: true
@@ -3368,7 +3360,6 @@ components:
         - financiallySupportedIndigenous
         - financiallySupportedNonProfit
         - financiallySupportedHousingCoop
-        - aaiUpdated
         - applicationStatus
         - createdBy
         - createdAt
@@ -5011,8 +5002,6 @@ paths:
                   type: integer
                   nullable: true
                   minimum: 0
-                aaiUpdated:
-                  type: boolean
               additionalProperties: false
       responses:
         '200':
@@ -7680,8 +7669,6 @@ paths:
                   type: integer
                   nullable: true
                   minimum: 0
-                aaiUpdated:
-                  type: boolean
                 astNotes:
                   type: string
                   nullable: true
@@ -10587,8 +10574,6 @@ paths:
                 ltsaCompleted:
                   type: boolean
                 bcOnlineCompleted:
-                  type: boolean
-                aaiUpdated:
                   type: boolean
                 astNotes:
                   type: string

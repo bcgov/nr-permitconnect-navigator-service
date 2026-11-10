@@ -128,7 +128,6 @@ describe('electrificationProject domain', () => {
       const result = await generateElectrificationProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
       expect(result.electrificationProject.companyIdRegistered).toBeNull();
-      expect(result.electrificationProject.aaiUpdated).toBe(false);
       expect(result.electrificationProject.addedToAts).toBe(false);
       expect(result.electrificationProject.queuePriority).toBeNull();
     });
