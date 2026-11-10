@@ -144,7 +144,6 @@ export const generateGeneralProjectData = async (
       submittedAt: new Date(),
       applicationStatus: ApplicationStatus.NEW,
       submissionType: SubmissionType.GUIDANCE,
-      aaiUpdated: false,
       assignedUserId: null,
       queuePriority: null
     } satisfies GeneralProjectCreateInput,
