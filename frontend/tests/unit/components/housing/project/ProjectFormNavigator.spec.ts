@@ -84,7 +84,6 @@ const testProject: HousingProject = {
   atsEnquiryId: 654321,
   ltsaCompleted: true,
   bcOnlineCompleted: true,
-  aaiUpdated: true,
   astNotes: 'AST notes.',
   applicationStatus: ApplicationStatus.COMPLETED,
   projectApplicantType: ProjectApplicant.INDIVIDUAL,

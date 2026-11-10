@@ -295,7 +295,6 @@ async function initializeFormValues(project: HousingProject): Promise<DeepPartia
 
     // Updates
     projectAreasUpdated: {
-      aaiUpdated: project.aaiUpdated,
       addedToAts: project.addedToAts,
       ltsaCompleted: project.ltsaCompleted,
       bcOnlineCompleted: project.bcOnlineCompleted
@@ -338,7 +337,7 @@ function onReOpen() {
     accept: async () => {
       formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
       const result = await formRef.value?.validate();
-      if (result?.valid && result.values) onSubmit(result.values);
+      if (result?.valid && result.values) await onSubmit(result.values);
       else if (result) onInvalidSubmit(result);
     }
   });
@@ -415,7 +414,6 @@ const onSubmit = async (formValues: GenericObject) => {
       addedToAts: atsCreate.addedToAts,
       ltsaCompleted: values.projectAreasUpdated.ltsaCompleted,
       bcOnlineCompleted: values.projectAreasUpdated.bcOnlineCompleted,
-      aaiUpdated: values.projectAreasUpdated.aaiUpdated,
 
       // Consent
       consentToFeedback: values.consent.consentToFeedback === BasicResponse.YES
