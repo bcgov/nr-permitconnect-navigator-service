@@ -40,13 +40,7 @@ beforeEach(() => {
 
 describe('ProjectAreasUpdatedSection', () => {
   describe('rendering', () => {
-    it('always renders the aaiUpdated checkbox', () => {
-      const { wrapper } = mountProjectAreasUpdatedSection({ initiative: Initiative.GENERAL });
-
-      expect(checkboxNames(wrapper)).toContain('projectAreasUpdated.aaiUpdated');
-    });
-
-    it('renders addedToAts for HOUSING and ELECTRIFICATION, but not GENERAL', () => {
+    it('renders addedToAts for HOUSING and ELECTRIFICATION', () => {
       const { wrapper: housing } = mountProjectAreasUpdatedSection({ initiative: Initiative.HOUSING });
       expect(checkboxNames(housing)).toContain('projectAreasUpdated.addedToAts');
 
@@ -54,9 +48,6 @@ describe('ProjectAreasUpdatedSection', () => {
         initiative: Initiative.ELECTRIFICATION
       });
       expect(checkboxNames(electrification)).toContain('projectAreasUpdated.addedToAts');
-
-      const { wrapper: general } = mountProjectAreasUpdatedSection({ initiative: Initiative.GENERAL });
-      expect(checkboxNames(general)).not.toContain('projectAreasUpdated.addedToAts');
     });
 
     it('renders ltsaCompleted and bcOnlineCompleted only for HOUSING', () => {
@@ -88,25 +79,55 @@ describe('ProjectAreasUpdatedSection', () => {
   });
 
   describe('form error reporting', () => {
-    it('reports an error to the store when vee-validate has one on its field', async () => {
-      const { formStore, form } = mountProjectAreasUpdatedSection({ tab: 1 });
+    const renderedFields = [
+      { initiative: Initiative.HOUSING, field: 'addedToAts' },
+      { initiative: Initiative.HOUSING, field: 'ltsaCompleted' },
+      { initiative: Initiative.HOUSING, field: 'bcOnlineCompleted' },
+      { initiative: Initiative.ELECTRIFICATION, field: 'addedToAts' }
+    ];
 
-      form.setErrors({ 'projectAreasUpdated.aaiUpdated': 'Required' });
-      await nextTick();
+    const notRenderedFields = [
+      { initiative: Initiative.ELECTRIFICATION, field: 'ltsaCompleted' },
+      { initiative: Initiative.ELECTRIFICATION, field: 'bcOnlineCompleted' }
+    ];
 
-      expect(formStore.setFormError).toHaveBeenCalledWith('ProjectAreasUpdatedSection', 1, true);
-    });
+    it.each(renderedFields)(
+      'reports an error to the store when $initiative has an error on $field',
+      async ({ initiative, field }) => {
+        const { formStore, form } = mountProjectAreasUpdatedSection({ initiative, tab: 1 });
 
-    it('clears the error once vee-validate reports the field as valid again', async () => {
-      const { formStore, form } = mountProjectAreasUpdatedSection();
+        form.setErrors({ [`projectAreasUpdated.${field}`]: 'Required' });
+        await nextTick();
 
-      form.setErrors({ 'projectAreasUpdated.aaiUpdated': 'Required' });
-      await nextTick();
+        expect(formStore.setFormError).toHaveBeenCalledWith('ProjectAreasUpdatedSection', 1, true);
+      }
+    );
 
-      form.setErrors({ 'projectAreasUpdated.aaiUpdated': undefined });
-      await nextTick();
+    it.each(renderedFields)(
+      'clears the error once vee-validate reports $field as valid again for $initiative',
+      async ({ initiative, field }) => {
+        const { formStore, form } = mountProjectAreasUpdatedSection({ initiative });
 
-      expect(formStore.setFormError).toHaveBeenLastCalledWith('ProjectAreasUpdatedSection', 0, false);
-    });
+        form.setErrors({ [`projectAreasUpdated.${field}`]: 'Required' });
+        await nextTick();
+
+        form.setErrors({ [`projectAreasUpdated.${field}`]: undefined });
+        await nextTick();
+
+        expect(formStore.setFormError).toHaveBeenLastCalledWith('ProjectAreasUpdatedSection', 0, false);
+      }
+    );
+
+    it.each(notRenderedFields)(
+      'does not report an error for $field when $initiative does not render it',
+      async ({ initiative, field }) => {
+        const { formStore, form } = mountProjectAreasUpdatedSection({ initiative });
+
+        form.setErrors({ [`projectAreasUpdated.${field}`]: 'Required' });
+        await nextTick();
+
+        expect(formStore.setFormError).toHaveBeenLastCalledWith('ProjectAreasUpdatedSection', 0, false);
+      }
+    );
   });
 });
