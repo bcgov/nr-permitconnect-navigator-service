@@ -36,6 +36,11 @@ Run these commands from `app/` with your local database configured.
 - `npm run prisma:migrate` applies pending Knex migrations from `src/db/migrations`.
 - `npm run prisma:sync` pulls the current database schema into the Prisma schema and regenerates the Prisma client.
 
+> [!IMPORTANT]
+> Knex reads `server.db.*` (or `SERVER_DB_*`), while Prisma reads `DATABASE_URL`. Both must point at the same database.
+>
+> Make sure that `DATABASE_URL` is set in `app/.env` and that the `server.db.*` values in `app/config` point to the same database.
+
 Database migrations are managed with Knex, not Prisma Migrate.
 
 ## Generating enums
