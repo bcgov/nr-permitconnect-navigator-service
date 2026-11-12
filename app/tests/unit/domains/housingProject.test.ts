@@ -424,7 +424,6 @@ describe('housingProject domain', () => {
 
       expect(result.housingProject.applicationStatus).toBe(ApplicationStatus.NEW);
       expect(result.housingProject.submissionType).toBe(SubmissionType.GUIDANCE);
-      expect(result.housingProject.aaiUpdated).toBe(false);
       expect(result.housingProject.astUpdated).toBe(false);
       expect(result.housingProject.queuePriority).toBe(3);
     });

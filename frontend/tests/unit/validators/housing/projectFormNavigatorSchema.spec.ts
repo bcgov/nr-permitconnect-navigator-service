@@ -17,8 +17,6 @@ const codeList = {
 
 const orgBookOptions = [{ registeredName: 'Test Co', registeredId: 'BC123' }];
 
-const AAI_REQUIRED = 'Authorization and Approvals Insight (AAI) updated is a required field';
-
 const testForm = {
   contact: { email: 'a@b.co', firstName: 'First' },
   companyProjectName: { projectName: 'Project' },
@@ -38,7 +36,7 @@ const testForm = {
     submissionType: SubmissionType.GUIDANCE
   },
   atsInfo: { atsClientId: null, atsEnquiryId: null, businessArea: null },
-  projectAreasUpdated: { aaiUpdated: true, addedToAts: false, ltsaCompleted: false, bcOnlineCompleted: false },
+  projectAreasUpdated: { addedToAts: false, ltsaCompleted: false, bcOnlineCompleted: false },
   consent: { consentToFeedback: BasicResponse.YES }
 };
 
@@ -73,7 +71,6 @@ describe('housing createProjectFormNavigatorSchema', () => {
       'submissionState.assignedUser': 'Assigned to must be empty or a selected user',
       'submissionState.queuePriority': 'Priority is a required field',
       'submissionState.submissionType': 'Submission type is a required field',
-      'projectAreasUpdated.aaiUpdated': AAI_REQUIRED,
       'projectAreasUpdated.addedToAts': 'Authorized Tracking System (ATS) updated is a required field',
       'projectAreasUpdated.ltsaCompleted': 'Land Title Survey Authority (LTSA) completed is a required field',
       'projectAreasUpdated.bcOnlineCompleted': 'BC Online completed is a required field',

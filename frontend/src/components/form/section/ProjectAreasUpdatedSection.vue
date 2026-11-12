@@ -58,10 +58,5 @@ useFormErrorWatcher(formRef, 'ProjectAreasUpdatedSection', tab);
       :label="t('i.housing.project.projectForm.bcOnlineCompleted')"
       :disabled="!getEditable"
     />
-    <Checkbox
-      name="projectAreasUpdated.aaiUpdated"
-      :label="t('i.housing.project.projectForm.aaiUpdateLabel')"
-      :disabled="!getEditable"
-    />
   </div>
 </template>

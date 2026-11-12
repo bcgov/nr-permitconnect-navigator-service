@@ -64,7 +64,6 @@ const testProject: ElectrificationProject = {
   astNotes: 'Notes',
   atsClientId: null,
   atsEnquiryId: null,
-  aaiUpdated: false,
   addedToAts: false,
   projectType: ElectrificationProjectType.IPP_SOLAR,
   projectCategory: null,

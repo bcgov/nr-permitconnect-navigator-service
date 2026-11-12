@@ -164,7 +164,6 @@ async function initializeFormValues(project: ElectrificationProject): Promise<De
 
     // Updates
     projectAreasUpdated: {
-      aaiUpdated: project.aaiUpdated,
       addedToAts: project.addedToAts
     }
   };
@@ -296,7 +295,7 @@ function onReOpen() {
     accept: async () => {
       formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
       const result = await formRef.value?.validate();
-      if (result?.valid && result.values) onSubmit(result.values);
+      if (result?.valid && result.values) await onSubmit(result.values);
       else if (result) onInvalidSubmit(result);
     }
   });
@@ -351,7 +350,6 @@ const onSubmit = async (formValues: GenericObject) => {
       atsEnquiryId: atsCreate.atsEnquiryId,
 
       // Updates
-      aaiUpdated: values.projectAreasUpdated.aaiUpdated,
       addedToAts: atsCreate.addedToAts
     };
 

@@ -228,7 +228,6 @@ export const generateHousingProjectData = async (
       submittedBy,
       applicationStatus: ApplicationStatus.NEW,
       submissionType: SubmissionType.GUIDANCE,
-      aaiUpdated: false,
       astUpdated: false,
       queuePriority: null,
       financiallySupported: [

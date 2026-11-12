@@ -1835,7 +1835,6 @@ export interface components {
       hasEpa: string | null;
       bcEnvironmentAssessNeeded: string | null;
       locationDescription: string | null;
-      aaiUpdated: boolean;
       atsClientId: number | null;
       astNotes: string | null;
       /** @enum {string|null} */
@@ -2489,7 +2488,6 @@ export interface components {
       astNotes: string | null;
       atsClientId: number | null;
       naturalDisaster: boolean;
-      aaiUpdated: boolean;
       applicationStatus: string | null;
       projectNumber: string | null;
       projectDescription: string | null;
@@ -2688,7 +2686,6 @@ export interface components {
       financiallySupportedIndigenous: string | null;
       financiallySupportedNonProfit: string | null;
       financiallySupportedHousingCoop: string | null;
-      aaiUpdated: boolean;
       applicationStatus: string | null;
       createdBy: string | null;
       /** Format: date-time */
@@ -4064,7 +4061,6 @@ export interface operations {
           addedToAts?: boolean;
           atsClientId?: number | null;
           atsEnquiryId?: number | null;
-          aaiUpdated?: boolean;
         };
       };
     };
@@ -6310,7 +6306,6 @@ export interface operations {
           projectLocationDescription?: string | null;
           atsClientId?: number | null;
           atsEnquiryId?: number | null;
-          aaiUpdated?: boolean;
           astNotes?: string | null;
           assignedUserId?: string | null;
           /** @enum {string} */
@@ -8670,7 +8665,6 @@ export interface operations {
           atsEnquiryId?: number | null;
           ltsaCompleted?: boolean;
           bcOnlineCompleted?: boolean;
-          aaiUpdated?: boolean;
           astNotes?: string | null;
           assignedUserId?: string | null;
           /** @enum {string} */

@@ -28,7 +28,6 @@ import type { CodeTableName } from '@/types';
 
 const UNITS = NUM_RESIDENTIAL_UNITS_LIST[0];
 const LONG = 'a'.repeat(256);
-const AAI_REQUIRED = 'Authorization and Approvals Insight (AAI) updated is a required field';
 const UNITS_ONE_OF = 'must be one of the following values: 1-9, 10-49, 50-500, >500, Unsure';
 
 const codeList = {
@@ -585,12 +584,10 @@ describe('navigator validators', () => {
       createProjectAreasUpdatedSchema(options(initiative)).projectAreasUpdated;
 
     it.each([
-      [Initiative.GENERAL, { aaiUpdated: AAI_REQUIRED }],
-      [Initiative.ELECTRIFICATION, { aaiUpdated: AAI_REQUIRED, addedToAts: ADDED_TO_ATS_REQUIRED }],
+      [Initiative.ELECTRIFICATION, { addedToAts: ADDED_TO_ATS_REQUIRED }],
       [
         Initiative.HOUSING,
         {
-          aaiUpdated: AAI_REQUIRED,
           addedToAts: ADDED_TO_ATS_REQUIRED,
           ltsaCompleted: LTSA_REQUIRED,
           bcOnlineCompleted: 'BC Online completed is a required field'
@@ -601,7 +598,7 @@ describe('navigator validators', () => {
     });
 
     it('accepts false flags', async () => {
-      const flags = { aaiUpdated: false, addedToAts: false, ltsaCompleted: false, bcOnlineCompleted: false };
+      const flags = { addedToAts: false, ltsaCompleted: false, bcOnlineCompleted: false };
 
       expect(await runSchema(schemaFor(Initiative.HOUSING), flags)).toEqual({ value: flags, errors: {} });
     });
