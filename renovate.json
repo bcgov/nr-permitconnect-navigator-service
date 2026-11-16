@@ -5,7 +5,9 @@
   ],
   "automerge": true,
   "branchPrefix": "chore/",
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "draftPR": false,
   "minimumReleaseAge": "3 days",
   "mode": "full",
