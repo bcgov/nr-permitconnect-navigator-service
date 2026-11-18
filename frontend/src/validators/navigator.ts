@@ -229,7 +229,6 @@ export function createProjectAreasUpdatedSchema({ initiative, t }: CreateSchemaO
   return {
     projectAreasUpdated: formSection(
       z.looseObject({
-        aaiUpdated: z.boolean(requiredMessage(t('validators.projectAreasUpdated.aaiUpdated'))),
         addedToAts: requiredFlag(t('validators.projectAreasUpdated.addedToAts'), initiative !== Initiative.GENERAL),
         ltsaCompleted: requiredFlag(
           t('validators.projectAreasUpdated.ltsaCompleted'),

@@ -81,7 +81,6 @@
       "description": "Additional information about location"
     },
     "projectAreasUpdated": {
-      "aaiUpdated": "Authorization and Approvals Insight (AAI) updated",
       "addedToAts": "Authorized Tracking System (ATS) updated",
       "ltsaCompleted": "Land Title Survey Authority (LTSA) completed",
       "bcOnlineCompleted": "BC Online completed"
@@ -516,7 +515,6 @@
           "updatesHeader": "Updates"
         },
         "projectFormNavigatorSchema": {
-          "aaiUpdated": "Authorization and Approvals Insight (AAI) updated",
           "addedToAts": "Authorized Tracking System (ATS) updated",
           "ltsaCompleted": "Land Title Survey Authority (LTSA) completed",
           "bcOnlineCompleted": "BC Online completed",

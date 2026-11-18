@@ -39,7 +39,7 @@ const {
 }>();
 
 // Emits
-const emit = defineEmits(['atsInfo:setClientId', 'atsInfo:setAddedToAts', 'atsInfo:create', 'atsInfo:createEnquiry']);
+const emit = defineEmits(['atsInfo:setClientId', 'atsInfo:create', 'atsInfo:createEnquiry']);
 
 // Composables
 const { t } = useI18n();
@@ -201,7 +201,6 @@ function onNewATSEnquiry() {
       () => {
         atsUserDetailsModalVisible = false;
         emit('atsInfo:setClientId', null);
-        emit('atsInfo:setAddedToAts', false);
         atsCreateType = undefined;
       }
     "

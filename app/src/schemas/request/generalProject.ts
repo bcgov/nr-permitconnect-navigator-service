@@ -140,7 +140,6 @@ export const schema = {
         projectLocationDescription: z.string().max(4000).nullish(),
         atsClientId: atsEnquirySubmissionFields.atsClientId,
         atsEnquiryId: atsEnquirySubmissionFields.atsEnquiryId,
-        aaiUpdated: z.boolean().optional(),
         astNotes: z.string().max(4000).nullish(),
         assignedUserId: uuidv4.nullish(),
         applicationStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional(),

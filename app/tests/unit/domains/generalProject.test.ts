@@ -239,7 +239,6 @@ describe('generalProject domain', () => {
 
       expect(result.generalProject.applicationStatus).toBe(ApplicationStatus.NEW);
       expect(result.generalProject.submissionType).toBe(SubmissionType.GUIDANCE);
-      expect(result.generalProject.aaiUpdated).toBe(false);
       expect(result.generalProject.queuePriority).toBeNull();
       expect(result.generalProject.assignedUserId).toBeNull();
     });

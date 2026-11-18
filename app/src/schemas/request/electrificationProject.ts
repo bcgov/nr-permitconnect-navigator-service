@@ -118,8 +118,7 @@ export const schema = {
         queuePriority: z.number().int().min(0).max(3).optional(),
         submissionType: z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]]).optional(),
         applicationStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional(),
-        ...atsEnquirySubmissionFields,
-        aaiUpdated: z.boolean().optional()
+        ...atsEnquirySubmissionFields
       })
       .strict(),
     params: z

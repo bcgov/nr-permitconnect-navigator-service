@@ -65,7 +65,6 @@ const testProject: GeneralProject = {
   astNotes: 'Notes',
   atsClientId: null,
   atsEnquiryId: null,
-  aaiUpdated: false,
   projectApplicantType: ProjectApplicant.INDIVIDUAL,
   projectLocation: 'Test Location',
   activityType: 'Other',

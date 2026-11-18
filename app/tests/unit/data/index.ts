@@ -245,12 +245,11 @@ export const TEST_ELECTRIFICATION_INTAKE: SubmitElectrificationProjectDraftReque
   draftId: null
 };
 
-export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProjectBase = {
+export const TEST_ELECTRIFICATION_PROJECT_1: Omit<ElectrificationProjectBase, 'aaiUpdated'> = {
   electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
   submittedAt: new Date(),
-  aaiUpdated: false,
   addedToAts: false,
   applicationStatus: ApplicationStatus.NEW,
   astNotes: null,
@@ -290,7 +289,6 @@ export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
   bcHydroNumber: null,
   submissionType: SubmissionType.GUIDANCE,
   applicationStatus: ApplicationStatus.NEW,
-  aaiUpdated: false,
   addedToAts: false,
   projectCategory: null,
   locationDescription: null,
@@ -400,7 +398,7 @@ export const TEST_HOUSING_DRAFT: Draft = {
   deletedAt: null
 };
 
-export const TEST_GENERAL_PROJECT_1: GeneralProjectBase = {
+export const TEST_GENERAL_PROJECT_1: Omit<GeneralProjectBase, 'aaiUpdated'> = {
   generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
@@ -419,7 +417,6 @@ export const TEST_GENERAL_PROJECT_1: GeneralProjectBase = {
   astNotes: null,
   atsClientId: null,
   naturalDisaster: false,
-  aaiUpdated: false,
   applicationStatus: ApplicationStatus.NEW,
   atsEnquiryId: null,
   checkProvincialPermits: null,
@@ -464,7 +461,6 @@ export const TEST_GENERAL_PROJECT_CREATE: GeneralProject = {
   astNotes: null,
   atsClientId: null,
   naturalDisaster: false,
-  aaiUpdated: false,
   applicationStatus: ApplicationStatus.NEW,
   atsEnquiryId: null,
   checkProvincialPermits: null,
@@ -574,7 +570,7 @@ export const TEST_GROUP_3_SUPERVISOR: Group = {
   deletedAt: null
 };
 
-export const TEST_HOUSING_PROJECT_1: HousingProjectBase = {
+export const TEST_HOUSING_PROJECT_1: Omit<HousingProjectBase, 'aaiUpdated'> = {
   housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
@@ -603,7 +599,6 @@ export const TEST_HOUSING_PROJECT_1: HousingProjectBase = {
   financiallySupportedIndigenous: BasicResponse.NO,
   financiallySupportedNonProfit: BasicResponse.NO,
   financiallySupportedHousingCoop: BasicResponse.NO,
-  aaiUpdated: false,
   applicationStatus: ApplicationStatus.NEW,
   atsEnquiryId: null,
   checkProvincialPermits: null,
@@ -663,7 +658,6 @@ export const TEST_HOUSING_PROJECT_CREATE: HousingProject = {
   financiallySupportedIndigenous: BasicResponse.NO,
   financiallySupportedNonProfit: BasicResponse.NO,
   financiallySupportedHousingCoop: BasicResponse.NO,
-  aaiUpdated: false,
   applicationStatus: ApplicationStatus.NEW,
   atsEnquiryId: null,
   checkProvincialPermits: null,

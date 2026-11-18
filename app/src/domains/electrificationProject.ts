@@ -62,7 +62,6 @@ export const generateElectrificationProjectData = async (
     submittedAt: new Date(),
     submissionType: SubmissionType.GUIDANCE,
     applicationStatus: ApplicationStatus.NEW,
-    aaiUpdated: false,
     addedToAts: false,
     queuePriority: null
   } satisfies ElectrificationProjectCreateInput;
