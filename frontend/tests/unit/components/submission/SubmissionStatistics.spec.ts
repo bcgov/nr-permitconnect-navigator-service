@@ -4,6 +4,7 @@ import { flushPromises } from '@vue/test-utils';
 import SubmissionStatistics from '@/components/submission/SubmissionStatistics.vue';
 import { Button, DatePicker, Select } from '@/lib/primevue';
 import { reportingService, userService } from '@/services';
+import { getDashboard } from '@/services/reportingService';
 import { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
 import { projectServiceKey } from '@/utils/keys';
 import { omit } from '@/utils/utils';
@@ -33,6 +34,10 @@ vi.mock('@/services', () => ({
   userService: {
     searchUsers: vi.fn()
   }
+}));
+
+vi.mock('@/services/reportingService', () => ({
+  getDashboard: vi.fn().mockResolvedValue({ url: null })
 }));
 
 vi.mock('@/utils/formatters', () => ({
@@ -182,6 +187,25 @@ describe('SubmissionStatistics.vue', () => {
 
       expect(wrapper.text()).not.toContain('BC Housing');
       expect(wrapper.text()).not.toContain('Non-profit');
+    });
+  });
+
+  describe('dashboard', () => {
+    it('embeds the dashboard for the current initiative', async () => {
+      vi.mocked(getDashboard).mockResolvedValueOnce({ url: 'about:blank' });
+      const { wrapper } = mountSubmissionStatistics();
+      await flushPromises();
+
+      expect(getDashboard).toHaveBeenCalledExactlyOnceWith({ initiative: Initiative.HOUSING });
+      expect(wrapper.find('iframe').attributes('src')).toBe('about:blank');
+    });
+
+    it('hides the dashboard when there is no url', async () => {
+      const { wrapper } = mountSubmissionStatistics();
+      await flushPromises();
+
+      expect(getDashboard).toHaveBeenCalledOnce();
+      expect(wrapper.find('iframe').exists()).toBe(false);
     });
   });
 

@@ -155,7 +155,7 @@ async function onDownloadProjectPermitData() {
 const onFrameLoad = () => frame.value && iframeResize({ checkOrigin: false }, frame.value);
 
 onBeforeMount(async () => {
-  url.value = (await getDashboard()).url ?? undefined;
+  url.value = (await getDashboard({ initiative: useAppStore().getInitiative })).url ?? undefined;
 });
 
 onBeforeUnmount(() => frame.value?.iFrameResizer?.removeListeners());

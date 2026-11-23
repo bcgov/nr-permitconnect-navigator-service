@@ -1,7 +1,7 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type { ResponseBody } from '@/types';
+import type { QueryParams, ResponseBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -17,8 +17,10 @@ const reportingRoutes = {
   housingProjectPermit: () => reportingRoute('housing-project', 'permit')
 } as const;
 
-export function getDashboard(): Promise<ResponseBody<'getReportingDashboard'>> {
-  return api.get<ResponseBody<'getReportingDashboard'>>(reportingRoutes.dashboard());
+export function getDashboard(
+  params: QueryParams<'getReportingDashboard'>
+): Promise<ResponseBody<'getReportingDashboard'>> {
+  return api.get<ResponseBody<'getReportingDashboard'>>(reportingRoutes.dashboard(), { params });
 }
 
 /**

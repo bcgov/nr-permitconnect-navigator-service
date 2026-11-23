@@ -12382,9 +12382,22 @@ paths:
       summary: Get a signed Metabase dashboard embed URL
       tags:
         - Reporting
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - PCNS
+              - ELECTRIFICATION
+              - GENERAL
+              - HOUSING
+          required: true
+          name: initiative
+          in: query
       responses:
         '200':
-          description: Signed dashboard embed URL, or null when Metabase is not configured
+          description: >-
+            Signed dashboard embed URL, or null when the initiative has no
+            dashboard configured
           content:
             application/json:
               schema:
@@ -12404,6 +12417,12 @@ paths:
                 $ref: '#/components/schemas/Problem'
         '403':
           description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation error
           content:
             application/problem+json:
               schema:

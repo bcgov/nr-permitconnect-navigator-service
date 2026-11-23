@@ -10340,14 +10340,16 @@ export interface operations {
   };
   getReportingDashboard: {
     parameters: {
-      query?: never;
+      query: {
+        initiative: 'PCNS' | 'ELECTRIFICATION' | 'GENERAL' | 'HOUSING';
+      };
       header?: never;
       path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description Signed dashboard embed URL, or null when Metabase is not configured */
+      /** @description Signed dashboard embed URL, or null when the initiative has no dashboard configured */
       200: {
         headers: {
           [name: string]: unknown;
@@ -10370,6 +10372,15 @@ export interface operations {
       };
       /** @description Forbidden */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
         headers: {
           [name: string]: unknown;
         };

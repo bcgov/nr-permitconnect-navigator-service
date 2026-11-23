@@ -204,6 +204,12 @@ spec:
                   key: {{ $dbPassKey }}
                   name: {{ $dbSecretName }}
 
+            - name: SERVER_METABASE_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ include "pcns.configname" . }}-metabase
+
             - name: SERVER_OBJECTSTORAGE_ACCESSKEYID
               valueFrom:
                 secretKeyRef:

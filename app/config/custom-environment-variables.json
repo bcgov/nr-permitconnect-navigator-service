@@ -69,7 +69,10 @@
     "logFile": "SERVER_LOGFILE",
     "logLevel": "SERVER_LOGLEVEL",
     "metabase": {
-      "dashboardId": "SERVER_METABASE_DASHBOARDID",
+      "dashboards": {
+        "__name": "SERVER_METABASE_DASHBOARDS",
+        "__format": "json"
+      },
       "secretKey": "SERVER_METABASE_SECRETKEY",
       "siteUrl": "SERVER_METABASE_SITEURL"
     },

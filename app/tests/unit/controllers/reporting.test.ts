@@ -7,6 +7,7 @@ import {
   getHousingProjectPermitDataController
 } from '#src/controllers/reporting';
 import * as reportingService from '#src/services/reporting';
+import { Initiative } from '#src/utils/enums/application';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
@@ -75,25 +76,27 @@ const mockData = [
 ];
 
 describe('getDashboardController', () => {
-  it('should respond with a null url when Metabase is not configured', () => {
-    vi.mocked(config.has).mockReturnValue(false);
+  const settings: Record<string, string> = {
+    'server.metabase.dashboards.HOUSING': '5',
+    'server.metabase.secretKey': 'secret',
+    'server.metabase.siteUrl': 'https://metabase.example.com'
+  };
+  const req = (initiative: Initiative) => ({ query: { initiative } }) as Parameters<typeof getDashboardController>[0];
 
-    getDashboardController({} as Request, res as unknown as Response);
+  beforeEach(() => {
+    vi.mocked(config.has).mockImplementation((key: string) => key in settings);
+    vi.mocked(config.get).mockImplementation((key: string) => settings[key]);
+  });
+
+  it('should respond with a null url when the initiative has no dashboard', () => {
+    getDashboardController(req(Initiative.GENERAL), res as unknown as Response);
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ url: null });
   });
 
-  it('should respond with a signed embed url when Metabase is configured', () => {
-    const settings: Record<string, string> = {
-      'server.metabase.dashboardId': '5',
-      'server.metabase.secretKey': 'secret',
-      'server.metabase.siteUrl': 'https://metabase.example.com'
-    };
-    vi.mocked(config.has).mockReturnValue(true);
-    vi.mocked(config.get).mockImplementation((key: string) => settings[key]);
-
-    getDashboardController({} as Request, res as unknown as Response);
+  it('should respond with a signed embed url when the initiative has a dashboard', () => {
+    getDashboardController(req(Initiative.HOUSING), res as unknown as Response);
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({

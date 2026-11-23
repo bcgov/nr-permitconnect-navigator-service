@@ -13,7 +13,8 @@ import { hasIdentity } from '#src/middleware/identity';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
-import { UNAUTHORIZED_RESPONSE, FORBIDDEN_RESPONSE } from '#src/schemas/response/problem';
+import { schema } from '#src/schemas/request/reporting';
+import { UNAUTHORIZED_RESPONSE, FORBIDDEN_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
 import { housingReportingPermitDataSchema, reportingPermitDataSchema } from '#src/schemas/response/reportingPermitData';
 import { reportingDashboardSchema } from '#src/schemas/response/reportingDashboard';
 
@@ -29,13 +30,15 @@ openapiRoute(basePath, router, {
   operationId: 'getReportingDashboard',
   summary: 'Get a signed Metabase dashboard embed URL',
   tags: ['Reporting'],
+  schema: schema.getDashboard,
   responses: {
     200: {
-      description: 'Signed dashboard embed URL, or null when Metabase is not configured',
+      description: 'Signed dashboard embed URL, or null when the initiative has no dashboard configured',
       schema: reportingDashboardSchema
     },
     401: UNAUTHORIZED_RESPONSE,
-    403: FORBIDDEN_RESPONSE
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.REPORTING, Action.READ)],
   handler: getDashboardController
