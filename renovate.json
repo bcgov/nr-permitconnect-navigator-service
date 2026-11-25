@@ -11,6 +11,13 @@
   "draftPR": false,
   "minimumReleaseAge": "3 days",
   "mode": "full",
+  "packageRules": [
+    {
+      "description": "v5+ is GPL-3.0; 4.4.5 is MIT",
+      "matchPackageNames": ["iframe-resizer"],
+      "enabled": false
+    }
+  ],
   "prConcurrentLimit": 3,
   "pruneStaleBranches": true,
   "rangeStrategy": "pin",
