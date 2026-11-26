@@ -38,7 +38,6 @@ useFormErrorWatcher(formRef, 'ProjectAreasUpdatedSection', tab);
       {{ t('i.housing.project.projectForm.updatesHeader') }}
     </h4>
     <Checkbox
-      v-if="getInitiative !== Initiative.GENERAL"
       name="projectAreasUpdated.addedToAts"
       class="mb-4"
       :label="t('i.housing.project.projectForm.atsUpdated')"
@@ -56,11 +55,6 @@ useFormErrorWatcher(formRef, 'ProjectAreasUpdatedSection', tab);
       class="col-span-12 mb-4"
       name="projectAreasUpdated.bcOnlineCompleted"
       :label="t('i.housing.project.projectForm.bcOnlineCompleted')"
-      :disabled="!getEditable"
-    />
-    <Checkbox
-      name="projectAreasUpdated.aaiUpdated"
-      :label="t('i.housing.project.projectForm.aaiUpdateLabel')"
       :disabled="!getEditable"
     />
   </div>

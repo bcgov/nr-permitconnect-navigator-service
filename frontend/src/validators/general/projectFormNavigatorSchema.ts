@@ -8,7 +8,6 @@ import {
   createLocationDescriptionPanelSchema,
   createLocationPanelSchema,
   createLocationPidsPanelSchema,
-  createProjectAreasUpdatedSchema,
   createProjectDescriptionPanelSchema,
   createRelatedEnquiriesPanelSchema,
   createSubmissionStatePanelSchema
@@ -33,8 +32,7 @@ export function createProjectFormNavigatorSchema({
     ...createAstNotesPanelSchema({ t }),
     ...createSubmissionStatePanelSchema({ initiative, t }),
     ...createRelatedEnquiriesPanelSchema(),
-    ...createAtsInfoPanelSchema({ initiative, t, codeList }),
-    ...createProjectAreasUpdatedSchema({ initiative, t })
+    ...createAtsInfoPanelSchema({ initiative, t, codeList })
   });
 }
 

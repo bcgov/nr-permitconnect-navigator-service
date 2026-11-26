@@ -14,7 +14,6 @@ import LocationDescriptionPanel from '@/components/form/panel/LocationDescriptio
 import LocationPanel from '@/components/form/panel/LocationPanel.vue';
 import LocationPidsPanel from '@/components/form/panel/LocationPidsPanel.vue';
 import ProjectDescriptionPanel from '@/components/form/panel/ProjectDescriptionPanel.vue';
-import ProjectAreasUpdatedSection from '@/components/form/section/ProjectAreasUpdatedSection.vue';
 import RelatedEnquiriesSection from '@/components/form/section/RelatedEnquiriesSection.vue';
 import SubmissionStateSection from '@/components/form/section/SubmissionStateSection.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
@@ -73,8 +72,7 @@ const initialFormValues: Ref<DeepPartial<FormSchemaType>> = ref({
   astNotes: {},
   submissionState: {},
   atsInfo: {},
-  relatedEnquiries: {},
-  projectAreasUpdated: {}
+  relatedEnquiries: {}
 });
 const isFormReady: Ref<boolean> = ref(false);
 provide(formReadyKey, isFormReady);
@@ -143,12 +141,7 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
       businessArea: project.businessArea
     },
 
-    relatedEnquiries: { csv: project.relatedEnquiries },
-
-    // Updates
-    projectAreasUpdated: {
-      aaiUpdated: project.aaiUpdated
-    }
+    relatedEnquiries: { csv: project.relatedEnquiries }
   };
 }
 
@@ -183,7 +176,7 @@ function onReOpen() {
     accept: async () => {
       formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
       const result = await formRef.value?.validate();
-      if (result?.valid && result.values) onSubmit(result.values);
+      if (result?.valid && result.values) await onSubmit(result.values);
       else if (result) onInvalidSubmit(result);
     }
   });
@@ -231,10 +224,7 @@ const onSubmit = async (formValues: GenericObject) => {
       queuePriority: values.submissionState.queuePriority,
 
       // ATS
-      businessArea: values.atsInfo.businessArea as BusinessArea,
-
-      // Updates
-      aaiUpdated: values.projectAreasUpdated.aaiUpdated
+      businessArea: values.atsInfo.businessArea as BusinessArea
     };
 
     // Update project
@@ -353,11 +343,7 @@ onMounted(async () => {
           :phone-number="values.contact.phoneNumber"
           :email="values.contact.email"
           @ats-info:set-client-id="(atsClientId: number | null) => setFieldValue('atsInfo.atsClientId', atsClientId)"
-          @ats-info:set-added-to-ats="
-            (addedToATS: boolean) => setFieldValue('projectAreasUpdated.addedToAts', addedToATS)
-          "
         />
-        <ProjectAreasUpdatedSection />
       </div>
     </div>
     <div class="mt-16">

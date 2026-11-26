@@ -35,7 +35,13 @@ const prisma = new PrismaClient({
   // TODO: https://www.prisma.io/docs/orm/prisma-client/observability-and-logging/logging#event-based-logging
   log: ['error', 'warn'],
   errorFormat: 'pretty',
-  adapter
+  adapter,
+  // Column retained for data retention, hidden from app/API
+  omit: {
+    electrification_project: { aaiUpdated: true },
+    general_project: { aaiUpdated: true },
+    housing_project: { aaiUpdated: true }
+  }
 })
   .$extends(permitStatusDatesTransform)
   .$extends(filterDeletedTransform)

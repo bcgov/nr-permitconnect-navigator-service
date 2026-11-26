@@ -81,7 +81,6 @@
       "description": "Additional information about location"
     },
     "projectAreasUpdated": {
-      "aaiUpdated": "Authorization and Approvals Insight (AAI) updated",
       "addedToAts": "Authorized Tracking System (ATS) updated",
       "ltsaCompleted": "Land Title Survey Authority (LTSA) completed",
       "bcOnlineCompleted": "BC Online completed"
@@ -443,14 +442,12 @@
         "projectStateLabel": "Project state",
         "submissionTypeLabel": "Submission type",
         "priorityLabel": "Priority",
-        "aaiUpdateLabel": "AAI Update",
         "searchContacts": "Search Contacts"
       }
     },
     "housing": {
       "project": {
         "projectForm": {
-          "aaiUpdateLabel": "AAI Update",
           "additionalInfoHeader": "Additional information about project",
           "addressSearchPlaceholder": "Type to search the address of your housing project",
           "affectedByNaturalDisaster": "Affected by natural disaster?",
@@ -516,7 +513,6 @@
           "updatesHeader": "Updates"
         },
         "projectFormNavigatorSchema": {
-          "aaiUpdated": "Authorization and Approvals Insight (AAI) updated",
           "addedToAts": "Authorized Tracking System (ATS) updated",
           "ltsaCompleted": "Land Title Survey Authority (LTSA) completed",
           "bcOnlineCompleted": "BC Online completed",
