@@ -47,6 +47,8 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function beginDeterminateLoading() {
+    // Overlapping calls would otherwise orphan the previous interval
+    clearInterval(state.loadingInterval.value);
     state.loadingValue.value = 0;
     ++state.loadingCalls.value;
     state.loadingMode.value = 'determinate';

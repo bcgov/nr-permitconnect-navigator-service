@@ -1,16 +1,20 @@
 import { randomUUID } from 'node:crypto';
 
-import { PermitStage, PermitState } from '#src/db/codes/enums';
 import { unitOfWork } from '#src/db/unitOfWork';
 import { activityContactScope } from '#src/db/utils/utils';
 import { findPriorityPermitTracking } from '#src/domains/peach';
-import { buildNewPermitRecord, prepareNotificationEmails, prepareIntakeNotificationEmails } from '#src/domains/permit';
+import {
+  buildAppliedPermits,
+  createPermitUpdateNote,
+  saveIntakePermits,
+  preparePermitUpdateEmails,
+  prepareIntakePermitEmails
+} from '#src/domains/permit';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { email } from '#src/external/ches';
 import { getPiesRecord } from '#src/external/peach';
 import { summarizePiesRecord } from '#src/parsers/peach';
 import { getScopeUserId } from '#src/parsers/responseFiltering';
-import { PermitNeeded } from '#src/utils/enums/permit';
 import { getLogger } from '#src/utils/log';
 import Problem from '#src/utils/problem';
 import { differential, isEmptyObject } from '#src/utils/utils';
@@ -90,6 +94,14 @@ export const getPermitService = async (permitId: string): Promise<Permit> => {
   });
 };
 
+/**
+ * Create applied permits and their trackers from a proponent intake
+ * @param currentAuthorization - Authorizations assigned to the current authorized user
+ * @param currentContext - Context data of current request
+ * @param data - The permits to create, each tied to an activity
+ * @returns A Promise that resolves to the created permits
+ * @throws {Problem} 403 when scope:self and the user is not a delegate for every activity
+ */
 export const intakePermitService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
@@ -128,40 +140,27 @@ export const intakePermitService = async (
         }
       }
 
-      // Build new permit and tracking ID arrays
-      const appliedPermitTrackers: PermitTrackingUpsertInput[] = [];
-
-      const appliedPermits = data.map((x: IntakePermitInput) => {
-        const permitId = randomUUID();
-
-        // Add each tracker for this permit with the proper permitId
-        if (x.trackingId)
-          appliedPermitTrackers.push({ trackingId: x.trackingId, permitId } as PermitTrackingUpsertInput);
-
-        return buildNewPermitRecord({
-          permitId,
-          permitTypeId: x.permitTypeId,
+      const intakePermits = buildAppliedPermits(
+        data.map((x: IntakePermitInput) => ({
           activityId: x.activityId,
-          stage: PermitStage.APPLICATION_SUBMISSION,
-          needed: PermitNeeded.YES,
-          state: PermitState.IN_PROGRESS,
-          submittedDate: x.submittedDate
-        });
-      });
+          permitTypeId: x.permitTypeId,
+          submittedDate: x.submittedDate,
+          permitTracking: [{ trackingId: x.trackingId }]
+        }))
+      );
 
       // Create each permit and tracking IDs
-      const addedPermits = await Promise.all(
-        appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p))
-      );
-      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
+      await saveIntakePermits({ permit, permitTracking }, intakePermits);
 
-      const emails = await prepareIntakeNotificationEmails(
+      const permits = await permit.findMany({
+        where: { permitId: { in: intakePermits.appliedPermits.map((x) => x.permitId) } }
+      });
+
+      const emails = await prepareIntakePermitEmails(
         { contact, electrificationProject, generalProject, housingProject, permitType, user },
         currentContext,
-        addedPermits
+        permits
       );
-
-      const permits = await permit.findMany({ where: { permitId: { in: appliedPermits.map((x) => x.permitId) } } });
 
       return { permits, emails };
     }
@@ -356,14 +355,12 @@ export const upsertPermitService = async (
       let emails: Email[] = [];
       if (data?.permitId) {
         if (!isEmptyPermitNote || (isValidPeachPermit && statusChanged)) {
-          const note = isEmptyPermitNote
-            ? `This application is ${data.state.toLocaleLowerCase()} in the ${data.stage.toLocaleLowerCase()}.`
-            : permitNoteText;
-          emails = await prepareNotificationEmails(
-            { electrificationProject, generalProject, housingProject, permitNote, permitType, user },
+          const createdNote = await createPermitUpdateNote({ permitNote }, data, permitNoteText || undefined);
+          emails = await preparePermitUpdateEmails(
+            { electrificationProject, generalProject, housingProject, permitType, user },
             data,
             false,
-            note
+            createdNote.note
           );
         }
       }

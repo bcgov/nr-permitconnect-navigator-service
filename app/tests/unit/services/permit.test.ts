@@ -5,6 +5,7 @@ import {
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
   TEST_PERMIT_1,
+  TEST_PERMIT_NOTE_1,
   TEST_PERMIT_TYPE_1
 } from '#tests/unit/data/index';
 import { prismaTxMock } from '#tests/__mocks__/prismaMock';
@@ -27,8 +28,11 @@ import type { CurrentAuthorization, IntakePermitRequest } from '#types';
 
 vi.mock('config');
 
-const prepareNotificationEmailsSpy = vi.spyOn(permitDomain, 'prepareNotificationEmails');
-const prepareIntakeNotificationEmails = vi.spyOn(permitDomain, 'prepareIntakeNotificationEmails');
+const createPermitUpdateNoteSpy = vi
+  .spyOn(permitDomain, 'createPermitUpdateNote')
+  .mockResolvedValue(TEST_PERMIT_NOTE_1 as never);
+const preparePermitUpdateEmailsSpy = vi.spyOn(permitDomain, 'preparePermitUpdateEmails');
+const prepareIntakePermitEmails = vi.spyOn(permitDomain, 'prepareIntakePermitEmails');
 const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
 const findPriorityPermitTrackingSpy = vi.spyOn(peachDomain, 'findPriorityPermitTracking');
 const getPiesRecordSpy = vi.spyOn(externalPeach, 'getPiesRecord');
@@ -94,7 +98,7 @@ describe('permit service', () => {
 
       mockRepos.permit.upsert.mockResolvedValue({} as never);
       upsertPermitTrackingSpy.mockResolvedValueOnce({} as never);
-      prepareIntakeNotificationEmails.mockResolvedValueOnce([]);
+      prepareIntakePermitEmails.mockResolvedValueOnce([]);
       mockRepos.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1] as never);
 
       const response = await permitService.intakePermitService(
@@ -136,7 +140,7 @@ describe('permit service', () => {
 
       mockRepos.permit.upsert.mockResolvedValueOnce({} as never);
       mockRepos.permit.findMany.mockResolvedValueOnce([] as never);
-      prepareIntakeNotificationEmails.mockResolvedValueOnce([]);
+      prepareIntakePermitEmails.mockResolvedValueOnce([]);
 
       await permitService.intakePermitService(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, intakeData);
 
@@ -182,7 +186,7 @@ describe('permit service', () => {
         mockRepos.activityContact.findMany.mockResolvedValueOnce([{ activityId: TEST_PERMIT_1.activityId }] as never);
         mockRepos.permit.upsert.mockResolvedValueOnce({} as never);
         mockRepos.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1] as never);
-        prepareIntakeNotificationEmails.mockResolvedValueOnce([]);
+        prepareIntakePermitEmails.mockResolvedValueOnce([]);
 
         await permitService.intakePermitService(proponentAuthContext, TEST_CURRENT_CONTEXT, intakeData);
 
@@ -352,7 +356,7 @@ describe('permit service', () => {
       ).rejects.toThrow(new Problem(400, { detail: 'Invalid Peach record summary' }));
     });
 
-    it('calls prepareNotificationEmails for integrated permits on status changes even w/ empty note', async () => {
+    it('calls preparePermitUpdateEmails for integrated permits on status changes even w/ empty note', async () => {
       const integratedSystem = { ...TEST_PERMIT_TYPE_1, integrated: true, sourceSystem: 'VFCBC' };
       const trackingData = [{ trackingId: 'REC-123', sourceSystemKind: integratedSystem }];
       const oldPermit = { ...TEST_PERMIT_1, state: 'SUBMITTED', stage: 'APPLICATION_SUBMISSION' };
@@ -367,7 +371,7 @@ describe('permit service', () => {
       mockRepos.permit.upsert.mockResolvedValueOnce(newPermit as never);
       mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(newPermit as never);
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({} as never);
-      prepareNotificationEmailsSpy.mockResolvedValueOnce([]);
+      preparePermitUpdateEmailsSpy.mockResolvedValueOnce([]);
 
       await permitService.upsertPermitService(
         newPermit as never,
@@ -376,16 +380,17 @@ describe('permit service', () => {
         { ...TEST_PERMIT_TYPE_1, sourceSystem: 'VFCBC' }
       );
 
-      expect(prepareNotificationEmailsSpy).toHaveBeenCalledTimes(1);
-      expect(prepareNotificationEmailsSpy).toHaveBeenCalledWith(
+      expect(createPermitUpdateNoteSpy).toHaveBeenCalledWith(expect.anything(), newPermit, undefined);
+      expect(preparePermitUpdateEmailsSpy).toHaveBeenCalledTimes(1);
+      expect(preparePermitUpdateEmailsSpy).toHaveBeenCalledWith(
         expect.anything(),
         newPermit,
         false,
-        'This application is approved in the decision.'
+        TEST_PERMIT_NOTE_1.note
       );
     });
 
-    it('calls prepareNotificationEmails when status changed', async () => {
+    it('calls preparePermitUpdateEmails when status changed', async () => {
       const oldPermit = { ...TEST_PERMIT_1, state: 'APPROVED' };
       const newPermit = { ...TEST_PERMIT_1, state: 'REJECTED' };
 
@@ -393,7 +398,7 @@ describe('permit service', () => {
       mockRepos.permit.upsert.mockResolvedValueOnce(newPermit as never);
       mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({ count: 0 } as never);
-      prepareNotificationEmailsSpy.mockResolvedValueOnce([]);
+      preparePermitUpdateEmailsSpy.mockResolvedValueOnce([]);
 
       await permitService.upsertPermitService(
         newPermit as never,
@@ -402,7 +407,7 @@ describe('permit service', () => {
         TEST_PERMIT_TYPE_1
       );
 
-      expect(prepareNotificationEmailsSpy).toHaveBeenCalled();
+      expect(preparePermitUpdateEmailsSpy).toHaveBeenCalled();
     });
 
     it('sends the prepared emails once the transaction has committed', async () => {
@@ -422,7 +427,7 @@ describe('permit service', () => {
       mockRepos.permit.upsert.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({ count: 0 } as never);
-      prepareNotificationEmailsSpy.mockResolvedValueOnce([preparedEmail] as never);
+      preparePermitUpdateEmailsSpy.mockResolvedValueOnce([preparedEmail] as never);
       emailSpy.mockImplementationOnce(async () => {
         sentInTransaction = inTransaction;
         return {} as never;
@@ -446,7 +451,7 @@ describe('permit service', () => {
       mockRepos.permit.upsert.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({ count: 0 } as never);
-      prepareNotificationEmailsSpy.mockResolvedValueOnce(preparedEmails as never);
+      preparePermitUpdateEmailsSpy.mockResolvedValueOnce(preparedEmails as never);
       emailSpy.mockRejectedValueOnce(new Error('Unable to start a transaction in the given time'));
 
       const response = await permitService.upsertPermitService(
@@ -460,7 +465,7 @@ describe('permit service', () => {
       expect(emailSpy).toHaveBeenCalledTimes(2);
     });
 
-    it('does not call prepareNotificationEmails when note is empty and status unchanged', async () => {
+    it('does not call preparePermitUpdateEmails when note is empty and status unchanged', async () => {
       mockRepos.permit.findFirst.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permit.upsert.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(TEST_PERMIT_1 as never);
@@ -473,7 +478,8 @@ describe('permit service', () => {
         TEST_PERMIT_TYPE_1
       );
 
-      expect(prepareNotificationEmailsSpy).not.toHaveBeenCalled();
+      expect(createPermitUpdateNoteSpy).not.toHaveBeenCalled();
+      expect(preparePermitUpdateEmailsSpy).not.toHaveBeenCalled();
     });
   });
 });

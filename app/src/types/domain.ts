@@ -4,6 +4,7 @@ import type {
   CreateEnquiryRequest,
   CreateNoteHistoryRequest,
   CreateUserAccessRequestRequest,
+  DraftPermitsRequest,
   GetElectrificationProjectStatisticsRequest,
   GetGeneralProjectStatisticsRequest,
   GetHousingProjectStatisticsRequest,
@@ -59,6 +60,7 @@ export type PatchNoteHistoryInput = PatchNoteHistoryRequest;
 export type CreateUserAccessRequestInput = CreateUserAccessRequestRequest;
 
 export type IntakePermitInput = IntakePermitRequest;
+export type DraftPermitsInput = DraftPermitsRequest;
 export type ListPermitsInput = ListPermitsRequest;
 export type SearchPermitsInput = SearchPermitsRequest;
 export type UpsertPermitBodyInput = UpsertPermitBodyRequest;

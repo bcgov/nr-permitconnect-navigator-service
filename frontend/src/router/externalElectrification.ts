@@ -9,7 +9,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: 'electrification',
     meta: { access: [NavigationPermission.EXT_ELECTRIFICATION], breadcrumb: 'Electrification', requiresAuth: true },
-    beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.ELECTRIFICATION)],
+    beforeEnter: [() => useAppStore().setInitiative(Initiative.ELECTRIFICATION), entryRedirect],
     children: [
       {
         path: '',

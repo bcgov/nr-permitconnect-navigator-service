@@ -233,6 +233,7 @@ export type Resource = (typeof Resource)[keyof typeof Resource];
 export const StorageKey = {
   AUTH: 'entrypoint',
   BF_ACCORDION_IDX: 'bf_accordion_idx',
+  CHUNK_RELOAD: 'chunk_reload',
   CONFIG: 'config',
   CONTACT_REDIRECT: 'contact_redirect'
 } as const;

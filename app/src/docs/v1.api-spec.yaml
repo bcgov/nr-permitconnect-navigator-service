@@ -655,6 +655,9 @@ components:
         companyIdRegistered:
           type: string
           nullable: true
+        hasAppliedProvincialPermits:
+          type: string
+          nullable: true
         activity:
           type: object
           properties:
@@ -889,6 +892,7 @@ components:
         - atsEnquiryId
         - addedToAts
         - companyIdRegistered
+        - hasAppliedProvincialPermits
         - projectId
         - megawatts
       additionalProperties: false
@@ -4690,10 +4694,162 @@ paths:
                   required:
                     - projectType
                   additionalProperties: false
+                permits:
+                  type: object
+                  properties:
+                    appliedPermits:
+                      type: array
+                      nullable: true
+                      items:
+                        type: object
+                        properties:
+                          permitTypeId:
+                            type: number
+                          submittedDate:
+                            anyOf:
+                              - type: string
+                              - type: number
+                              - type: string
+                                format: date-time
+                              - nullable: true
+                          permitTracking:
+                            type: array
+                            nullable: true
+                            items:
+                              type: object
+                              properties:
+                                trackingId:
+                                  type: string
+                                  nullable: true
+                                permitTrackingId:
+                                  type: number
+                                  nullable: true
+                                shownToProponent:
+                                  type: boolean
+                                  nullable: true
+                                sourceSystemKindId:
+                                  type: number
+                                  nullable: true
+                                sourceSystemKind:
+                                  type: object
+                                  nullable: true
+                                  properties:
+                                    sourceSystemKindId:
+                                      type: number
+                                    description:
+                                      type: string
+                                      minLength: 1
+                                    integrated:
+                                      type: boolean
+                                    kind:
+                                      type: string
+                                      nullable: true
+                                    sourceSystem:
+                                      type: string
+                                      minLength: 1
+                                    createdAt:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: string
+                                          format: date-time
+                                        - nullable: true
+                                    createdBy:
+                                      type: string
+                                      nullable: true
+                                      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+                                    updatedAt:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: string
+                                          format: date-time
+                                        - nullable: true
+                                    updatedBy:
+                                      type: string
+                                      nullable: true
+                                      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+                                    deletedAt:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                        - type: string
+                                          format: date-time
+                                        - nullable: true
+                                    deletedBy:
+                                      type: string
+                                      nullable: true
+                                      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+                                  required:
+                                    - sourceSystemKindId
+                                    - description
+                                    - sourceSystem
+                                  additionalProperties: false
+                                permitId:
+                                  type: string
+                                  nullable: true
+                                createdAt:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: string
+                                      format: date-time
+                                    - nullable: true
+                                createdBy:
+                                  type: string
+                                  nullable: true
+                                  pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+                                updatedAt:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: string
+                                      format: date-time
+                                    - nullable: true
+                                updatedBy:
+                                  type: string
+                                  nullable: true
+                                  pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+                                deletedAt:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                                    - type: string
+                                      format: date-time
+                                    - nullable: true
+                                deletedBy:
+                                  type: string
+                                  nullable: true
+                                  pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+                              additionalProperties: false
+                        required:
+                          - permitTypeId
+                        additionalProperties: false
+                    hasAppliedProvincialPermits:
+                      type: string
+                      enum:
+                        - 'Yes'
+                        - 'No'
+                        - Unsure
+                    investigatePermits:
+                      type: array
+                      nullable: true
+                      items:
+                        type: object
+                        properties:
+                          permitTypeId:
+                            type: number
+                        required:
+                          - permitTypeId
+                        additionalProperties: false
+                  required:
+                    - hasAppliedProvincialPermits
+                  additionalProperties: false
               required:
                 - basic
                 - contact
                 - project
+                - permits
               additionalProperties: false
       responses:
         '201':
@@ -7233,9 +7389,6 @@ paths:
                         properties:
                           permitTypeId:
                             type: number
-                          stage:
-                            type: string
-                            nullable: true
                           submittedDate:
                             anyOf:
                               - type: string
@@ -10061,9 +10214,6 @@ paths:
                         properties:
                           permitTypeId:
                             type: number
-                          stage:
-                            type: string
-                            nullable: true
                           submittedDate:
                             anyOf:
                               - type: string

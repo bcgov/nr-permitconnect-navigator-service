@@ -7,7 +7,7 @@ import {
   findPriorityPermitTracking,
   getPeachTrackingRecords
 } from '#src/domains/peach';
-import { prepareNotificationEmails } from '#src/domains/permit';
+import { createPermitUpdateNote, preparePermitUpdateEmails } from '#src/domains/permit';
 import { email } from '#src/external/ches';
 import { getPiesRecord } from '#src/external/peach';
 import { summarizePiesRecord } from '#src/parsers/peach';
@@ -52,7 +52,10 @@ export const syncPeachRecordsService = async (): Promise<Email[]> => {
     const updatedPermitsWithNotes = await applyPeachUpdates({ permit: repos.permit }, trackingRecords, parsedRecords);
 
     const emailLists = await Promise.all(
-      updatedPermitsWithNotes.map(({ permit, note }) => prepareNotificationEmails(repos, permit, true, note))
+      updatedPermitsWithNotes.map(async ({ permit, note }) => {
+        const permitNote = await createPermitUpdateNote(repos, permit, note);
+        return preparePermitUpdateEmails(repos, permit, true, permitNote.note);
+      })
     );
 
     return emailLists.flat();
