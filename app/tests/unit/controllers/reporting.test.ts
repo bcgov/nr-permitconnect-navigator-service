@@ -1,14 +1,21 @@
+import config from 'config';
+
 import {
+  getDashboardController,
   getElectrificationProjectPermitDataController,
   getGeneralProjectPermitDataController,
   getHousingProjectPermitDataController
 } from '#src/controllers/reporting';
 import * as reportingService from '#src/services/reporting';
+import { Initiative } from '#src/utils/enums/application';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 
-vi.mock('config');
+vi.mock('config', async () => {
+  const actual = await vi.importActual<{ get: (k: string) => unknown }>('config');
+  return { default: { ...actual, get: vi.fn((key: string) => actual.get(key)), has: vi.fn() } };
+});
 
 const mockResponse = () => {
   const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
@@ -67,6 +74,36 @@ const mockData = [
     source_system_acronym: 'TS'
   }
 ];
+
+describe('getDashboardController', () => {
+  const settings: Record<string, string> = {
+    'server.metabase.dashboards.HOUSING': '5',
+    'server.metabase.secretKey': 'secret',
+    'server.metabase.siteUrl': 'https://metabase.example.com'
+  };
+  const req = (initiative: Initiative) => ({ query: { initiative } }) as Parameters<typeof getDashboardController>[0];
+
+  beforeEach(() => {
+    vi.mocked(config.has).mockImplementation((key: string) => key in settings);
+    vi.mocked(config.get).mockImplementation((key: string) => settings[key]);
+  });
+
+  it('should respond with a null url when the initiative has no dashboard', () => {
+    getDashboardController(req(Initiative.GENERAL), res as unknown as Response);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ url: null });
+  });
+
+  it('should respond with a signed embed url when the initiative has a dashboard', () => {
+    getDashboardController(req(Initiative.HOUSING), res as unknown as Response);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      url: expect.stringMatching(/^https:\/\/metabase\.example\.com\/embed\/dashboard\/[\w-]+\.[\w-]+\.[\w-]+#/)
+    });
+  });
+});
 
 describe('getElectrificationProjectPermitDataController', () => {
   it('should call service and respond with 200 and result', async () => {

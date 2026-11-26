@@ -1,7 +1,7 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type { ResponseBody } from '@/types';
+import type { QueryParams, ResponseBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -11,10 +11,17 @@ import type { ResponseBody } from '@/types';
 const reportingRoute = createRouteBuilder('reporting');
 
 const reportingRoutes = {
+  dashboard: () => reportingRoute('dashboard'),
   electrificationProjectPermit: () => reportingRoute('electrification-project', 'permit'),
   generalProjectPermit: () => reportingRoute('general-project', 'permit'),
   housingProjectPermit: () => reportingRoute('housing-project', 'permit')
 } as const;
+
+export function getDashboard(
+  params: QueryParams<'getReportingDashboard'>
+): Promise<ResponseBody<'getReportingDashboard'>> {
+  return api.get<ResponseBody<'getReportingDashboard'>>(reportingRoutes.dashboard(), { params });
+}
 
 /**
  * Retrieves permit data for electrification projects.

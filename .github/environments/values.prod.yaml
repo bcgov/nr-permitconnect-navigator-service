@@ -23,6 +23,8 @@ config:
     SERVER_ENV: prod
     # SERVER_LOGFILE: ~
     SERVER_LOGLEVEL: http
+    SERVER_METABASE_DASHBOARDS: '{"HOUSING":5}'
+    SERVER_METABASE_SITEURL: https://pcns-metabase.apps.silver.devops.gov.bc.ca
     SERVER_OBJECTSTORAGE_BUCKET: pcnspr
     SERVER_OBJECTSTORAGE_ENDPOINT: https://nrs.objectstore.gov.bc.ca
     SERVER_OBJECTSTORAGE_KEY: shas

@@ -159,6 +159,9 @@ config:
     # SERVER_LOGFILE: ~
     SERVER_LOGLEVEL: http
 
+    SERVER_METABASE_DASHBOARDS: ~
+    SERVER_METABASE_SITEURL: ~
+
     SERVER_OBJECTSTORAGE_BUCKET: ~
     SERVER_OBJECTSTORAGE_ENDPOINT: ~
     SERVER_OBJECTSTORAGE_KEY: ~
@@ -197,6 +200,8 @@ form1SecretOverride:
   password: ~
 form2SecretOverride:
   username: ~
+  password: ~
+metabaseSecretOverride:
   password: ~
 objectStorageSecretOverride:
   username: ~

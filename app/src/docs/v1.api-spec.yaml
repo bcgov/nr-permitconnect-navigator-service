@@ -12526,6 +12526,57 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
+  /reporting/dashboard:
+    get:
+      operationId: getReportingDashboard
+      summary: Get a signed Metabase dashboard embed URL
+      tags:
+        - Reporting
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - PCNS
+              - ELECTRIFICATION
+              - GENERAL
+              - HOUSING
+          required: true
+          name: initiative
+          in: query
+      responses:
+        '200':
+          description: >-
+            Signed dashboard embed URL, or null when the initiative has no
+            dashboard configured
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    nullable: true
+                    format: uri
+                required:
+                  - url
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /reporting/electrification-project/permit:
     get:
       operationId: getElectrificationProjectPermitReport
