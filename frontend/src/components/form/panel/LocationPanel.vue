@@ -6,9 +6,9 @@ import { useI18n } from 'vue-i18n';
 
 import { Location } from '@/components/common/icons';
 import { EditableSelect, InputText, InputNumber, Select } from '@/components/form';
+import { useAddressSearch } from '@/composables/useAddressSearch';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Panel } from '@/lib/primevue';
-import { externalApiService } from '@/services';
 import { useFormStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
 
@@ -28,13 +28,13 @@ const setStreetAddress = useSetFieldValue('location.streetAddress');
 const setLocality = useSetFieldValue('location.locality');
 const setProvince = useSetFieldValue('location.province');
 const setLocationAddress = useSetFieldValue('location.locationAddress');
+const { cancel: cancelAddressSearch, search: searchAddress, suggestions: addressGeocoderFeatures } = useAddressSearch();
 
 // Store
 const formStore = useFormStore();
 const { getEditable } = storeToRefs(formStore);
 
 // State
-const addressGeocoderFeatures: Ref<GeocoderFeature[]> = ref([]);
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);
 
 // Actions
@@ -44,20 +44,19 @@ const getAddressSearchLabel = (e: GeocoderFeature) => {
   return e.properties.fullAddress ?? '';
 };
 
-async function onAddressSearchInput(e: InputEvent) {
+function onAddressSearchInput(e: InputEvent) {
   const input = e.target.value;
-  if (input.length == 0) {
+  if (input.trim().length === 0) {
     setStreetAddress(null);
     setLocality(null);
     setProvince(null);
-  } else {
-    addressGeocoderFeatures.value =
-      (await externalApiService.searchGeocoderAddress({ addressSearch: input }))?.features ?? [];
   }
+  searchAddress(input);
 }
 
 async function onAddressSelect(e: SelectChangeEvent) {
   if (e.originalEvent instanceof InputEvent) return;
+  cancelAddressSearch();
   if (e.value as GeocoderFeature) {
     const properties = e.value?.properties;
     setStreetAddress(`${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`);

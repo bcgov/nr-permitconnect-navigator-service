@@ -8,9 +8,9 @@ import Divider from '@/components/common/Divider.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import { EditableSelect, InputNumber, InputText, RadioList } from '@/components/form';
 import Map from '@/components/maps/Map.vue';
+import { useAddressSearch } from '@/composables/useAddressSearch';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Button, Card } from '@/lib/primevue';
-import { externalApiService } from '@/services';
 import { useFormStore } from '@/store';
 import { PROJECT_LOCATION_LIST } from '@/utils/constants/projectCommon';
 import { ProjectLocation } from '@/utils/enums/projectCommon';
@@ -45,6 +45,12 @@ const setProvince = useSetFieldValue('location.province');
 const setGeoJson = useSetFieldValue('location.geoJson');
 const validateLatitude = useValidateField('location.latitude');
 const validateLongitude = useValidateField('location.longitude');
+const {
+  cancel: cancelAddressSearch,
+  search: searchAddress,
+  searchImmediate: searchAddressImmediate,
+  suggestions: addressGeocoderFeatures
+} = useAddressSearch();
 
 // Store
 const formStore = useFormStore();
@@ -52,7 +58,6 @@ const { getEditable } = storeToRefs(formStore);
 
 // State
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);
-const addressGeocoderFeatures: Ref<GeocoderFeature[]> = ref([]);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
@@ -85,14 +90,13 @@ function handleProjectLocationClick() {
   }
 }
 
-async function onAddressSearchInput(e: InputEvent) {
-  const input = e.target.value;
-  addressGeocoderFeatures.value =
-    (await externalApiService.searchGeocoderAddress({ addressSearch: input }))?.features ?? [];
+function onAddressSearchInput(e: InputEvent) {
+  searchAddress(e.target.value);
 }
 
 async function onAddressSelect(e: SelectChangeEvent) {
   if (e.originalEvent instanceof InputEvent) return;
+  cancelAddressSearch();
 
   if (e.value as GeocoderFeature) {
     const properties = e.value?.properties;
@@ -146,11 +150,10 @@ useFormErrorWatcher(formRef, 'LocationCard', tab);
 
 onBeforeMount(async () => {
   // Force the search bar to load & display the last set text when loading a draft
-  if (values.value.location?.addressSearch?.properties?.fullAddress) {
-    await onAddressSearchInput({
-      target: { value: values.value.location.addressSearch.properties.fullAddress }
-    } as InputEvent);
-    setAddressSearch(values.value.location.addressSearch.properties.fullAddress);
+  const fullAddress = values.value.location?.addressSearch?.properties?.fullAddress;
+  if (fullAddress) {
+    await searchAddressImmediate(fullAddress);
+    setAddressSearch(fullAddress);
   }
 });
 
