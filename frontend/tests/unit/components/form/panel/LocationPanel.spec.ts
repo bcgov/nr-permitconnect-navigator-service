@@ -62,6 +62,11 @@ function mountLocationPanel(
 }
 
 beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
   vi.clearAllMocks();
 });
 
@@ -126,10 +131,36 @@ describe('LocationPanel', () => {
 
       const { wrapper } = mountLocationPanel();
       await wrapper.findComponent(EditableSelect).vm.$emit('onInput', { target: { value: '123 Main' } });
-      await nextTick();
+      await vi.advanceTimersByTimeAsync(500);
 
       expect(searchGeocoderAddressSpy).toHaveBeenCalledWith({ addressSearch: '123 Main' });
       expect(wrapper.findComponent(EditableSelect).props('options')).toEqual([geocoderFeature()]);
+    });
+
+    it('clears stale suggestions once the search input is cleared', async () => {
+      searchGeocoderAddressSpy.mockResolvedValue({ features: [geocoderFeature()] } as SearchGeocoderAddressResponse);
+
+      const { wrapper } = mountLocationPanel();
+      const addressSearch = wrapper.findComponent(EditableSelect);
+      await addressSearch.vm.$emit('onInput', { target: { value: '123 Main' } });
+      await vi.advanceTimersByTimeAsync(500);
+      expect(addressSearch.props('options')).toEqual([geocoderFeature()]);
+
+      await addressSearch.vm.$emit('onInput', { target: { value: '' } });
+
+      expect(addressSearch.props('options')).toEqual([]);
+    });
+
+    it('cancels any pending search once a suggestion is selected', async () => {
+      searchGeocoderAddressSpy.mockResolvedValue({ features: [geocoderFeature()] } as SearchGeocoderAddressResponse);
+
+      const { wrapper } = mountLocationPanel();
+      const addressSearch = wrapper.findComponent(EditableSelect);
+      await addressSearch.vm.$emit('onInput', { target: { value: '123 Main' } });
+      await addressSearch.vm.$emit('onChange', { value: geocoderFeature(), originalEvent: {} });
+      await vi.advanceTimersByTimeAsync(500);
+
+      expect(searchGeocoderAddressSpy).not.toHaveBeenCalled();
     });
   });
 
